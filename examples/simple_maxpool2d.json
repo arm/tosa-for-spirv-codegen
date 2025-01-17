@@ -1,0 +1,83 @@
+{
+  "version": {
+    "_major": 0,
+    "_minor": 80,
+    "_patch": 1,
+    "_draft": false
+  },
+  "regions": [
+    {
+      "name": "main",
+      "blocks": [
+        {
+          "name": "main",
+          "operators": [
+            {
+              "op": "MAX_POOL2D",
+              "attribute_type": "PoolAttribute",
+              "attribute": {
+                "pad": [
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "kernel": [
+                  2,
+                  2
+                ],
+                "stride": [
+                  2,
+                  2
+                ],
+                "accum_dtype": "INT8"
+              },
+              "inputs": [
+                "input_1"
+              ],
+              "outputs": [
+                "output0_2"
+              ]
+            }
+          ],
+          "tensors": [
+            {
+              "name": "input_1",
+              "shape": [
+                1,
+                16,
+                16,
+                16
+              ],
+              "type": "INT8",
+              "data": [
+
+              ],
+              "variable_name": ""
+            },
+            {
+              "name": "output0_2",
+              "shape": [
+                1,
+                8,
+                8,
+                16
+              ],
+              "type": "INT8",
+              "data": [
+
+              ],
+              "variable_name": ""
+            }
+          ],
+          "inputs": [
+            "input_1"
+          ],
+          "outputs": [
+            "output0_2"
+          ]
+        }
+      ]
+    }
+  ]
+}
