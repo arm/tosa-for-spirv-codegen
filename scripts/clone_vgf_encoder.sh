@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# Copyright © 2024 Arm Ltd and Contributors. All rights reserved.
+# Copyright © 2024-2025 Arm Ltd and Contributors. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -14,10 +14,10 @@ VGF_ENCODER_DIR=$EXTERNAL_DIR/vgf_encoder
 rm -rf $VGF_ENCODER_DIR
 
 # Pinned SHA for branch
-VGF_ENCODER_REVISION="aeccd4a5c8f23b28a7b330e320b4e5c0408a5fad"
+VGF_ENCODER_REVISION="main" # Use main to streamline absorption of changes
 
 echo "+++ Cloning VGF Encoder"
-mkdir -p VGF_ENCODER_DIR
+mkdir -p $VGF_ENCODER_DIR
 git clone ssh://$USERNAME@eu-gerrit-2.euhpc.arm.com:29418/ml/ngp/ml-sdk-vgf-lib $VGF_ENCODER_DIR
 
 pushd $VGF_ENCODER_DIR > /dev/null
