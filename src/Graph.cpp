@@ -1,283 +1,275 @@
 //
-// Copyright © 2023-2024 Arm Ltd and Contributors. All rights reserved.
+// Copyright © 2023-2025 Arm Ltd and Contributors. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #include <Graph.hpp>
-#include <Writer.hpp>
 #include <OperatorDefinitions.hpp>
-#include "OperatorUtils.hpp"
+#include <SPIRVDefinitions.hpp>
 
-#include <unordered_set>
+#include <algorithm>
 
-namespace tosa2spirv
+namespace tosa2spirv::tosa
 {
 
-namespace graphbuilder
-{
+using namespace spirv;
+using namespace spv;
+using namespace tosa2spirv::spirv;
 
-std::vector<ResId> Graph::AddOperator(OperatorEnum operatorType,
-                                      const std::vector<Tensor>& inputs,
+Graph::Graph(std::shared_ptr<Module> module, std::string name)
+    : m_Module(std::move(module))
+    , m_Name(std::move(name))
+{
+}
+
+ResId Graph::AddInput(const Tensor& input, const unsigned int bindingId)
+{
+    const auto inputId = CreateConstant(m_Inputs.size(), DataType::uint32_t, *m_Module);
+
+    auto tensor = CreateTensor(input, *m_Module);
+    auto uniformConstantPtr =
+        m_Module->EmplaceInstruction(OpTypePointer, {RESID, Operand{StorageClassUniformConstant}, tensor});
+
+    const auto opVariable =
+        m_Module->EmplaceInstructionNonUnique(OpVariable,
+                                              {uniformConstantPtr, RESID, Operand{StorageClassUniformConstant}});
+
+    m_Module->EmplaceInstruction(OpDecorate, {opVariable, Operand{DecorationDescriptorSet}, Operand{0u}});
+    m_Module->EmplaceInstruction(OpDecorate, {opVariable, Operand{DecorationBinding}, Operand{bindingId}});
+
+    m_Inputs.emplace_back(opVariable.m_InstructionPtr);
+    return m_Module->EmplaceInstruction(OpGraphInputARM, {tensor, RESID, inputId}).m_InstructionPtr;
+}
+
+void Graph::AddOutput(const ResId outputTensor, const unsigned int bindingId)
+{
+    std::vector<Operand> outputsWithIds;
+    const auto tensor = outputTensor->m_Operands[0];
+    const auto outputIdOperand = CreateConstant(m_Outputs.size(), DataType::int32_t, *m_Module);
+
+    m_Module->EmplaceInstruction(OpGraphSetOutputARM, {Operand{outputTensor}, outputIdOperand});
+    auto uniformConstantPtr =
+        m_Module->EmplaceInstruction(OpTypePointer, {RESID, Operand{StorageClassUniformConstant}, tensor});
+
+    const auto opVariable =
+        m_Module->EmplaceInstructionNonUnique(OpVariable,
+                                              {uniformConstantPtr, RESID, Operand{StorageClassUniformConstant}});
+
+    m_Module->EmplaceInstruction(OpDecorate, {opVariable, Operand{DecorationDescriptorSet}, Operand{0u}});
+    m_Module->EmplaceInstruction(OpDecorate, {opVariable, Operand{DecorationBinding}, Operand{bindingId}});
+
+    m_Outputs.emplace_back(opVariable.m_InstructionPtr);
+}
+
+ResId Graph::AddGraphConstant(const Tensor& tensor)
+{
+    const auto tensorOperand = CreateTensor(tensor, *m_Module);
+    return m_Module->EmplaceInstruction(OpGraphConstantARM, {tensorOperand, RESID, Operand{m_GraphConstantId++}})
+        .m_InstructionPtr;
+}
+
+ResId Graph::AddExternalGraphConstant(const Tensor& tensor)
+{
+    const auto tensorOperand = CreateTensor(tensor, *m_Module);
+    return m_Module->EmplaceInstruction(OpGraphConstantARM, {tensorOperand, RESID, Operand{m_GraphConstantId++}})
+        .m_InstructionPtr;
+}
+
+ResId Graph::AddTensorConstant(const Attribute& attribute)
+{
+    const auto tensor = CreateTensor(attribute.GetTensor(), *m_Module);
+    return CreateConstantCompositeBasic(attribute.GetData(), tensor, *m_Module).m_InstructionPtr;
+}
+
+// Forward declaration of the static helper function ChainConcat.
+static Operand ChainConcat(Module& spirvModule,
+                           const std::vector<Operand>& operands,
+                           const std::vector<unsigned int>& oShape,
+                           const uint16_t& maxOperands);
+
+std::vector<ResId> Graph::AddOperator(const OperatorEnum operatorType,
+                                      const std::vector<ResId>& inputs,
                                       const std::vector<Tensor>& outputs,
-                                      const std::vector<Tensor> attributes)
+                                      const std::vector<Attribute>& attributes) const
 {
-    std::vector<ResId> resIds;
-    for (int i = 0; i < outputs.size(); ++i)
-    {
-       resIds.push_back(m_IdGenerator.GetNextId());
-    }
-    m_Operators.emplace_back(operatorType, resIds, inputs, outputs, attributes);
-
-    ValidateAndAnnotateOp(m_Operators.back());
-    return resIds;
-}
-
-void WriteOperatorTwoOutputs(const Operator& op, spirvwriter::Writer& writer, const ResId& tosaId, GraphInfo& graphInfo)
-{
-    using namespace spirvwriter;
-
     std::vector<Operand> operands;
+    operands.reserve(inputs.size() + outputs.size() + attributes.size() + 3);
+
     std::vector<Operand> postOperands;
-    InstructionList layerInstList;
-    auto operatorId = writer.GetNextId();
-    auto outputOperand0 = writer.WriteTensorInstruction(op.m_OutputTensors[0]);
-    auto outputOperand1 = writer.WriteTensorInstruction(op.m_OutputTensors[1]);
-    std::vector outputTensorTypeOpVec{outputOperand0, outputOperand1};
+    std::vector<Operand> outputTensorTypeOpVec;
 
-    auto output0CompositeExtractInst = writer.WriteCompositeExtractInstruction(operatorId,
-                                                                               op.m_ResIds[0],
-                                                                               outputOperand0,
-                                                                               0);
-    auto output0CompositeExtractId = output0CompositeExtractInst.GetResultId().Get();
-    auto output1CompositeExtractInst = writer.WriteCompositeExtractInstruction(operatorId,
-                                                                               op.m_ResIds[1],
-                                                                               outputOperand1,
-                                                                               1);
-    auto output1CompositeExtractId = output1CompositeExtractInst.GetResultId().Get();
-    auto outputTypeStructOp = writer.WriteTypeStructInstruction(outputTensorTypeOpVec);
+    if (outputs.size() == 2)
+    {
+        outputTensorTypeOpVec.emplace_back(RESID);
+        outputTensorTypeOpVec.emplace_back(CreateTensor(outputs[0], *m_Module));
+        outputTensorTypeOpVec.emplace_back(CreateTensor(outputs[1], *m_Module));
 
-    ResId operatorResId = outputTypeStructOp.GetNumId();
-    operands.push_back(outputTypeStructOp);
+        const auto outputTypeStructOp = m_Module->EmplaceInstruction(OpTypeStruct, outputTensorTypeOpVec);
+        operands.push_back(outputTypeStructOp);
+    }
+    else
+    {
+        operands.emplace_back(CreateTensor(outputs[0], *m_Module));
+    }
 
-    // Create an operand with the ID of the Extended Instruction Set Import of TOSA
-    Operand tosaOp(OperandType::NUMBER_ID, tosaId.Get());
-    // Create an operand containing the TOSA Instruction for the given operator from TOSA.h
-    TOSAInstructions tosaEnum = GetTOSAInstructions(op.m_OperatorEnum);
-    Operand operatorOperand(OperandType::NUMBER_ID, tosaEnum);
-    operands.push_back(tosaOp);
+    operands.emplace_back(RESID);
+    const auto tosaVersion = Operand{&(*m_Module->GetInstructionsOfType(OpExtInstImport).first)};
+    operands.push_back(tosaVersion);
+    const Operand operatorOperand(GetTOSAInstructions(operatorType));
     operands.push_back(operatorOperand);
 
-    for (const auto& attributeTensor : op.m_AttributeTensors)
+    auto expectedIt = GetOperatorDefinition(operatorType).m_AttributeDefinitions;
+    for (const auto& attribute : attributes)
     {
-        if (attributeTensor.GetMetadata() == Metadata::Shape)
+        if (expectedIt->m_Metadata == Metadata::Shape)
         {
-            postOperands.push_back(HandleAttribute(writer, attributeTensor));
-        }
-        else
-        {
-            operands.push_back(HandleAttribute(writer, attributeTensor));
-        }
-    }
-
-    std::string name = GetOperatorName(op.m_OperatorEnum) + "_" + std::to_string(op.m_ResIds[0].Get());
-    for (const auto& inputTensor : op.m_InputTensors)
-    {
-        operands.push_back(AddLayerInputInstruction(writer, graphInfo, inputTensor, layerInstList, name, op.m_ResIds[0]));
-    }
-
-    operands.insert(operands.end(), postOperands.begin(), postOperands.end());
-
-    if (op.m_OutputTensors[0].IsGraphOutput())
-    {
-        HandleGraphOutput(writer,
-                          op.m_ResIds[0],
-                          graphInfo,
-                          op.m_OutputTensors[0],
-                          outputOperand0,
-                          layerInstList,
-                          name);
-    }
-    if (op.m_OutputTensors[1].IsGraphOutput())
-    {
-        HandleGraphOutput(writer,
-                          op.m_ResIds[1],
-                          graphInfo,
-                          op.m_OutputTensors[1],
-                          outputOperand1,
-                          layerInstList,
-                          name);
-    }
-
-    // Add the OpExtInst instruction using the ID from Layers member variables as well as the rest of the Ops.
-    graphInfo.m_LayerList.push_back(std::move(Instruction(OpExtInst, operatorId, operands)));
-    graphInfo.m_LayerList.push_back(std::move(output0CompositeExtractInst));
-    graphInfo.m_LayerList.push_back(std::move(output1CompositeExtractInst));
-    // Add the OpExtInst instruction using the ID from Layers member variables as well as the rest of the Ops.
-    // Write to binary
-    writer.WriteBinary(layerInstList);
-}
-
-void WriteOperator(const Operator& op, spirvwriter::Writer& writer, const ResId& tosaId, GraphInfo& graphInfo)
-{
-    using namespace spirvwriter;
-
-    std::vector<Operand> operands;
-    std::vector<Operand> postOperands;
-    InstructionList layerInstList;
-
-    ResId operatorResId = op.m_ResIds[0];
-    auto outputOperand = writer.WriteTensorInstruction(op.m_OutputTensors[0]);
-    operands.push_back(outputOperand);
-
-    // Create an operand with the ID of the Extended Instruction Set Import of TOSA
-    Operand tosaOp(OperandType::NUMBER_ID, tosaId.Get());
-    // Create an operand containing the TOSA Instruction for the given operator from TOSA.h
-    TOSAInstructions tosaEnum = GetTOSAInstructions(op.m_OperatorEnum);
-    Operand operatorOperand(OperandType::NUMBER_ID, tosaEnum);
-    operands.push_back(tosaOp);
-    operands.push_back(operatorOperand);
-
-    for (const auto& attributeTensor : op.m_AttributeTensors)
-    {
-        if (attributeTensor.GetMetadata() == Metadata::Shape)
-        {
-            postOperands.push_back(HandleAttribute(writer, attributeTensor));
-        }
-        else
-        {
-            operands.push_back(HandleAttribute(writer, attributeTensor));
-        }
-    }
-
-    std::string name = GetOperatorName(op.m_OperatorEnum) + "_" + std::to_string(op.m_ResIds[0].Get());
-    for (const auto& inputTensor : op.m_InputTensors)
-    {
-        operands.push_back(AddLayerInputInstruction(writer, graphInfo, inputTensor, layerInstList, name, op.m_ResIds[0]));
-    }
-
-    operands.insert(operands.end(), postOperands.begin(), postOperands.end());
-
-    // Check if the layer is an output, if so add OpGraphOutputEXT instruction.
-    if (op.m_OutputTensors[0].IsGraphOutput())
-    {
-        HandleGraphOutput(writer,
-                          op.m_ResIds[0],
-                          graphInfo,
-                          op.m_OutputTensors[0],
-                          operands[0],
-                          layerInstList,
-                          name);
-    }
-
-    // Add the OpExtInst instruction using the ID from Layers member variables as well as the rest of the Ops.
-    graphInfo.m_LayerList.push_back(std::move(Instruction(OpExtInst, operatorResId, operands)));
-    // Write to binary
-    writer.WriteBinary(layerInstList);
-}
-
-void Graph::Write(spirvwriter::Writer& writer, const ResId& tosaId)
-{
-    GraphInfo graphInfo;
-    for (auto& op : m_Operators)
-    {
-        if (op.m_OutputTensors.size() == 2)
-        {
-            WriteOperatorTwoOutputs(op, writer, tosaId, graphInfo);
-        }
-        else
-        {
-            WriteOperator(op, writer, tosaId, graphInfo);
-        }
-    }
-
-    // Note: Graphs can have no inputs so definition can be started even if graphInputs.empty()
-    // Instead they can have constants as inputs in certain tests.
-    auto graphInputs = graphInfo.m_GraphInputsInfo;
-    auto graphOutputs = graphInfo.m_GraphOutputsInfo;
-
-    // Create Constants for input/output index to make sure it is written before OpGraphEntryPointARM
-    int32_t maxIndex = std::max(graphInputs.size(), graphOutputs.size());
-    for (int32_t index = 0; index < maxIndex; ++index)
-    {
-        writer.WriteGraphInputOutputIndexConstant(index);
-    }
-
-    // Add OpTypeGraphARM
-    auto graphTypeOp = writer.WriteGraphTypeInstruction(graphInputs.size(), graphInputs, graphOutputs);
-
-    // Add OpGraphEntryPointARM
-    writer.WriteGraphEntryPointInstruction(m_GraphId, m_Name, graphInputs, graphOutputs);
-
-    // Add OpGraphARM
-    writer.WriteGraphInstruction(m_GraphId, graphTypeOp);
-
-    if (!graphInputs.empty())
-    {
-        // Write the graphInputs now that the graph definition has begun
-        writer.WriteBinary(graphInfo.m_GraphInputList);
-    }
-
-    if (!graphOutputs.empty())
-    {
-        spirvwriter::InstructionList outputInstList;
-        writer.WriteBinary(outputInstList);
-    }
-
-    writer.WriteBinary(graphInfo.m_LayerList);
-
-    // Reorder graph outputs
-    ReorderGraphOutputs(graphOutputs);
-
-    // Add OpGraphSetOutputARM
-    writer.WriteGraphSetOutputInstruction(graphOutputs);
-
-    // End the graph
-    writer.WriteGraphEndInstruction();
-}
-
-void Graph::SetGraphOutputs(const std::vector<ResId>& graphOutputs)
-{
-    m_GraphOutputs = graphOutputs;
-}
-
-void Graph::ReorderGraphOutputs(std::vector<GraphIOInfo>& graphOutputs)
-{
-    if (!m_GraphOutputs.empty())
-    {
-        unsigned long n = m_GraphOutputs.size();
-        if (n != graphOutputs.size())
-        {
-            throw std::invalid_argument("ReorderGraphOutputs(): Overridden GraphOutput ID count "
-                                        "does not match number of GraphOutputs found in the graph.");
-        }
-        {
-            std::unordered_set<uint32_t> unorderedIds, orderedIds;
-            for (int i = 0; i != n; ++i)
+            if (expectedIt->m_Category == Category::GraphConstant)
             {
-                unorderedIds.emplace(graphOutputs[i].m_Layer.GetNumId());
-                orderedIds.emplace(m_GraphOutputs[i].Get());
+                postOperands.emplace_back(attribute.GetResId());
             }
-            if (unorderedIds != orderedIds)
+            else
             {
-                throw std::invalid_argument("ReorderGraphOutputs(): ResId values for graph outputs do not match.");
+                postOperands.push_back(CreateAttribute(attribute, *m_Module));
             }
+            expectedIt++;
+            continue;
         }
-        for (int i = 0; i != n; ++i)
+
+        if (expectedIt->m_Category == Category::Scalar || expectedIt->m_Category == Category::Enum)
         {
-            graphOutputs[i].m_Layer = spirvwriter::Operand(spirvwriter::NUMBER_ID, m_GraphOutputs[i].Get());
+            operands.push_back(CreateConstant(attribute.GetData()[0], attribute.GetTensor().GetDataType(), *m_Module));
         }
+        else if (expectedIt->m_Category == Category::GraphConstant)
+        {
+            operands.emplace_back(attribute.GetResId());
+        }
+        else
+        {
+            operands.push_back(CreateAttribute(attribute, *m_Module));
+        }
+        expectedIt++;
     }
+
+    for (const auto& input : inputs)
+    {
+        operands.emplace_back(input);
+    }
+
+    operands.insert(std::end(operands), std::begin(postOperands), std::end(postOperands));
+
+    Operand operatorResId;
+    constexpr uint16_t maxSpirvOperands = 250;
+    if (operatorType == OperatorEnum::Concat && operands.size() > maxSpirvOperands)
+    {
+        operatorResId = ChainConcat(*m_Module, operands, outputs[0].GetTensorShape(), maxSpirvOperands);
+    }
+    else
+    {
+        operatorResId = m_Module->EmplaceInstruction(OpExtInst, {operands});
+    }
+
+    if (outputs.size() == 2)
+    {
+        auto output0CompositeExtractInst0 =
+            m_Module->EmplaceInstruction(OpCompositeExtract,
+                                         {outputTensorTypeOpVec[1], RESID, operatorResId, Operand{0u}});
+        auto output0CompositeExtractInst1 =
+            m_Module->EmplaceInstruction(OpCompositeExtract,
+                                         {outputTensorTypeOpVec[2], RESID, operatorResId, Operand{1u}});
+
+        return {output0CompositeExtractInst0.m_InstructionPtr, output0CompositeExtractInst1.m_InstructionPtr};
+    }
+
+    return {operatorResId.m_InstructionPtr};
 }
 
-//
-// Data-node
-//
-
-void Graph::Accept(IVisitor &visitor) const
+void Graph::FinalizeGraph()
 {
-    visitor.Visit(*this);
+    const auto IOSize = m_Inputs.size() + m_Outputs.size();
+
+    std::vector<Operand> graphTypeOperands(2 + IOSize);
+    std::vector<Operand> entryPointOperands(2 + IOSize);
+
+    auto entryPointOperandsIOBegin = entryPointOperands.begin() + 2;
+    auto graphTypeOperandsIOBegin = graphTypeOperands.begin() + 2;
+
+    for (const auto& input : m_Inputs)
+    {
+        *entryPointOperandsIOBegin++ = Operand{input};
+        const auto tensor = input->m_Operands[0].m_InstructionPtr->m_Operands[2];
+        *graphTypeOperandsIOBegin++ = tensor;
+    }
+    for (const auto& output : m_Outputs)
+    {
+        *entryPointOperandsIOBegin++ = Operand{output};
+        const auto tensor = output->m_Operands[0].m_InstructionPtr->m_Operands[2];
+        *graphTypeOperandsIOBegin++ = tensor;
+    }
+
+    graphTypeOperands[0] = RESID;
+    graphTypeOperands[1] = Operand{static_cast<uint32_t>(m_Inputs.size())};
+    auto graphTypeInstruction = m_Module->EmplaceInstruction(OpTypeGraphARM, graphTypeOperands);
+    const auto graphArm = m_Module->EmplaceInstruction(OpGraphARM, {graphTypeInstruction, RESID});
+
+    entryPointOperands[0] = graphArm;
+    entryPointOperands[1] = Operand{m_Name};
+
+    m_Module->EmplaceInstruction(OpGraphEntryPointARM, entryPointOperands);
+    m_Module->EmplaceInstruction(OpGraphEndARM, {});
+    // Graph is complete no more instructions should be added.
+    m_Module.reset();
 }
 
-} // namespace graphbuilder
+/// Function made to handle Concats with > 255 Operands which is the limit.
+static Operand ChainConcat(Module& spirvModule,
+                           const std::vector<Operand>& operands,
+                           const std::vector<unsigned int>& oShape,
+                           const uint16_t& maxOperands)
+{
+    std::vector<unsigned int> shape = oShape;
 
-} // namespace tosa2spirv
+    const Operand& version = operands[2];
+    const Operand& opEnum = operands[3];
+    const Operand& concatAxis = operands[4];
+
+    // Store final output shape
+    uint16_t outputAxisShape = shape.back();
+
+    std::vector<Operand> concatInputs(operands.begin() + 4, operands.end());
+    auto it = concatInputs.begin();
+    auto end = concatInputs.end();
+
+    shape.back() = maxOperands;
+    Operand previousConcat;
+    uint16_t isFirst = 1;
+
+    // Following chunks so we can chain Concats together.
+    for (int16_t i = -1; i < (outputAxisShape / maxOperands); ++i)
+    {
+        // First iteration needs a size of 2 more for the previous concat + concatAxis
+        // If this is the first iteration value will be 251 otherwise 249.
+        unsigned int allowed = (maxOperands - 1) + isFirst * 2;
+        unsigned int count = std::min(allowed, static_cast<unsigned int>(end - it));
+
+        shape.back() += count * (1 - isFirst);
+        Tensor chunkTensor = Tensor(DataType::uint8_t, shape);
+        Operand chunkType = CreateTensor(chunkTensor, spirvModule);
+
+        // If not first iteration then concat the axis + previous concat
+        std::vector<Operand> chunk{chunkType,
+                                   RESID,
+                                   version,
+                                   opEnum,
+                                   isFirst ? Operand{} : concatAxis,
+                                   isFirst ? Operand{} : previousConcat};
+
+        chunk.insert(chunk.end(), it, it + count);
+        it += count;
+
+        previousConcat = spirvModule.EmplaceInstruction(OpExtInst, chunk);
+        isFirst = 0;
+    }
+    return previousConcat;
+}
+
+} // namespace tosa2spirv::tosa

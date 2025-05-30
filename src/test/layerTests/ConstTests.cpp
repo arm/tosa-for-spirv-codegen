@@ -1,5 +1,5 @@
 //
-// Copyright © 2023-2024 Arm Ltd and Contributors. All rights reserved.
+// Copyright © 2023-2025 Arm Ltd and Contributors. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -10,8 +10,8 @@
 #include <Module.hpp>
 #include <Writer.hpp>
 
-#include <gtest/gtest.h>
 #include <TestUtils.hpp>
+#include <gtest/gtest.h>
 
 #include <iostream>
 
@@ -29,9 +29,7 @@ TEST(TOSA2SPIRV_LAYERS, Const)
     auto values = Tensor::CreateAttribute(DataType::int8_t, std::vector<unsigned int>{1, 1});
     auto output = Tensor::CreateOutputTo(DataType::int8_t, std::vector<unsigned int>{1, 1});
 
-    Const const(values,
-                     output,
-                     idGenerator.GetNextId());
+    Const const(values, output, idGenerator.GetNextId());
 
     auto writer = spirvwriter::Writer(idGenerator);
 

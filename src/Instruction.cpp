@@ -1,64 +1,48 @@
 //
-// Copyright 2017 The Clspv Authors. All rights reserved.
-// Copyright © 2023, 2024 Arm Ltd and Contributors. All rights reserved.
+// Copyright © 2025 Arm Ltd and Contributors. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include "Instruction.hpp"
+#include <Module.hpp>
 
-#include <iostream>
-#include <utility>
+#include <algorithm>
 
-namespace tosa2spirv
+namespace tosa2spirv::spirv
 {
 
-namespace spirvwriter
+bool InstructionComparator::operator()(const Instruction& lhs, const spv::Op rhs) const noexcept
 {
-
-Instruction::Instruction(spv::Op opCode, graphbuilder::ResId id)
-    : m_Opcode(static_cast<uint16_t>(opCode))
-{
-    SetResult(id);
+    return lhs.m_Opcode < rhs;
 }
 
-Instruction::Instruction(spv::Op opCode, std::vector<Operand>& ops)
-    : Instruction(opCode)
+bool InstructionComparator::operator()(const spv::Op lhs, const Instruction& rhs) const noexcept
 {
-    SetOperands(ops);
+    return lhs < rhs.m_Opcode;
 }
 
-Instruction::Instruction(spv::Op opCode, graphbuilder::ResId id, std::vector<Operand>& opVec)
-    : Instruction(opCode, id)
+bool InstructionComparator::operator()(const Instruction& lhs, const Instruction& rhs) const noexcept
 {
-    if (opCode == spv::OpTypeBool)
+    if (lhs.m_Opcode != rhs.m_Opcode)
     {
-        return;
+        return lhs.m_Opcode < rhs.m_Opcode;
     }
-
-    SetOperands(opVec);
-}
-
-void Instruction::SetResult(graphbuilder::ResId id)
-{
-    m_WordCount = 1 + (id.IsValid() ? 1 : 0);
-    m_ResultId = id;
-}
-
-void Instruction::SetOperands(std::vector<Operand> opVec)
-{
-    if (opVec.empty())
+    if (lhs.m_Operands.size() != rhs.m_Operands.size())
     {
-        std::cerr << "Instruction(): Vector size must be > 0." << std::endl;
-        throw std::exception();
+        return lhs.m_Operands.size() < rhs.m_Operands.size();
     }
-
-    m_Operands = std::move(opVec);
-    for (auto& opd : m_Operands)
+    auto itRhs = rhs.m_Operands.crbegin();
+    for (auto itLhs = lhs.m_Operands.crbegin(); itLhs != lhs.m_Operands.crend(); ++itLhs, ++itRhs)
     {
-        m_WordCount += uint16_t(opd.GetNumWords());
+        if (itLhs->m_Type == RES_ID)
+        {
+            continue;
+        }
+        if (*itLhs != *itRhs)
+        {
+            return *itLhs < *itRhs;
+        }
     }
+    return false;
 }
 
-} // spirvwriter namespace
-
-} // tosa2spirv namespace
+} // namespace tosa2spirv::spirv

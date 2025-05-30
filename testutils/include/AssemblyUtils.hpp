@@ -1,0 +1,29 @@
+//
+// Copyright © 2023-2025 Arm Ltd and Contributors. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
+//
+
+#pragma once
+
+#include <Module.hpp>
+
+#include <algorithm>
+#include <cstdint>
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+namespace testutils
+{
+
+std::string DisassembleSPIRV(const std::vector<uint32_t>& binary, bool runValidation = true);
+
+std::shared_ptr<tosa2spirv::spirv::Module> LoadSPIRVDisassembly(const std::string& text);
+
+inline unsigned int GetInstructionCount(const std::string& spirvString)
+{
+    return std::count(spirvString.begin(), spirvString.end(), '\n');
+}
+
+} // namespace testutils

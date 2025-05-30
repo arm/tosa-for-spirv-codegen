@@ -6,6 +6,7 @@
 #
 
 import sys
+from unicodedata import category
 
 # Add tosa.py directory to paths python searches for modules
 sys.path.append('./external/tosa_specification/tools')
@@ -13,6 +14,7 @@ sys.path.append('./external/tosa_specification/tools')
 sys.path.append('./external/ngp-runtime/scripts')
 
 import tosa
+from tosa import TOSAOperatorArgumentCategory
 
 class Operators:
     def __init__(self):
@@ -41,6 +43,11 @@ def get_argument(op, name):
     raise Exception("Argument: " + name + " not found in operator: " + op.name)
 
 def apply_operator_fixes(op):
+
+    if op.name == 'MUL':
+        shape = get_argument(op, 'shift')
+        shape.categories[0].name = 'attribute'
+
     if op.name == 'RESCALE':
         multiplier = get_argument(op, 'multiplier')
         multiplier.categories[0].name = 'input'
@@ -48,7 +55,7 @@ def apply_operator_fixes(op):
         shift = get_argument(op, 'shift')
         shift.categories[0].name = 'input'
 
-    if op.name == 'RESHAPE':
+    elif op.name == 'RESHAPE':
         shape = get_argument(op, 'shape')
         shape.categories[0].name = 'attribute'
 
@@ -62,9 +69,20 @@ def apply_operator_fixes(op):
         border = get_argument(op, 'border')
         border.categories[0].name = 'attribute'
 
+    elif op.name == 'RESHAPE':
+        shape = get_argument(op, 'shape')
+        shape.categories[0].name = 'attribute'
+
     elif op.name == 'TILE':
         arg = get_argument(op, 'multiples')
         arg.categories[0].name = 'attribute'
+
+    elif op.name == 'PAD':
+        arg = get_argument(op, 'padding')
+        arg.categories.append(TOSAOperatorArgumentCategory('attribute'))
+        for cat in get_argument(op, 'padding').categories:
+            print(cat.name)
+
     return op
 
 def name_to_pascal_case(name, separator):

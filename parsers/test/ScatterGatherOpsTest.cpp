@@ -1,22 +1,19 @@
 //
-// Copyright © 2023-2024 Arm Ltd and Contributors. All rights reserved.
+// Copyright © 2023-2025 Arm Ltd and Contributors. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 //
 
 // THIS FILE IS GENERATED WITH TOSA 0.80.0. DO NOT EDIT!
-// See tosa2spirv/python/frontend_generator.py and README
+// See tosa2spirv/python/code_generator.py and README
 
-#include <TosaSerializationParser.hpp>
-#include <Writer.hpp>
-#include <TestUtils.hpp>
+#include <AssemblyUtils.hpp>
 #include <OpTestUtils.hpp>
+#include <TosaSerializationParser.hpp>
 
 #include <gtest/gtest.h>
 
 using namespace tosa;
-using namespace tosa2spirv;
-using namespace parsers;
-
+using namespace tosa2spirv::parsers;
 TEST(TOSA2SPIRV_PARSER, Gather)
 {
     // Create Tensors
@@ -24,9 +21,9 @@ TEST(TOSA2SPIRV_PARSER, Gather)
     std::string indicesName = "indices";
     std::string outputName = "output";
 
-    std::vector<int32_t> valuesShape = {1,1,1,1};
-    std::vector<int32_t> indicesShape = {1,1,1,1};
-    std::vector<int32_t> outputShape = {1,1,1,1};
+    std::vector<int32_t> valuesShape = {1, 1, 1, 1};
+    std::vector<int32_t> indicesShape = {1, 1, 1, 1};
+    std::vector<int32_t> outputShape = {1, 1, 1, 1};
 
     auto* valuesTensor = new TosaSerializationTensor(valuesName, valuesShape, DType::DType_INT8, {});
     auto* indicesTensor = new TosaSerializationTensor(indicesName, indicesShape, DType::DType_INT32, {});
@@ -36,25 +33,25 @@ TEST(TOSA2SPIRV_PARSER, Gather)
     auto op = new tosa::TosaSerializationOperator(Op::Op_GATHER,
                                                   Attribute::Attribute_NONE,
                                                   nullptr,
-                                                  { valuesName, indicesName },
-                                                  { outputName });
+                                                  {valuesName, indicesName},
+                                                  {outputName});
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
     TosaSerializationBasicBlock block("gather",
                                       "main",
-                                      { op },
-                                      { valuesTensor, indicesTensor, outputTensor },
-                                      { valuesName, indicesName },
-                                      { outputName });
+                                      {op},
+                                      {valuesTensor, indicesTensor, outputTensor},
+                                      {valuesName, indicesName},
+                                      {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(spirvwriter::DisassembleSPIRV(binarySpirv, true));
+    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "GATHER", outputStr);
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "GATHER", outputStr);
-    spirvwriter::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "GATHER", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "GATHER", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "GATHER", outputStr);
+    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "GATHER", outputStr);
 }
 
 TEST(TOSA2SPIRV_PARSER, Scatter)
@@ -65,10 +62,10 @@ TEST(TOSA2SPIRV_PARSER, Scatter)
     std::string inputName = "input";
     std::string values_outName = "values_out";
 
-    std::vector<int32_t> values_inShape = {1,1,1,1};
-    std::vector<int32_t> indicesShape = {1,1,1,1};
-    std::vector<int32_t> inputShape = {1,1,1,1};
-    std::vector<int32_t> values_outShape = {1,1,1,1};
+    std::vector<int32_t> values_inShape = {1, 1, 1, 1};
+    std::vector<int32_t> indicesShape = {1, 1, 1, 1};
+    std::vector<int32_t> inputShape = {1, 1, 1, 1};
+    std::vector<int32_t> values_outShape = {1, 1, 1, 1};
 
     auto* values_inTensor = new TosaSerializationTensor(values_inName, values_inShape, DType::DType_INT8, {});
     auto* indicesTensor = new TosaSerializationTensor(indicesName, indicesShape, DType::DType_INT32, {});
@@ -79,25 +76,24 @@ TEST(TOSA2SPIRV_PARSER, Scatter)
     auto op = new tosa::TosaSerializationOperator(Op::Op_SCATTER,
                                                   Attribute::Attribute_NONE,
                                                   nullptr,
-                                                  { values_inName, indicesName, inputName },
-                                                  { values_outName });
+                                                  {values_inName, indicesName, inputName},
+                                                  {values_outName});
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
     TosaSerializationBasicBlock block("scatter",
                                       "main",
-                                      { op },
-                                      { values_inTensor, indicesTensor, inputTensor, values_outTensor },
-                                      { values_inName, indicesName, inputName },
-                                      { values_outName });
+                                      {op},
+                                      {values_inTensor, indicesTensor, inputTensor, values_outTensor},
+                                      {values_inName, indicesName, inputName},
+                                      {values_outName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(spirvwriter::DisassembleSPIRV(binarySpirv, true));
+    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "SCATTER", outputStr);
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "SCATTER", outputStr);
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "SCATTER", outputStr);
-    spirvwriter::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "SCATTER", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "SCATTER", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "SCATTER", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "SCATTER", outputStr);
+    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "SCATTER", outputStr);
 }
-

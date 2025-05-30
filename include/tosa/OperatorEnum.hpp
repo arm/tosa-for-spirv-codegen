@@ -1,0 +1,82 @@
+//
+// Copyright © 2023-2025 Arm Ltd and Contributors. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
+//
+
+#pragma once
+
+namespace tosa2spirv::tosa
+{
+// See tosa2spirv/python/source_generator.py and README
+// THIS SECTION IS GENERATED WITH TOSA 0.80.0. DO NOT EDIT!
+// OPERATOR ENUM NAME SECTION BEGIN
+enum class OperatorEnum
+{
+    Argmax,
+    AvgPool2d,
+    Conv2d,
+    Conv3d,
+    DepthwiseConv2d,
+    Fft2d,
+    FullyConnected,
+    Matmul,
+    MaxPool2d,
+    Rfft2d,
+    TransposeConv2d,
+    Clamp,
+    Erf,
+    Sigmoid,
+    Tanh,
+    Add,
+    ArithmeticRightShift,
+    BitwiseAnd,
+    BitwiseOr,
+    BitwiseXor,
+    Intdiv,
+    LogicalAnd,
+    LogicalLeftShift,
+    LogicalRightShift,
+    LogicalOr,
+    LogicalXor,
+    Maximum,
+    Minimum,
+    Mul,
+    Pow,
+    Sub,
+    Table,
+    Abs,
+    BitwiseNot,
+    Ceil,
+    Clz,
+    Exp,
+    Floor,
+    Log,
+    LogicalNot,
+    Negate,
+    Reciprocal,
+    Rsqrt,
+    Select,
+    Equal,
+    Greater,
+    GreaterEqual,
+    ReduceAll,
+    ReduceAny,
+    ReduceMax,
+    ReduceMin,
+    ReduceProduct,
+    ReduceSum,
+    Concat,
+    Pad,
+    Reshape,
+    Reverse,
+    Slice,
+    Tile,
+    Transpose,
+    Gather,
+    Scatter,
+    Resize,
+    Cast,
+    Rescale,
+};
+// OPERATOR ENUM NAME SECTION END
+} // namespace tosa2spirv::tosa

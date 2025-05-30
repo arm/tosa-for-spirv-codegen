@@ -1,5 +1,5 @@
 //
-// Copyright © 2023-2024 Arm Ltd and Contributors. All rights reserved.
+// Copyright © 2023-2025 Arm Ltd and Contributors. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -7,11 +7,11 @@
 // See tosa2spirv/python/frontend_generator.py and README
 
 #include <Graph.hpp>
-#include <OpTestUtils.hpp>
 #include <Module.hpp>
+#include <OpTestUtils.hpp>
+#include <TestUtils.hpp>
 #include <Writer.hpp>
 #include <gtest/gtest.h>
-#include <TestUtils.hpp>
 
 #include <iostream>
 
@@ -27,15 +27,10 @@ TEST(TOSA2SPIRV_LAYERS, Dim)
     auto module = Module::Create();
 
     auto graph = module->AddGraph();
-    auto input1 = Tensor::CreateInput(DataType::bool_t,
-                                      std::vector<unsigned int>{ 1,1,1,1 },
-                                      module,
-                                      "input1");
+    auto input1 = Tensor::CreateInput(DataType::bool_t, std::vector<unsigned int>{1, 1, 1, 1}, module, "input1");
 
     auto axis_val = Tensor::ConvertInt32tToUint32t({1});
-    auto axis = Tensor::CreateAttribute(DataType::int32_t,
-                                        std::vector<unsigned int>{ 1 },
-                                        axis_val);
+    auto axis = Tensor::CreateAttribute(DataType::int32_t, std::vector<unsigned int>{1}, axis_val);
 
     auto output = Tensor::CreateOutput(DataType::int32_t,
                                        std::vector<unsigned int>{ 1 },

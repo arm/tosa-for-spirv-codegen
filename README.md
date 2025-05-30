@@ -13,6 +13,10 @@ compiler frameworks.
 
 ## How to get started
 
+By default tosa2spirv will build for the native platform. It also supports
+building with the Android NDK. It assumes that GNU cmake with a minimum
+version of 3.17.2 is available in the path.
+
 In order to build the tosa2spirv project a number of dependencies are required,
 as listed below in the [dependencies](#dependencies) section.
 
@@ -20,7 +24,24 @@ To download and build these dependencies two scripts are provided in the root di
 
 ``` bash
 ./download_dependencies.sh
+```
+
+These dependencies do not include the Android NDK. When building for Android
+it is expected that the following environment variables are set:
+
+NDK_VERSION=[NDK version]
+DEFAULT_NDK=android-ndk-${NDK_VERSION}
+NDK_DIR=[path to the NDK]
+ANDROID_API=[API Version]
+
+For a native build.
+``` bash
 ./build_dependencies.sh -t Release
+```
+
+To build for Android
+``` bash
+./build_dependencies.sh -t Release -s Android
 ```
 
 The *tosa2spirv* build can then be prepared by creating makefiles using CMake:
@@ -28,7 +49,20 @@ The *tosa2spirv* build can then be prepared by creating makefiles using CMake:
 ``` bash
 mkdir -p build
 cd build
+```
+
+For a native build
+``` bash
 cmake ..
+```
+or if you need position independent code
+``` bash
+cmake -DCMAKE_POSITION_INDEPENDENT_CODE=ON ..
+```
+
+For an Android build
+``` bash
+cmake cmake -DCMAKE_SYSTEM_NAME=Android -DCMAKE_ANDROID_NDK=$NDK_DIR ..
 ```
 
 Lastly, compile using `make`:
@@ -39,7 +73,7 @@ make
 
 The resulting executable will be located here:
 `build/generator/tosa2spirvGenerator`. This executable is built by default,
-but can be disabled with `-DBUILD_TOSA_2_SPIRV_GENERATOR=NO`.
+but can be disabled with `-DBUILD_TOSA_2_SPIRV_GENERATOR=OFF`.
 More information on the usage can be found in the next section
 ([tosa2spirv Generator Usage](#tosa2spirv-generator-usage)).
 
@@ -54,7 +88,14 @@ rebuilt simply using `make`.
 
 ## Generator Usage
 
-The *tosa2spirv* Generator executable can be used to generate SPIR-V in two ways.
+The *tosa2spirv* Generator is a command line executable that makes use of the
+[VgfWriter](vgfwriter/include/VgfWriter.hpp) library ('vgfwriter/include/VgfWriter.hpp')
+which is a wrapper of the ml-sdk-vgf-lib.
+
+The VgfWriter library (libvgfWriter.a) is currently enabled by default, but can be disabled by adding
+`-DBUILD_VGF_WRITER=OFF` to the CMake command.
+
+The executable can be used to generate SPIR-V in two ways.
 
 **Option 1:** Using a TOSA FlatBuffers file containing the serialized subgraph.
 
@@ -81,7 +122,8 @@ specified using `--schema-file=external/serialization_lib/schema/tosa.fbs`
 On a successful execution, the output SPIR-V will be written in binary
 format into the output file specified with the `--output-file` option.
 
-This output can be converted into human-readable SPIR-V using the vgf_dump executable in combination with the SPIR-V Tools disassembler.
+This output can be converted into human-readable SPIR-V using the vgf_dump executable in combination
+with the SPIR-V Tools disassembler.
 ``` bash
 ./external/vgf_encoder/build/vgf_dump/vgf_dump -i output_file.vgf --dump-spirv 0 -o output_file.spv
 ./external/SPIRV-Tools/build/tools/spirv-dis output_file.spv > disassembledSpv.txt
@@ -90,7 +132,8 @@ This output can be converted into human-readable SPIR-V using the vgf_dump execu
 ## TosaSerializationParser API Usage
 
 As an alternative to the tosa2spirv generator executable described above,
-the [TosaSerializationParser.hpp](parsers/include/TosaSerializationParser.hpp) ('parsers/include/TosaSerializationParser.hpp')
+the [TosaSerializationParser.hpp](parsers/include/TosaSerializationParser.hpp)
+('parsers/include/TosaSerializationParser.hpp')
 is provided, which can be used to generate SPIR-V from a TosaSerialization
 data structure easily within C++ code.
 
@@ -102,13 +145,18 @@ TosaSerializationParser parser(&block);
 // Call GenerateSPIRV, which returns a SPIR-V binary vector.
 // This can then be disassembled into human-readable SPIR-V or passed for execution.
 auto binarySpirv = parser.GenerateSPIRV();
+
+// Constants can be retrieved with the function:
+// Note: Constants of a 1D tensor, with less than 17 elements, will be stored in the SPIRV binary
+//       and will not be in the returned vector
+std::vector<ConstantData>& constants parser.GetGraphConstants();
 ```
 
 This example can be found in the `Readme` unit test located here:
 [ParserTests.cpp](parsers/test/ParserTests.cpp) ('parsers/test/ParserTests.cpp').
 
 The parser is currently enabled by default, but can be disabled by adding
-`-DBUILD_TOSA_SERIALIZATION_PARSER=NO` to the CMake command.
+`-DBUILD_TOSA_SERIALIZATION_PARSER=OFF` to the CMake command.
 
 ### Unit Tests
 
@@ -126,63 +174,54 @@ the graph builder API and subsequently write SPIR-V.
 
 *Example:*
 ``` c++
+
 // Create a module and add a graph.
-// The graph can then be used to add operators.
-auto module = Module::Create();
-auto graph = module->AddGraph();
+auto module = CreateModule(m_Version);
+auto graph = Graph(module, graphName);
 
-// Initialize the tensors for the AddXXXLayer methods.
-// This function automatically adds a DescSetBinding and assigns it to the created input tensor.
-auto input = Tensor::CreateInput(DataType::int8_t,
-                                 std::vector<unsigned int>{1,1,1,1},
-                                 module,
-                                 "input_tensor_ptr");
+// Create an input to the graph, this will be the input to the maxpool2d operator
+// DescriptorSet will be 0. Binding can be specified or left to default
+auto input = graph.AddInput(Tensor{DataType::int8_t, {1,1}}, 0);
 
-auto kernel = Tensor::CreateAttribute(DataType::int32_t,
-                                      std::vector<unsigned int>{2},
-                                      Tensor::ConvertInt32tToUint32t({1,1}););
+// Maxpool attributes
+auto kernel = Attribute({1, 1}, DataType::int8_t);
+auto stride = Attribute({1, 1}, DataType::int8_t);
+auto pad = Attribute({1, 1}, DataType::int8_t);
 
-auto stride = Tensor::CreateAttribute(DataType::int32_t,
-                                      std::vector<unsigned int>{2},
-                                      Tensor::ConvertInt32tToUint32t({1,1}););
+// Create an output Tensor
+auto outputTensor = Tensor{DataType::int8_t, std::vector<unsigned int>{1,1}};
 
-auto pad = Tensor::CreateAttribute(DataType::int32_t,
-                                   std::vector<unsigned int>{4},
-                                   Tensor::ConvertInt32tToUint32t({1,1,1,1}););
+// Create the operator
+auto maxPool2d = graph.AddMaxPool2dOperator(input, kernel, stride, pad, outputTensor);
 
-// If the output tensor is an output of the graph,
-// The Tensor::CreateOutput function should be used as shown below.
-auto output = Tensor::CreateOutput(DataType::int8_t,
-                                   std::vector<unsigned int>{1,1,1,1},
-                                   module,
-                                   "output_tensor_ptr");
+// Set the graphs output to be the output of maxPool2d
+// DescriptorSet will be 0. Binding can be specified or left to default
+graph.SetOutputs({maxPool2d, 1});
 
-// Add an operator to the graph.
-graph->AddMaxPool2dOperator(input,
-                            kernel,
-                            stride,
-                            pad,
-                            output);
+// Once all IO and operators are set FinalizeGraph() fixes the type of the graph
+// After being called the graph becomes immutable
+graph.FinalizeGraph();
 
 // Use Module to write the full binary.
-auto binary = module->Write();
+std::vector<uint32_t> binary = WriteToBinary(module);
 ```
 
 This example can be found in the `Readme` unit test located here:
 [MaxPool2dTests.cpp](src/test/layerTests/MaxPool2dTests.cpp) ('src/test/layerTests/MaxPool2dTests.cpp').
 
-GraphConstants, ie. constant inputs to layers, can be initialized as follows:
+GraphConstants, i.e. constant inputs to operators, can be initialized as follows:
 ``` c++
-    auto multiplier = Tensor::CreateConstInput(DataType::int32_t,
-                                               std::vector<unsigned int>{ 1 },
-                                               module,
-                                               "Multiplier_Rescale");
+    Tensor tensor{DataType::int8_t, {1,1}}
+    ResId constantResId = graph.AddGraphConstant(tensor);
 ```
-Some examples of how to use them can be found in the Rescale tests here: [RescaleTests.cpp](src/test/layerTests/RescaleTests.cpp) (`src/test/layerTests/RescaleTests.cpp`)
+Some examples of how to use them can be found in the Rescale tests here:
+[RescaleTests.cpp](src/test/layerTests/RescaleTests.cpp) (`src/test/layerTests/RescaleTests.cpp`)
 
-## Introspection API
-A Visitor interface [IVisitor.hpp](include/IVisitor.hpp) ('include/IVisitor.hpp') has been provided to allow uses to inspect and gather information from a Module, its graphs and their layers.
-An example of this can be seen in the [ResourceInfoLayerWriteWithVisitor](generator/test/GeneratorTests.cpp) (`generator/test/GeneratorTests.cpp`) test.
+## Model information
+
+    /// Model state is primarliy represented and stored as SPIRV-V in tosa2spirv::Module::m_SPIRVGraph.
+    /// The spirv module can be parsed using the tosa2spirv/include/spirv headers and following TOSA SPIR-V specification
+    /// Examples can be found in src/tosa2spirv.cpp and vgfwriter/src/VgfWriter.cpp
 
 ### Unit Tests
 
@@ -210,22 +249,36 @@ as follows:
 <browser_name> ./docs/html/index.xhtml
 ```
 
+## Code Formatting (clang-format 11)
+
+This project uses **clang-format 11** to enforce consistent code style.
+
+### Formatting Code
+
+To format your code:
+
+```bash
+clang-format-11 -i path/to/file.cpp
+```
+
 ## Frontend Generator
 
-Located in the `python` directory we have provided the frontend_generator.py script along with its input files (.hpp) and (.cpp).
+Located in the `python` directory we have provided the frontend_generator.py script
+along with its input files (.hpp) and (.cpp).
 This script can be used to generate the front end interface for tosa2spirv. It will generate the following:
 
 * Graph header `include/Graph.hpp`  and source file `src/Graph.cpp`.
-* Unit tests covering the Operators and the output from their Write() functions.
+* Unit tests covering the Operators and their output SPIR-V.
 
-The AddXXXOperator() functions generated in `include/Graph.hpp` are created using the TOSA specifications directly this means the script has a dependency on `tosa.xml`  and `tosa.py`.
+The AddXXXOperator() functions generated in `include/Graph.hpp` are created using the TOSA specifications directly this
+means the script has a dependency on `tosa.xml`  and `tosa.py`.
 
-| GENERATION_ARGS          | Description                                                                                            |
-|--------------------------|:-------------------------------------------------------------------------------------------------------|
-| -g, --graph_enabled      | **flag:** generate graph header `include/Graph.hpp` and source file `src/Graph.cpp`                    |
-| -d, --definition_enabled | **flag:** generate operator definitions to include/OperatorDefinitions.hpp and src/OperatorDefinitions |
-| -u, --unit_test_enabled  | **flag:** generate unit tests to `src/test/layerTests`                                                 |
-| -f, --force_generate     | **flag:** force generate mode to overwrite any existing tests                                          |
+| GENERATION_ARGS          | Description                                                                         |
+|--------------------------|:------------------------------------------------------------------------------------|
+| -g, --graph_enabled      | **flag:** generate graph header `include/Graph.hpp` and source file `src/Graph.cpp` |
+| -d, --definition_enabled | **flag:** generate operator definitions to include/OperatorDefinitions.hpp          |
+| -u, --unit_test_enabled  | **flag:** generate unit tests to `src/test/layerTests`                              |
+| -f, --force_generate     | **flag:** force generate mode to overwrite any existing tests                       |
 
 To generate Graph header, source file, operators and unit tests, the following command can be run:
 

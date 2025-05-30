@@ -1,5 +1,5 @@
 //
-// Copyright © 2023 Arm Ltd and Contributors. All rights reserved.
+// Copyright © 2023-2025 Arm Ltd and Contributors. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -10,8 +10,8 @@
 #include <Module.hpp>
 #include <Writer.hpp>
 
-#include <gtest/gtest.h>
 #include <TestUtils.hpp>
+#include <gtest/gtest.h>
 
 #include <iostream>
 
@@ -26,14 +26,10 @@ TEST(TOSA2SPIRV_LAYERS, Identity)
 
     // Pass in ResId as if coming from a previous layer
     // All datatypes are set to int8_t by default for code generation.
-    auto input1 = Tensor::CreateInputFrom(DataType::int8_t,
-                                               std::vector<unsigned int>{1,1},
-                                               idGenerator.GetNextId());
+    auto input1 = Tensor::CreateInputFrom(DataType::int8_t, std::vector<unsigned int>{1, 1}, idGenerator.GetNextId());
     auto output = Tensor::CreateOutputTo(DataType::int8_t, std::vector<unsigned int>{1, 1});
 
-    Identity identity(input1,
-                           output,
-                           idGenerator.GetNextId());
+    Identity identity(input1, output, idGenerator.GetNextId());
 
     auto writer = spirvwriter::Writer(idGenerator);
 

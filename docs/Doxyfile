@@ -1,6 +1,6 @@
 # Doxyfile 1.8.12
 
-# Copyright © 2023 Arm Ltd and Contributors. All rights reserved.
+# Copyright © 2023-2025 Arm Ltd and Contributors. All rights reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -814,8 +814,8 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = ./include/ \
-                         ./src/ \
                          ./parsers/ \
+                         ./vgfwriter/include \
                          ./generator/test/GeneratorTests.cpp \
                          ./src/test/layerTests/MaxPool2dTests.cpp \
                          ./src/test/layerTests/RescaleTests.cpp \

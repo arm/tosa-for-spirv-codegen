@@ -1,22 +1,19 @@
 //
-// Copyright © 2023-2024 Arm Ltd and Contributors. All rights reserved.
+// Copyright © 2023-2025 Arm Ltd and Contributors. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 //
 
 // THIS FILE IS GENERATED WITH TOSA 0.80.0. DO NOT EDIT!
-// See tosa2spirv/python/frontend_generator.py and README
+// See tosa2spirv/python/code_generator.py and README
 
-#include <TosaSerializationParser.hpp>
-#include <Writer.hpp>
-#include <TestUtils.hpp>
+#include <AssemblyUtils.hpp>
 #include <OpTestUtils.hpp>
+#include <TosaSerializationParser.hpp>
 
 #include <gtest/gtest.h>
 
 using namespace tosa;
-using namespace tosa2spirv;
-using namespace parsers;
-
+using namespace tosa2spirv::parsers;
 TEST(TOSA2SPIRV_PARSER, Add)
 {
     // Create Tensors
@@ -24,9 +21,9 @@ TEST(TOSA2SPIRV_PARSER, Add)
     std::string input2Name = "input2";
     std::string outputName = "output";
 
-    std::vector<int32_t> input1Shape = {1,1,1,1};
-    std::vector<int32_t> input2Shape = {1,1,1,1};
-    std::vector<int32_t> outputShape = {1,1,1,1};
+    std::vector<int32_t> input1Shape = {1, 1, 1, 1};
+    std::vector<int32_t> input2Shape = {1, 1, 1, 1};
+    std::vector<int32_t> outputShape = {1, 1, 1, 1};
 
     auto* input1Tensor = new TosaSerializationTensor(input1Name, input1Shape, DType::DType_INT32, {});
     auto* input2Tensor = new TosaSerializationTensor(input2Name, input2Shape, DType::DType_INT32, {});
@@ -36,25 +33,25 @@ TEST(TOSA2SPIRV_PARSER, Add)
     auto op = new tosa::TosaSerializationOperator(Op::Op_ADD,
                                                   Attribute::Attribute_NONE,
                                                   nullptr,
-                                                  { input1Name, input2Name },
-                                                  { outputName });
+                                                  {input1Name, input2Name},
+                                                  {outputName});
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
     TosaSerializationBasicBlock block("add",
                                       "main",
-                                      { op },
-                                      { input1Tensor, input2Tensor, outputTensor },
-                                      { input1Name, input2Name },
-                                      { outputName });
+                                      {op},
+                                      {input1Tensor, input2Tensor, outputTensor},
+                                      {input1Name, input2Name},
+                                      {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(spirvwriter::DisassembleSPIRV(binarySpirv, true));
+    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "ADD", outputStr);
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "ADD", outputStr);
-    spirvwriter::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "ADD", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "ADD", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "ADD", outputStr);
+    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "ADD", outputStr);
 }
 
 TEST(TOSA2SPIRV_PARSER, ArithmeticRightShift)
@@ -68,9 +65,9 @@ TEST(TOSA2SPIRV_PARSER, ArithmeticRightShift)
     std::string input2Name = "input2";
     std::string outputName = "output";
 
-    std::vector<int32_t> input1Shape = {1,1,1,1};
-    std::vector<int32_t> input2Shape = {1,1,1,1};
-    std::vector<int32_t> outputShape = {1,1,1,1};
+    std::vector<int32_t> input1Shape = {1, 1, 1, 1};
+    std::vector<int32_t> input2Shape = {1, 1, 1, 1};
+    std::vector<int32_t> outputShape = {1, 1, 1, 1};
 
     auto* input1Tensor = new TosaSerializationTensor(input1Name, input1Shape, DType::DType_INT8, {});
     auto* input2Tensor = new TosaSerializationTensor(input2Name, input2Shape, DType::DType_INT8, {});
@@ -80,26 +77,26 @@ TEST(TOSA2SPIRV_PARSER, ArithmeticRightShift)
     auto op = new tosa::TosaSerializationOperator(Op::Op_ARITHMETIC_RIGHT_SHIFT,
                                                   Attribute::Attribute_ArithmeticRightShiftAttribute,
                                                   &attribute,
-                                                  { input1Name, input2Name },
-                                                  { outputName });
+                                                  {input1Name, input2Name},
+                                                  {outputName});
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
     TosaSerializationBasicBlock block("arithmetic_right_shift",
                                       "main",
-                                      { op },
-                                      { input1Tensor, input2Tensor, outputTensor },
-                                      { input1Name, input2Name },
-                                      { outputName });
+                                      {op},
+                                      {input1Tensor, input2Tensor, outputTensor},
+                                      {input1Name, input2Name},
+                                      {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(spirvwriter::DisassembleSPIRV(binarySpirv, true));
+    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr);
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr);
-    spirvwriter::CheckBoolConstant(DataType::bool_t, "ARITHMETIC_RIGHT_SHIFT", outputStr, true, 0);
-    spirvwriter::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr);
+    testutils::CheckBoolConstant(DataType::bool_t, "ARITHMETIC_RIGHT_SHIFT", outputStr, true, 0);
+    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr);
 }
 
 TEST(TOSA2SPIRV_PARSER, BitwiseAnd)
@@ -109,9 +106,9 @@ TEST(TOSA2SPIRV_PARSER, BitwiseAnd)
     std::string input2Name = "input2";
     std::string outputName = "output";
 
-    std::vector<int32_t> input1Shape = {1,1,1,1};
-    std::vector<int32_t> input2Shape = {1,1,1,1};
-    std::vector<int32_t> outputShape = {1,1,1,1};
+    std::vector<int32_t> input1Shape = {1, 1, 1, 1};
+    std::vector<int32_t> input2Shape = {1, 1, 1, 1};
+    std::vector<int32_t> outputShape = {1, 1, 1, 1};
 
     auto* input1Tensor = new TosaSerializationTensor(input1Name, input1Shape, DType::DType_INT8, {});
     auto* input2Tensor = new TosaSerializationTensor(input2Name, input2Shape, DType::DType_INT8, {});
@@ -121,25 +118,25 @@ TEST(TOSA2SPIRV_PARSER, BitwiseAnd)
     auto op = new tosa::TosaSerializationOperator(Op::Op_BITWISE_AND,
                                                   Attribute::Attribute_NONE,
                                                   nullptr,
-                                                  { input1Name, input2Name },
-                                                  { outputName });
+                                                  {input1Name, input2Name},
+                                                  {outputName});
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
     TosaSerializationBasicBlock block("bitwise_and",
                                       "main",
-                                      { op },
-                                      { input1Tensor, input2Tensor, outputTensor },
-                                      { input1Name, input2Name },
-                                      { outputName });
+                                      {op},
+                                      {input1Tensor, input2Tensor, outputTensor},
+                                      {input1Name, input2Name},
+                                      {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(spirvwriter::DisassembleSPIRV(binarySpirv, true));
+    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_AND", outputStr);
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_AND", outputStr);
-    spirvwriter::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_AND", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_AND", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_AND", outputStr);
+    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_AND", outputStr);
 }
 
 TEST(TOSA2SPIRV_PARSER, BitwiseOr)
@@ -149,9 +146,9 @@ TEST(TOSA2SPIRV_PARSER, BitwiseOr)
     std::string input2Name = "input2";
     std::string outputName = "output";
 
-    std::vector<int32_t> input1Shape = {1,1,1,1};
-    std::vector<int32_t> input2Shape = {1,1,1,1};
-    std::vector<int32_t> outputShape = {1,1,1,1};
+    std::vector<int32_t> input1Shape = {1, 1, 1, 1};
+    std::vector<int32_t> input2Shape = {1, 1, 1, 1};
+    std::vector<int32_t> outputShape = {1, 1, 1, 1};
 
     auto* input1Tensor = new TosaSerializationTensor(input1Name, input1Shape, DType::DType_INT8, {});
     auto* input2Tensor = new TosaSerializationTensor(input2Name, input2Shape, DType::DType_INT8, {});
@@ -161,25 +158,25 @@ TEST(TOSA2SPIRV_PARSER, BitwiseOr)
     auto op = new tosa::TosaSerializationOperator(Op::Op_BITWISE_OR,
                                                   Attribute::Attribute_NONE,
                                                   nullptr,
-                                                  { input1Name, input2Name },
-                                                  { outputName });
+                                                  {input1Name, input2Name},
+                                                  {outputName});
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
     TosaSerializationBasicBlock block("bitwise_or",
                                       "main",
-                                      { op },
-                                      { input1Tensor, input2Tensor, outputTensor },
-                                      { input1Name, input2Name },
-                                      { outputName });
+                                      {op},
+                                      {input1Tensor, input2Tensor, outputTensor},
+                                      {input1Name, input2Name},
+                                      {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(spirvwriter::DisassembleSPIRV(binarySpirv, true));
+    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_OR", outputStr);
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_OR", outputStr);
-    spirvwriter::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_OR", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_OR", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_OR", outputStr);
+    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_OR", outputStr);
 }
 
 TEST(TOSA2SPIRV_PARSER, BitwiseXor)
@@ -189,9 +186,9 @@ TEST(TOSA2SPIRV_PARSER, BitwiseXor)
     std::string input2Name = "input2";
     std::string outputName = "output";
 
-    std::vector<int32_t> input1Shape = {1,1,1,1};
-    std::vector<int32_t> input2Shape = {1,1,1,1};
-    std::vector<int32_t> outputShape = {1,1,1,1};
+    std::vector<int32_t> input1Shape = {1, 1, 1, 1};
+    std::vector<int32_t> input2Shape = {1, 1, 1, 1};
+    std::vector<int32_t> outputShape = {1, 1, 1, 1};
 
     auto* input1Tensor = new TosaSerializationTensor(input1Name, input1Shape, DType::DType_INT8, {});
     auto* input2Tensor = new TosaSerializationTensor(input2Name, input2Shape, DType::DType_INT8, {});
@@ -201,25 +198,25 @@ TEST(TOSA2SPIRV_PARSER, BitwiseXor)
     auto op = new tosa::TosaSerializationOperator(Op::Op_BITWISE_XOR,
                                                   Attribute::Attribute_NONE,
                                                   nullptr,
-                                                  { input1Name, input2Name },
-                                                  { outputName });
+                                                  {input1Name, input2Name},
+                                                  {outputName});
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
     TosaSerializationBasicBlock block("bitwise_xor",
                                       "main",
-                                      { op },
-                                      { input1Tensor, input2Tensor, outputTensor },
-                                      { input1Name, input2Name },
-                                      { outputName });
+                                      {op},
+                                      {input1Tensor, input2Tensor, outputTensor},
+                                      {input1Name, input2Name},
+                                      {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(spirvwriter::DisassembleSPIRV(binarySpirv, true));
+    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_XOR", outputStr);
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_XOR", outputStr);
-    spirvwriter::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_XOR", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_XOR", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_XOR", outputStr);
+    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_XOR", outputStr);
 }
 
 TEST(TOSA2SPIRV_PARSER, Intdiv)
@@ -229,9 +226,9 @@ TEST(TOSA2SPIRV_PARSER, Intdiv)
     std::string input2Name = "input2";
     std::string outputName = "output";
 
-    std::vector<int32_t> input1Shape = {1,1,1,1};
-    std::vector<int32_t> input2Shape = {1,1,1,1};
-    std::vector<int32_t> outputShape = {1,1,1,1};
+    std::vector<int32_t> input1Shape = {1, 1, 1, 1};
+    std::vector<int32_t> input2Shape = {1, 1, 1, 1};
+    std::vector<int32_t> outputShape = {1, 1, 1, 1};
 
     auto* input1Tensor = new TosaSerializationTensor(input1Name, input1Shape, DType::DType_INT32, {});
     auto* input2Tensor = new TosaSerializationTensor(input2Name, input2Shape, DType::DType_INT32, {});
@@ -241,25 +238,25 @@ TEST(TOSA2SPIRV_PARSER, Intdiv)
     auto op = new tosa::TosaSerializationOperator(Op::Op_INTDIV,
                                                   Attribute::Attribute_NONE,
                                                   nullptr,
-                                                  { input1Name, input2Name },
-                                                  { outputName });
+                                                  {input1Name, input2Name},
+                                                  {outputName});
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
     TosaSerializationBasicBlock block("intdiv",
                                       "main",
-                                      { op },
-                                      { input1Tensor, input2Tensor, outputTensor },
-                                      { input1Name, input2Name },
-                                      { outputName });
+                                      {op},
+                                      {input1Tensor, input2Tensor, outputTensor},
+                                      {input1Name, input2Name},
+                                      {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(spirvwriter::DisassembleSPIRV(binarySpirv, true));
+    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "INTDIV", outputStr);
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "INTDIV", outputStr);
-    spirvwriter::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "INTDIV", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "INTDIV", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "INTDIV", outputStr);
+    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "INTDIV", outputStr);
 }
 
 TEST(TOSA2SPIRV_PARSER, LogicalAnd)
@@ -269,9 +266,9 @@ TEST(TOSA2SPIRV_PARSER, LogicalAnd)
     std::string input2Name = "input2";
     std::string outputName = "output";
 
-    std::vector<int32_t> input1Shape = {1,1,1,1};
-    std::vector<int32_t> input2Shape = {1,1,1,1};
-    std::vector<int32_t> outputShape = {1,1,1,1};
+    std::vector<int32_t> input1Shape = {1, 1, 1, 1};
+    std::vector<int32_t> input2Shape = {1, 1, 1, 1};
+    std::vector<int32_t> outputShape = {1, 1, 1, 1};
 
     auto* input1Tensor = new TosaSerializationTensor(input1Name, input1Shape, DType::DType_BOOL, {});
     auto* input2Tensor = new TosaSerializationTensor(input2Name, input2Shape, DType::DType_BOOL, {});
@@ -281,25 +278,25 @@ TEST(TOSA2SPIRV_PARSER, LogicalAnd)
     auto op = new tosa::TosaSerializationOperator(Op::Op_LOGICAL_AND,
                                                   Attribute::Attribute_NONE,
                                                   nullptr,
-                                                  { input1Name, input2Name },
-                                                  { outputName });
+                                                  {input1Name, input2Name},
+                                                  {outputName});
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
     TosaSerializationBasicBlock block("logical_and",
                                       "main",
-                                      { op },
-                                      { input1Tensor, input2Tensor, outputTensor },
-                                      { input1Name, input2Name },
-                                      { outputName });
+                                      {op},
+                                      {input1Tensor, input2Tensor, outputTensor},
+                                      {input1Name, input2Name},
+                                      {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(spirvwriter::DisassembleSPIRV(binarySpirv, true));
+    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_AND", outputStr);
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_AND", outputStr);
-    spirvwriter::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_AND", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_AND", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_AND", outputStr);
+    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_AND", outputStr);
 }
 
 TEST(TOSA2SPIRV_PARSER, LogicalLeftShift)
@@ -309,9 +306,9 @@ TEST(TOSA2SPIRV_PARSER, LogicalLeftShift)
     std::string input2Name = "input2";
     std::string outputName = "output";
 
-    std::vector<int32_t> input1Shape = {1,1,1,1};
-    std::vector<int32_t> input2Shape = {1,1,1,1};
-    std::vector<int32_t> outputShape = {1,1,1,1};
+    std::vector<int32_t> input1Shape = {1, 1, 1, 1};
+    std::vector<int32_t> input2Shape = {1, 1, 1, 1};
+    std::vector<int32_t> outputShape = {1, 1, 1, 1};
 
     auto* input1Tensor = new TosaSerializationTensor(input1Name, input1Shape, DType::DType_INT8, {});
     auto* input2Tensor = new TosaSerializationTensor(input2Name, input2Shape, DType::DType_INT8, {});
@@ -321,25 +318,25 @@ TEST(TOSA2SPIRV_PARSER, LogicalLeftShift)
     auto op = new tosa::TosaSerializationOperator(Op::Op_LOGICAL_LEFT_SHIFT,
                                                   Attribute::Attribute_NONE,
                                                   nullptr,
-                                                  { input1Name, input2Name },
-                                                  { outputName });
+                                                  {input1Name, input2Name},
+                                                  {outputName});
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
     TosaSerializationBasicBlock block("logical_left_shift",
                                       "main",
-                                      { op },
-                                      { input1Tensor, input2Tensor, outputTensor },
-                                      { input1Name, input2Name },
-                                      { outputName });
+                                      {op},
+                                      {input1Tensor, input2Tensor, outputTensor},
+                                      {input1Name, input2Name},
+                                      {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(spirvwriter::DisassembleSPIRV(binarySpirv, true));
+    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "LOGICAL_LEFT_SHIFT", outputStr);
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "LOGICAL_LEFT_SHIFT", outputStr);
-    spirvwriter::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "LOGICAL_LEFT_SHIFT", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "LOGICAL_LEFT_SHIFT", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "LOGICAL_LEFT_SHIFT", outputStr);
+    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "LOGICAL_LEFT_SHIFT", outputStr);
 }
 
 TEST(TOSA2SPIRV_PARSER, LogicalRightShift)
@@ -349,9 +346,9 @@ TEST(TOSA2SPIRV_PARSER, LogicalRightShift)
     std::string input2Name = "input2";
     std::string outputName = "output";
 
-    std::vector<int32_t> input1Shape = {1,1,1,1};
-    std::vector<int32_t> input2Shape = {1,1,1,1};
-    std::vector<int32_t> outputShape = {1,1,1,1};
+    std::vector<int32_t> input1Shape = {1, 1, 1, 1};
+    std::vector<int32_t> input2Shape = {1, 1, 1, 1};
+    std::vector<int32_t> outputShape = {1, 1, 1, 1};
 
     auto* input1Tensor = new TosaSerializationTensor(input1Name, input1Shape, DType::DType_INT8, {});
     auto* input2Tensor = new TosaSerializationTensor(input2Name, input2Shape, DType::DType_INT8, {});
@@ -361,25 +358,25 @@ TEST(TOSA2SPIRV_PARSER, LogicalRightShift)
     auto op = new tosa::TosaSerializationOperator(Op::Op_LOGICAL_RIGHT_SHIFT,
                                                   Attribute::Attribute_NONE,
                                                   nullptr,
-                                                  { input1Name, input2Name },
-                                                  { outputName });
+                                                  {input1Name, input2Name},
+                                                  {outputName});
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
     TosaSerializationBasicBlock block("logical_right_shift",
                                       "main",
-                                      { op },
-                                      { input1Tensor, input2Tensor, outputTensor },
-                                      { input1Name, input2Name },
-                                      { outputName });
+                                      {op},
+                                      {input1Tensor, input2Tensor, outputTensor},
+                                      {input1Name, input2Name},
+                                      {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(spirvwriter::DisassembleSPIRV(binarySpirv, true));
+    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "LOGICAL_RIGHT_SHIFT", outputStr);
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "LOGICAL_RIGHT_SHIFT", outputStr);
-    spirvwriter::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "LOGICAL_RIGHT_SHIFT", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "LOGICAL_RIGHT_SHIFT", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "LOGICAL_RIGHT_SHIFT", outputStr);
+    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "LOGICAL_RIGHT_SHIFT", outputStr);
 }
 
 TEST(TOSA2SPIRV_PARSER, LogicalOr)
@@ -389,9 +386,9 @@ TEST(TOSA2SPIRV_PARSER, LogicalOr)
     std::string input2Name = "input2";
     std::string outputName = "output";
 
-    std::vector<int32_t> input1Shape = {1,1,1,1};
-    std::vector<int32_t> input2Shape = {1,1,1,1};
-    std::vector<int32_t> outputShape = {1,1,1,1};
+    std::vector<int32_t> input1Shape = {1, 1, 1, 1};
+    std::vector<int32_t> input2Shape = {1, 1, 1, 1};
+    std::vector<int32_t> outputShape = {1, 1, 1, 1};
 
     auto* input1Tensor = new TosaSerializationTensor(input1Name, input1Shape, DType::DType_BOOL, {});
     auto* input2Tensor = new TosaSerializationTensor(input2Name, input2Shape, DType::DType_BOOL, {});
@@ -401,25 +398,25 @@ TEST(TOSA2SPIRV_PARSER, LogicalOr)
     auto op = new tosa::TosaSerializationOperator(Op::Op_LOGICAL_OR,
                                                   Attribute::Attribute_NONE,
                                                   nullptr,
-                                                  { input1Name, input2Name },
-                                                  { outputName });
+                                                  {input1Name, input2Name},
+                                                  {outputName});
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
     TosaSerializationBasicBlock block("logical_or",
                                       "main",
-                                      { op },
-                                      { input1Tensor, input2Tensor, outputTensor },
-                                      { input1Name, input2Name },
-                                      { outputName });
+                                      {op},
+                                      {input1Tensor, input2Tensor, outputTensor},
+                                      {input1Name, input2Name},
+                                      {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(spirvwriter::DisassembleSPIRV(binarySpirv, true));
+    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_OR", outputStr);
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_OR", outputStr);
-    spirvwriter::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_OR", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_OR", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_OR", outputStr);
+    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_OR", outputStr);
 }
 
 TEST(TOSA2SPIRV_PARSER, LogicalXor)
@@ -429,9 +426,9 @@ TEST(TOSA2SPIRV_PARSER, LogicalXor)
     std::string input2Name = "input2";
     std::string outputName = "output";
 
-    std::vector<int32_t> input1Shape = {1,1,1,1};
-    std::vector<int32_t> input2Shape = {1,1,1,1};
-    std::vector<int32_t> outputShape = {1,1,1,1};
+    std::vector<int32_t> input1Shape = {1, 1, 1, 1};
+    std::vector<int32_t> input2Shape = {1, 1, 1, 1};
+    std::vector<int32_t> outputShape = {1, 1, 1, 1};
 
     auto* input1Tensor = new TosaSerializationTensor(input1Name, input1Shape, DType::DType_BOOL, {});
     auto* input2Tensor = new TosaSerializationTensor(input2Name, input2Shape, DType::DType_BOOL, {});
@@ -441,25 +438,25 @@ TEST(TOSA2SPIRV_PARSER, LogicalXor)
     auto op = new tosa::TosaSerializationOperator(Op::Op_LOGICAL_XOR,
                                                   Attribute::Attribute_NONE,
                                                   nullptr,
-                                                  { input1Name, input2Name },
-                                                  { outputName });
+                                                  {input1Name, input2Name},
+                                                  {outputName});
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
     TosaSerializationBasicBlock block("logical_xor",
                                       "main",
-                                      { op },
-                                      { input1Tensor, input2Tensor, outputTensor },
-                                      { input1Name, input2Name },
-                                      { outputName });
+                                      {op},
+                                      {input1Tensor, input2Tensor, outputTensor},
+                                      {input1Name, input2Name},
+                                      {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(spirvwriter::DisassembleSPIRV(binarySpirv, true));
+    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_XOR", outputStr);
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_XOR", outputStr);
-    spirvwriter::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_XOR", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_XOR", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_XOR", outputStr);
+    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_XOR", outputStr);
 }
 
 TEST(TOSA2SPIRV_PARSER, Maximum)
@@ -469,9 +466,9 @@ TEST(TOSA2SPIRV_PARSER, Maximum)
     std::string input2Name = "input2";
     std::string outputName = "output";
 
-    std::vector<int32_t> input1Shape = {1,1,1,1};
-    std::vector<int32_t> input2Shape = {1,1,1,1};
-    std::vector<int32_t> outputShape = {1,1,1,1};
+    std::vector<int32_t> input1Shape = {1, 1, 1, 1};
+    std::vector<int32_t> input2Shape = {1, 1, 1, 1};
+    std::vector<int32_t> outputShape = {1, 1, 1, 1};
 
     auto* input1Tensor = new TosaSerializationTensor(input1Name, input1Shape, DType::DType_INT32, {});
     auto* input2Tensor = new TosaSerializationTensor(input2Name, input2Shape, DType::DType_INT32, {});
@@ -481,25 +478,25 @@ TEST(TOSA2SPIRV_PARSER, Maximum)
     auto op = new tosa::TosaSerializationOperator(Op::Op_MAXIMUM,
                                                   Attribute::Attribute_NONE,
                                                   nullptr,
-                                                  { input1Name, input2Name },
-                                                  { outputName });
+                                                  {input1Name, input2Name},
+                                                  {outputName});
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
     TosaSerializationBasicBlock block("maximum",
                                       "main",
-                                      { op },
-                                      { input1Tensor, input2Tensor, outputTensor },
-                                      { input1Name, input2Name },
-                                      { outputName });
+                                      {op},
+                                      {input1Tensor, input2Tensor, outputTensor},
+                                      {input1Name, input2Name},
+                                      {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(spirvwriter::DisassembleSPIRV(binarySpirv, true));
+    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "MAXIMUM", outputStr);
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "MAXIMUM", outputStr);
-    spirvwriter::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "MAXIMUM", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "MAXIMUM", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "MAXIMUM", outputStr);
+    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "MAXIMUM", outputStr);
 }
 
 TEST(TOSA2SPIRV_PARSER, Minimum)
@@ -509,9 +506,9 @@ TEST(TOSA2SPIRV_PARSER, Minimum)
     std::string input2Name = "input2";
     std::string outputName = "output";
 
-    std::vector<int32_t> input1Shape = {1,1,1,1};
-    std::vector<int32_t> input2Shape = {1,1,1,1};
-    std::vector<int32_t> outputShape = {1,1,1,1};
+    std::vector<int32_t> input1Shape = {1, 1, 1, 1};
+    std::vector<int32_t> input2Shape = {1, 1, 1, 1};
+    std::vector<int32_t> outputShape = {1, 1, 1, 1};
 
     auto* input1Tensor = new TosaSerializationTensor(input1Name, input1Shape, DType::DType_INT32, {});
     auto* input2Tensor = new TosaSerializationTensor(input2Name, input2Shape, DType::DType_INT32, {});
@@ -521,25 +518,25 @@ TEST(TOSA2SPIRV_PARSER, Minimum)
     auto op = new tosa::TosaSerializationOperator(Op::Op_MINIMUM,
                                                   Attribute::Attribute_NONE,
                                                   nullptr,
-                                                  { input1Name, input2Name },
-                                                  { outputName });
+                                                  {input1Name, input2Name},
+                                                  {outputName});
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
     TosaSerializationBasicBlock block("minimum",
                                       "main",
-                                      { op },
-                                      { input1Tensor, input2Tensor, outputTensor },
-                                      { input1Name, input2Name },
-                                      { outputName });
+                                      {op},
+                                      {input1Tensor, input2Tensor, outputTensor},
+                                      {input1Name, input2Name},
+                                      {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(spirvwriter::DisassembleSPIRV(binarySpirv, true));
+    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "MINIMUM", outputStr);
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "MINIMUM", outputStr);
-    spirvwriter::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "MINIMUM", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "MINIMUM", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "MINIMUM", outputStr);
+    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "MINIMUM", outputStr);
 }
 
 TEST(TOSA2SPIRV_PARSER, Mul)
@@ -553,9 +550,9 @@ TEST(TOSA2SPIRV_PARSER, Mul)
     std::string input2Name = "input2";
     std::string outputName = "output";
 
-    std::vector<int32_t> input1Shape = {1,1,1,1};
-    std::vector<int32_t> input2Shape = {1,1,1,1};
-    std::vector<int32_t> outputShape = {1,1,1,1};
+    std::vector<int32_t> input1Shape = {1, 1, 1, 1};
+    std::vector<int32_t> input2Shape = {1, 1, 1, 1};
+    std::vector<int32_t> outputShape = {1, 1, 1, 1};
 
     auto* input1Tensor = new TosaSerializationTensor(input1Name, input1Shape, DType::DType_INT8, {});
     auto* input2Tensor = new TosaSerializationTensor(input2Name, input2Shape, DType::DType_INT8, {});
@@ -565,26 +562,26 @@ TEST(TOSA2SPIRV_PARSER, Mul)
     auto op = new tosa::TosaSerializationOperator(Op::Op_MUL,
                                                   Attribute::Attribute_MulAttribute,
                                                   &attribute,
-                                                  { input1Name, input2Name },
-                                                  { outputName });
+                                                  {input1Name, input2Name},
+                                                  {outputName});
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
     TosaSerializationBasicBlock block("mul",
                                       "main",
-                                      { op },
-                                      { input1Tensor, input2Tensor, outputTensor },
-                                      { input1Name, input2Name },
-                                      { outputName });
+                                      {op},
+                                      {input1Tensor, input2Tensor, outputTensor},
+                                      {input1Name, input2Name},
+                                      {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(spirvwriter::DisassembleSPIRV(binarySpirv, true));
+    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MUL", outputStr);
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MUL", outputStr);
-    spirvwriter::CheckConstant(DataType::int8_t, "MUL", outputStr, 1, 0);
-    spirvwriter::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "MUL", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MUL", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MUL", outputStr);
+    testutils::CheckConstant(DataType::int8_t, "MUL", outputStr, 1, 0);
+    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "MUL", outputStr);
 }
 
 TEST(TOSA2SPIRV_PARSER, Pow)
@@ -594,9 +591,9 @@ TEST(TOSA2SPIRV_PARSER, Pow)
     std::string input2Name = "input2";
     std::string outputName = "output";
 
-    std::vector<int32_t> input1Shape = {1,1,1,1};
-    std::vector<int32_t> input2Shape = {1,1,1,1};
-    std::vector<int32_t> outputShape = {1,1,1,1};
+    std::vector<int32_t> input1Shape = {1, 1, 1, 1};
+    std::vector<int32_t> input2Shape = {1, 1, 1, 1};
+    std::vector<int32_t> outputShape = {1, 1, 1, 1};
 
     auto* input1Tensor = new TosaSerializationTensor(input1Name, input1Shape, DType::DType_FP16, {});
     auto* input2Tensor = new TosaSerializationTensor(input2Name, input2Shape, DType::DType_FP16, {});
@@ -606,25 +603,25 @@ TEST(TOSA2SPIRV_PARSER, Pow)
     auto op = new tosa::TosaSerializationOperator(Op::Op_POW,
                                                   Attribute::Attribute_NONE,
                                                   nullptr,
-                                                  { input1Name, input2Name },
-                                                  { outputName });
+                                                  {input1Name, input2Name},
+                                                  {outputName});
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
     TosaSerializationBasicBlock block("pow",
                                       "main",
-                                      { op },
-                                      { input1Tensor, input2Tensor, outputTensor },
-                                      { input1Name, input2Name },
-                                      { outputName });
+                                      {op},
+                                      {input1Tensor, input2Tensor, outputTensor},
+                                      {input1Name, input2Name},
+                                      {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(spirvwriter::DisassembleSPIRV(binarySpirv, true));
+    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "POW", outputStr);
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "POW", outputStr);
-    spirvwriter::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "POW", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "POW", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "POW", outputStr);
+    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "POW", outputStr);
 }
 
 TEST(TOSA2SPIRV_PARSER, Sub)
@@ -634,9 +631,9 @@ TEST(TOSA2SPIRV_PARSER, Sub)
     std::string input2Name = "input2";
     std::string outputName = "output";
 
-    std::vector<int32_t> input1Shape = {1,1,1,1};
-    std::vector<int32_t> input2Shape = {1,1,1,1};
-    std::vector<int32_t> outputShape = {1,1,1,1};
+    std::vector<int32_t> input1Shape = {1, 1, 1, 1};
+    std::vector<int32_t> input2Shape = {1, 1, 1, 1};
+    std::vector<int32_t> outputShape = {1, 1, 1, 1};
 
     auto* input1Tensor = new TosaSerializationTensor(input1Name, input1Shape, DType::DType_INT32, {});
     auto* input2Tensor = new TosaSerializationTensor(input2Name, input2Shape, DType::DType_INT32, {});
@@ -646,25 +643,25 @@ TEST(TOSA2SPIRV_PARSER, Sub)
     auto op = new tosa::TosaSerializationOperator(Op::Op_SUB,
                                                   Attribute::Attribute_NONE,
                                                   nullptr,
-                                                  { input1Name, input2Name },
-                                                  { outputName });
+                                                  {input1Name, input2Name},
+                                                  {outputName});
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
     TosaSerializationBasicBlock block("sub",
                                       "main",
-                                      { op },
-                                      { input1Tensor, input2Tensor, outputTensor },
-                                      { input1Name, input2Name },
-                                      { outputName });
+                                      {op},
+                                      {input1Tensor, input2Tensor, outputTensor},
+                                      {input1Name, input2Name},
+                                      {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(spirvwriter::DisassembleSPIRV(binarySpirv, true));
+    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "SUB", outputStr);
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "SUB", outputStr);
-    spirvwriter::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "SUB", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "SUB", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "SUB", outputStr);
+    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "SUB", outputStr);
 }
 
 TEST(TOSA2SPIRV_PARSER, Table)
@@ -677,8 +674,8 @@ TEST(TOSA2SPIRV_PARSER, Table)
     std::string inputName = "input";
     std::string outputName = "output";
 
-    std::vector<int32_t> inputShape = {1,1,1,1};
-    std::vector<int32_t> outputShape = {1,1,1,1};
+    std::vector<int32_t> inputShape = {1, 1, 1, 1};
+    std::vector<int32_t> outputShape = {1, 1, 1, 1};
 
     auto* inputTensor = new TosaSerializationTensor(inputName, inputShape, DType::DType_INT8, {});
     auto* outputTensor = new TosaSerializationTensor(outputName, outputShape, DType::DType_INT8, {});
@@ -687,23 +684,17 @@ TEST(TOSA2SPIRV_PARSER, Table)
     auto op = new tosa::TosaSerializationOperator(Op::Op_TABLE,
                                                   Attribute::Attribute_TableAttribute,
                                                   &attribute,
-                                                  { inputName },
-                                                  { outputName });
+                                                  {inputName},
+                                                  {outputName});
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("table",
-                                      "main",
-                                      { op },
-                                      { inputTensor, outputTensor },
-                                      { inputName },
-                                      { outputName });
+    TosaSerializationBasicBlock block("table", "main", {op}, {inputTensor, outputTensor}, {inputName}, {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(spirvwriter::DisassembleSPIRV(binarySpirv, true));
+    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    spirvwriter::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "TABLE", outputStr);
-        spirvwriter::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "TABLE", outputStr);
+    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "TABLE", outputStr);
+    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "TABLE", outputStr);
 }
-

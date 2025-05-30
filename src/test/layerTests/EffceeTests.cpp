@@ -1,10 +1,9 @@
 //
-// Copyright © 2024 Arm Ltd and Contributors. All rights reserved.
+// Copyright © 2024-2025 Arm Ltd and Contributors. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #include <OpTestUtils.hpp>
-#include <TestUtils.hpp>
 
 #include <gtest/gtest.h>
 
@@ -89,7 +88,6 @@ struct goldenSPIRV
                        OpGraphEndARM
     )";
 
-
     const std::string clamp = R"(
                                    OpDecorate %15 DescriptorSet 0
                                    OpDecorate %15 Binding 0
@@ -122,22 +120,22 @@ namespace ts = tosa2spirv::spirvwriter;
 
 TEST(TOSA2SPIRV_LAYERS, CheckInputTensor)
 {
-    ts::CheckInputTensor({ 1, 1, 1, 1 }, DataType::uint8_t, "MAX_POOL2D", goldenSPIRV().maxpool2d);
+    ts::CheckInputTensor({1, 1, 1, 1}, DataType::uint8_t, "MAX_POOL2D", goldenSPIRV().maxpool2d);
 }
 
 TEST(TOSA2SPIRV_LAYERS, CheckOutputTensor)
 {
-    ts::CheckOutputTensor({ 1, 1, 1, 1 }, DataType::uint8_t, "MAX_POOL2D", goldenSPIRV().maxpool2d);
+    ts::CheckOutputTensor({1, 1, 1, 1}, DataType::uint8_t, "MAX_POOL2D", goldenSPIRV().maxpool2d);
 }
 
 TEST(TOSA2SPIRV_LAYERS, CheckConstCompositeTensor)
 {
-    ts::CheckConstCompositeTensor({ 1, 1, 1, 1 }, "MAX_POOL2D", goldenSPIRV().maxpool2d, 2);
+    ts::CheckConstCompositeTensor({1, 1, 1, 1}, "MAX_POOL2D", goldenSPIRV().maxpool2d, 2);
 }
 
 TEST(TOSA2SPIRV_LAYERS, CheckGraphConstant)
 {
-    ts::CheckGraphConstant({ 1 }, DataType::uint8_t, "RESCALE", goldenSPIRV().rescale);
+    ts::CheckGraphConstant({1}, DataType::uint8_t, "RESCALE", goldenSPIRV().rescale);
 }
 
 TEST(TOSA2SPIRV_LAYERS, CheckConstant)
