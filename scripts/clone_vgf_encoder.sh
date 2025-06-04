@@ -10,16 +10,20 @@ USERNAME=$1
 source "$(dirname "$0")/scripts_common.sh"
 
 VGF_ENCODER_DIR=$EXTERNAL_DIR/vgf_encoder
+FLATBUFFERS_DIR=$EXTERNAL_DIR/flatbuffers
 
 rm -rf $VGF_ENCODER_DIR
+rm -rf $FLATBUFFERS_DIR
 
 # Pinned SHA for branch
 VGF_ENCODER_REVISION="main" # Use main to streamline absorption of changes
+FLATBUFFERS_REVISION="v23.5.26" # Taken from ngp manifest ssh://eu-gerrit-2.euhpc.arm.com:29418/ml/ngp/manifest
 
 echo "+++ Cloning VGF Encoder"
 mkdir -p $VGF_ENCODER_DIR
 git clone ssh://$USERNAME@eu-gerrit-2.euhpc.arm.com:29418/ml/ngp/ml-sdk-vgf-lib $VGF_ENCODER_DIR
+git -C $VGF_ENCODER_DIR checkout $VGF_ENCODER_REVISION
 
-pushd $VGF_ENCODER_DIR > /dev/null
-  git checkout $VGF_ENCODER_REVISION
-popd > /dev/null
+mkdir -p $FLATBUFFERS_DIR
+git clone https://github.com/google/flatbuffers.git $FLATBUFFERS_DIR
+git -C $FLATBUFFERS_DIR checkout $FLATBUFFERS_REVISION

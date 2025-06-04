@@ -14,7 +14,7 @@ SPIRV_HEADERS_DIR=$EXTERNAL_DIR/SPIRV-Headers
 rm -rf $SPIRV_HEADERS_DIR
 
 # Pinned SHA for main-with-ARM-patches branch
-SPIRV_HEADERS_REVISION="993ee5240d4179537cff7fb392b34f91c809e319" # Initial extended instruction set for TOSA v1.0
+SPIRV_HEADERS_REVISION="1b865bb073dfbeab2f84e2c781f2e48f2a557497" # Update TOSA SPIR-V 1.0
 
 echo "+++ Cloning SPIRV-Headers"
 mkdir -p SPIRV_HEADERS_DIR

@@ -12,7 +12,7 @@ source "$(dirname "$0")/scripts_common.sh"
 SPIRV_TOOLS_DIR=$EXTERNAL_DIR/SPIRV-Tools
 
 # Pinned SHA for main-with-ARM-patches branch
-SPIRV_TOOLS_REVISION="498dfc8acbdf6d4c621a8bead8c2771384415c6a" # Add TOSA SPIR-V v1.0 rev1
+SPIRV_TOOLS_REVISION="039dd9cf8888cba5eb50ca9d7361975d446afa71" # Rename TensorEXT to TensorARM in opt/val
 
 rm -rf $SPIRV_TOOLS_DIR
 

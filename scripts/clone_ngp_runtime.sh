@@ -12,7 +12,7 @@ source "$(dirname "$0")/scripts_common.sh"
 NGP_RUNTIME_DIR=$EXTERNAL_DIR/ngp-runtime
 
 # Pinned SHA
-NGP_RUNTIME_SHA="8797d08cc1a1db76a0d8ef35fc5a7c78dac828f1" # Pinned to known good SHA to prevent breaks
+NGP_RUNTIME_SHA="9a944168717744958219da4a7f35904d5c3df507" # Tosa 1.0 March ops delivery
 
 rm -rf $NGP_RUNTIME_DIR
 mkdir $EXTERNAL_DIR/ngp-runtime

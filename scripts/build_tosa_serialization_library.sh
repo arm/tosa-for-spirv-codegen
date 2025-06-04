@@ -13,13 +13,6 @@ BUILD_DIR=$TOSA_SERIALIZATION_LIB_DIR/build
 
 pushd "$TOSA_SERIALIZATION_LIB_DIR" > /dev/null
 
-if [ "$TARGET" = "ANDROID" ]; then
-  flatbufferPath="flatbuffers/flatbuffers.h"
-  pattern="FLATBUFFERS_INCLUDE_PATH ${flatbufferPath}"
-  replacement="${pattern} NO_CMAKE_FIND_ROOT_PATH"
-  sed -i "s|${pattern}|${replacement}|" CMakeLists.txt
-fi
-
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
 pushd "$BUILD_DIR" > /dev/null
@@ -40,10 +33,5 @@ AssertZeroExitCode "CMake for TOSA serialization library ($TARGET) failed"
 
 $CMAKE_PATH --build . -j$(nproc)
 AssertZeroExitCode "Build of TOSA serialization library ($TARGET) failed"
-
-if [ "$TARGET" = "ANDROID" ]; then
-  cd "$TOSA_SERIALIZATION_LIB_DIR"
-  git checkout CMakeLists.txt
-fi
 
 popd > /dev/null
