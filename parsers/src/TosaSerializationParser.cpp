@@ -68,13 +68,39 @@ ResId TosaSerializationParser::InitializeInputTensor(Graph& graph, const std::st
     constexpr auto internalConstantLimit = 16u;
     if (constTensor.GetTensorShape().size() > 1 || constTensor.GetNumElements() > internalConstantLimit)
     {
+        if (constTensor.GetDataType() == DataType::int48_t)
+        {
+            const std::vector<int64_t> vec = ConvertToInt64(constTosaTensor->GetData(), constTensor);
+            return AddExternalConstant(graph, constTensor, vec, inputName);
+        }
+        if (constTensor.GetDataType() == DataType::int4_t)
+        {
+            const std::vector<uint8_t> vec = UnpackInt4Signed(constTosaTensor->GetData(), constTensor);
+            return AddExternalConstant(graph, constTensor, vec, inputName);
+        }
         const ConstantData constantData{constTosaTensor->GetData()};
         return AddExternalConstant(graph, constTensor, constantData, inputName);
     }
 
-    const std::vector<uint32_t> vec = ConvertToUint32(constTosaTensor->GetData(), constTensor);
-    const Attribute constantAttribute{vec, constTensor.GetDataType(), constTensor.GetTensorShape()};
-    ResId constantResId = graph.AddTensorConstant(constantAttribute);
+    ResId constantResId;
+    if (constTensor.GetDataType() == DataType::int48_t)
+    {
+        const std::vector<int64_t> vec = ConvertToInt64(constTosaTensor->GetData(), constTensor);
+        const Attribute constantAttribute{vec, DataType::int48_t, constTensor.GetTensorShape()};
+        constantResId = graph.AddTensorConstant(constantAttribute);
+    }
+    else if (constTensor.GetDataType() == DataType::int4_t)
+    {
+        const std::vector<uint8_t> vec = UnpackInt4Signed(constTosaTensor->GetData(), constTensor);
+        const Attribute constantAttribute{vec, constTensor.GetDataType(), constTensor.GetTensorShape()};
+        constantResId = graph.AddTensorConstant(constantAttribute);
+    }
+    else
+    {
+        const std::vector<uint32_t> vec = ConvertToUint32(constTosaTensor->GetData(), constTensor);
+        const Attribute constantAttribute{vec, constTensor.GetDataType(), constTensor.GetTensorShape()};
+        constantResId = graph.AddTensorConstant(constantAttribute);
+    }
     m_OpNameResIdMap.try_emplace(inputName, constantResId);
     return constantResId;
 }

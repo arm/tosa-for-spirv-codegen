@@ -358,7 +358,7 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteVgfFile)
             },
             "modules": [
             {
-                "code_size": 198,
+                "code_size": 200,
                         "entry_point": "main",
                         "has_spirv": true,
                         "index": 0,
@@ -515,7 +515,7 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFiles)
         },
         "modules": [
         {
-            "code_size": 246,
+            "code_size": 248,
                     "entry_point": "main",
                     "has_spirv": true,
                     "index": 0,
@@ -697,7 +697,7 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFilesRescale)
     },
     "modules": [
         {
-            "code_size": 192,
+            "code_size": 194,
             "entry_point": "main",
             "has_spirv": true,
             "index": 0,

@@ -199,6 +199,7 @@ TEST(GraphTests, CreateConstant)
     auto int4 = CreateConstant(123, DataType::int4_t, *sharedModule);
     auto int16 = CreateConstant(123, DataType::int16_t, *sharedModule);
     auto int32 = CreateConstant(123, DataType::int32_t, *sharedModule);
+    auto int48 = CreateConstantDouble(123, 123, *sharedModule);
     auto float16 = CreateConstant(123, DataType::float16_t, *sharedModule);
     auto float32 = CreateConstant(123, DataType::float32_t, *sharedModule);
     auto bfloat16 = CreateConstant(123, DataType::bfloat16_t, *sharedModule);
@@ -206,6 +207,7 @@ TEST(GraphTests, CreateConstant)
     CheckConstant(int4.m_InstructionPtr, DataType::int4_t, 123);
     CheckConstant(int16.m_InstructionPtr, DataType::int16_t, 123);
     CheckConstant(int32.m_InstructionPtr, DataType::int32_t, 123);
+    CheckConstant(int48.m_InstructionPtr, DataType::int48_t, 123, 123);
     CheckConstant(float16.m_InstructionPtr, DataType::float16_t, 123);
     CheckConstant(float32.m_InstructionPtr, DataType::float32_t, 123);
     CheckConstant(bfloat16.m_InstructionPtr, DataType::bfloat16_t, 123);
@@ -238,10 +240,23 @@ TEST(GraphTests, CreateConstantCompositeBasic)
     for (auto dt : types)
     {
         auto typeId = CreateDataType(dt, *sharedModule);
-        auto result = CreateConstantCompositeBasic(values, typeId, *sharedModule);
+        auto result = CreateConstantComposite(values, typeId, *sharedModule, false);
 
-        CheckConstantComposite(result.m_InstructionPtr, values, dt);
+        CheckConstantComposite(result.m_InstructionPtr, values, DataType::uint32_t, dt);
     }
+}
+
+TEST(GraphTests, CreateCreateConstantCompositeDouble)
+{
+    using namespace tosa;
+    const auto sharedModule = CreateModule(TOSAVersion{});
+
+    const std::vector<uint32_t> values = {2, 2};
+
+    const auto typeId = CreateDataType(DataType::int48_t, *sharedModule);
+    const auto result = CreateConstantCompositeDouble(values, typeId, *sharedModule);
+
+    CheckConstantComposite(result.m_InstructionPtr, values, DataType::int48_t, DataType::int48_t);
 }
 
 TEST(GraphTests, CreateTensor)
@@ -275,7 +290,7 @@ TEST(GraphTests, Constructor)
     const auto sharedModule = CreateModule(TOSAVersion{});
     Graph graph(sharedModule, "TestGraph");
 
-    EXPECT_EQ(graph.m_Name, "TestGraph");
+    EXPECT_EQ(graph.GetName(), "TestGraph");
 }
 
 // Test AddOperator
@@ -360,7 +375,7 @@ TEST(GraphTests, CreateAttribute)
     Attribute attribute(data, DataType::uint32_t);
 
     auto result = CreateAttribute(attribute, *sharedModule);
-    CheckConstantComposite(result.m_InstructionPtr, data, DataType::uint32_t);
+    CheckConstantComposite(result.m_InstructionPtr, data, DataType::uint32_t, DataType::uint32_t);
 }
 
 TEST(GraphTests, AttributeConversion)

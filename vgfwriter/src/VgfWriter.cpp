@@ -53,6 +53,7 @@ static std::string GetVulkanFormatFromTensor(const spirv::Instruction* tensorIns
                 case 8u: return "VK_FORMAT_R8_SINT";
                 case 16u: return "VK_FORMAT_R16_SINT";
                 case 32u: return "VK_FORMAT_R32_SINT";
+                case 64u: return "VK_FORMAT_R64_SINT";
                 default:;
             }
         case OpTypeFloat:

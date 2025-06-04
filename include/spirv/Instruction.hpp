@@ -56,8 +56,8 @@ struct InstructionComparator
 {
     // mark comparator as transparent, allowing for equal range search
     using is_transparent = void;
-    bool operator()(const Instruction& lhs, const spv::Op rhs) const noexcept;
-    bool operator()(const spv::Op lhs, const Instruction& rhs) const noexcept;
+    bool operator()(const Instruction& lhs, spv::Op rhs) const noexcept;
+    bool operator()(spv::Op lhs, const Instruction& rhs) const noexcept;
     bool operator()(const Instruction& lhs, const Instruction& rhs) const noexcept;
 };
 

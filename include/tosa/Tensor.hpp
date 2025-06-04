@@ -31,18 +31,19 @@ enum class DataType
     uint8_t = 4,
     uint16_t = 5,
     uint32_t = 6,
-    float16_t = 7,
-    float32_t = 8,
-    bfloat16_t = 9,
-    bool_t = 10,
-    null_t = 11,
+    int48_t = 7,
+    float16_t = 8,
+    float32_t = 9,
+    bfloat16_t = 10,
+    bool_t = 11,
+    null_t = 12,
 };
 
 /// tosa2spirv's implementation of TOSA tensor.
 class Tensor
 {
     public:
-    using TensorShape = std::vector<unsigned int>;
+    using TensorShape = std::vector<uint32_t>;
 
     /// Default Constructor for Tensor
     Tensor() = default;
@@ -83,76 +84,92 @@ class Tensor
 
 template <typename T> DataType GetDataType();
 
+template <typename T, std::enable_if_t<std::is_floating_point_v<T>, bool> = true>
+void CastAndEmplace(T val, DataType, std::vector<uint32_t>& attributeData)
+{
+    attributeData.emplace_back(*reinterpret_cast<uint32_t*>(&val));
+}
+
+template <typename T, std::enable_if_t<(std::is_integral_v<T> && sizeof(T) == 8), bool> = true>
+void CastAndEmplace(const T val, DataType, std::vector<uint32_t>& attributeData)
+{
+    attributeData.emplace_back(static_cast<uint32_t>(val));
+    attributeData.emplace_back(static_cast<uint32_t>(val >> 32));
+}
+
+template <typename T, std::enable_if_t<(std::is_integral_v<T> && sizeof(T) <= 4), bool> = true>
+void CastAndEmplace(const T val, const DataType dataType, std::vector<uint32_t>& attributeData)
+{
+    switch (dataType)
+    {
+        // Assume int4 nibbles are un packed, i.e. one int4 per T Val
+        case DataType::int4_t:
+            attributeData.emplace_back(static_cast<uint32_t>((val & 0x8 ? val | 0xF0 : val) & 0xFF));
+            break;
+        case DataType::int8_t: attributeData.emplace_back(static_cast<uint32_t>(val & 0xFF)); break;
+        case DataType::int16_t: attributeData.emplace_back(static_cast<uint32_t>(val & 0xFFFF)); break;
+        case DataType::int48_t:
+        {
+            const auto uval = static_cast<uint64_t>(val);
+            attributeData.emplace_back(static_cast<uint32_t>(uval));
+            attributeData.emplace_back(static_cast<uint32_t>(0));
+            break;
+        }
+        default: attributeData.emplace_back(static_cast<uint32_t>(val));
+    }
+}
+
 /// Attribute is a small vector, which is stored locally within the spirv module, and a Tensor describing that vector
 class Attribute
 {
     public:
-    template <typename T>
-    explicit Attribute(const std::vector<T>& data,
-                       const DataType dataType = GetDataType<T>(),
-                       const Tensor::TensorShape& shape = {})
+    template <typename T, const DataType DT = GetDataType<T>()>
+    explicit Attribute(const std::vector<T>& data, const DataType dataType = DT, const Tensor::TensorShape& shape = {})
         : m_Tensor(dataType, shape.empty() ? Tensor::TensorShape{static_cast<unsigned>(data.size())} : shape)
     {
         m_AttributeData.reserve(data.size());
         for (const auto val : data)
         {
-            // constexpr used to prevent compilation issues for floating point types and binary AND operator below.
-            if constexpr (std::is_floating_point<T>::value)
-            {
-                uint32_t bits = 0;
-                std::memcpy(&bits, &val, sizeof(float));
-                m_AttributeData.emplace_back(bits);
-            }
-            else
-            {
-                switch (dataType)
-                {
-                    case DataType::int8_t: m_AttributeData.emplace_back(static_cast<uint32_t>(val & 0xFF)); break;
-                    case DataType::int16_t: m_AttributeData.emplace_back(static_cast<uint32_t>(val & 0xFFFF)); break;
-                    case DataType::int32_t: m_AttributeData.emplace_back(static_cast<uint32_t>(val)); break;
-                    default: m_AttributeData.emplace_back(static_cast<uint32_t>(val));
-                }
-            }
+            CastAndEmplace<T>(val, dataType, m_AttributeData);
         }
     }
 
     /// Helper ctor for single values
-    template <typename T, std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
-    explicit Attribute(T data, const DataType dataType = GetDataType<T>())
+    template <typename T, const DataType DT = GetDataType<T>(), std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
+    explicit Attribute(T data, const DataType dataType = DT)
         : Attribute(std::vector{data}, dataType, Tensor::TensorShape{1u})
     {
     }
 
     /// Helper ctor for initializer lists
-    template <typename T>
-    Attribute(std::initializer_list<T> data,
-              const DataType dataType = GetDataType<T>(),
-              const Tensor::TensorShape& shape = {})
+    template <typename T,
+              const DataType DT = GetDataType<T>(),
+              std::enable_if_t<std::is_arithmetic_v<std::decay_t<T>>, bool> = true>
+    Attribute(std::initializer_list<T> data, const DataType dataType = DT, const Tensor::TensorShape& shape = {})
         : Attribute(std::vector(data), dataType, shape)
     {
     }
 
-    Tensor GetTensor() const { return m_Tensor; }
+    explicit Attribute(const ResId resId)
+        : m_ResId(resId){};
 
     const std::vector<uint32_t>& GetData() const { return m_AttributeData; }
-
-    explicit Attribute(ResId resId)
-        : m_ResId(std::move(resId)){};
-
+    Tensor GetTensor() const { return m_Tensor; }
     ResId GetResId() const { return m_ResId; }
 
     private:
     Tensor m_Tensor;
     std::vector<uint32_t> m_AttributeData;
-    ResId m_ResId;
+    ResId m_ResId = nullptr;
 };
 
-template <> inline DataType GetDataType<uint32_t>() { return DataType::uint32_t; }
-template <> inline DataType GetDataType<int32_t>() { return DataType::int32_t; }
-template <> inline DataType GetDataType<int16_t>() { return DataType::int16_t; };
-template <> inline DataType GetDataType<int8_t>() { return DataType::int8_t; }
-template <> inline DataType GetDataType<uint8_t>() { return DataType::uint8_t; };
-template <> inline DataType GetDataType<float>() { return DataType::float32_t; }
-template <> inline DataType GetDataType<bool>() { return DataType::bool_t; }
+template <> constexpr DataType GetDataType<int64_t>() { return DataType::int48_t; }
+template <> constexpr DataType GetDataType<uint32_t>() { return DataType::uint32_t; }
+template <> constexpr DataType GetDataType<int32_t>() { return DataType::int32_t; }
+template <> constexpr DataType GetDataType<int16_t>() { return DataType::int16_t; };
+template <> constexpr DataType GetDataType<int8_t>() { return DataType::int8_t; }
+template <> constexpr DataType GetDataType<uint8_t>() { return DataType::uint8_t; };
+template <> constexpr DataType GetDataType<float>() { return DataType::float32_t; }
+template <> constexpr DataType GetDataType<bool>() { return DataType::bool_t; }
 
 } // namespace tosa2spirv::tosa

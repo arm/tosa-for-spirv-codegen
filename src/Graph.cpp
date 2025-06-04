@@ -17,8 +17,8 @@ using namespace spv;
 using namespace tosa2spirv::spirv;
 
 Graph::Graph(std::shared_ptr<Module> module, std::string name)
-    : m_Module(std::move(module))
-    , m_Name(std::move(name))
+    : m_Name(std::move(name))
+    , m_Module(std::move(module))
 {
 }
 
@@ -77,8 +77,7 @@ ResId Graph::AddExternalGraphConstant(const Tensor& tensor)
 
 ResId Graph::AddTensorConstant(const Attribute& attribute)
 {
-    const auto tensor = CreateTensor(attribute.GetTensor(), *m_Module);
-    return CreateConstantCompositeBasic(attribute.GetData(), tensor, *m_Module).m_InstructionPtr;
+    return CreateAttribute(attribute, *m_Module).m_InstructionPtr;
 }
 
 // Forward declaration of the static helper function ChainConcat.
@@ -137,7 +136,15 @@ std::vector<ResId> Graph::AddOperator(const OperatorEnum operatorType,
 
         if (expectedIt->m_Category == Category::Scalar || expectedIt->m_Category == Category::Enum)
         {
-            operands.push_back(CreateConstant(attribute.GetData()[0], attribute.GetTensor().GetDataType(), *m_Module));
+            const auto dataType = attribute.GetTensor().GetDataType();
+            if (dataType == DataType::int48_t)
+            {
+                operands.push_back(CreateConstantDouble(attribute.GetData()[0], attribute.GetData()[0], *m_Module));
+            }
+            else
+            {
+                operands.push_back(CreateConstant(attribute.GetData()[0], dataType, *m_Module));
+            }
         }
         else if (expectedIt->m_Category == Category::GraphConstant)
         {

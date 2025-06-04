@@ -10,6 +10,7 @@ namespace spirvmodels
 {
 static const std::string SPIRV_HEADER = "               OpCapability Shader\n"
                                         "               OpCapability Float16\n"
+                                        "               OpCapability Int64\n"
                                         "               OpCapability Int16\n"
                                         "               OpCapability Int8\n"
                                         "               OpCapability TensorsARM\n"

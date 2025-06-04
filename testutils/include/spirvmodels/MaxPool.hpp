@@ -50,6 +50,7 @@ static const std::string SimpleMaxpool2d = SPIRV_HEADER +
 static const std::string SimpleMaxpool2dGenerator =
     R"(               OpCapability Shader
                OpCapability Float16
+               OpCapability Int64
                OpCapability Int16
                OpCapability Int8
                OpCapability TensorsARM

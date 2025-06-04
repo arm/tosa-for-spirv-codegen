@@ -23,9 +23,9 @@ namespace tosa2spirv::tosa
 class Graph
 {
     public:
-    /// Module::AddGraph() returns a shared pointer to the graph for the user to then make calls to AddXXXOperator().
-    /// @param module
-    /// @param[in] name std::string that will be used as the name of the graph.
+    /// Graph constructor
+    /// @param module Shared pointer to the SPIR-V module the graph will be added to.
+    /// @param name Optional name for the graph. Defaults to an empty string.
     explicit Graph(std::shared_ptr<spirv::Module> module, std::string name = std::string());
 
     /// Add an input to the graph, specifying the binding id (Descriptor Set will be 0)
@@ -67,6 +67,10 @@ class Graph
                                    const std::vector<ResId>& inputs,
                                    const std::vector<Tensor>& outputs,
                                    const std::vector<Attribute>& attributes = {}) const;
+
+    /// Get Graph name
+    /// @return name of Graph
+    const std::string& GetName() const { return m_Name; }
 
     /// Once all Operators and IO are set, this function creates the spirv instructions describing the graph
     /// After being called no more changes may be made to this graph.
@@ -819,16 +823,13 @@ class Graph
     }
 
     // GRAPH OPERATOR HELPER FUNCTION END
-    std::string m_Name;
-
     private:
+    std::string m_Name;
     std::shared_ptr<spirv::Module> m_Module;
 
     // Instructions built up over the lifetime of the graph, then inserted at lifetime end
     std::vector<const spirv::Instruction*> m_Inputs;
     std::vector<const spirv::Instruction*> m_Outputs;
-
-    spirv::Instruction* m_TosaVersion;
 
     uint32_t m_GraphConstantId = 0;
 };

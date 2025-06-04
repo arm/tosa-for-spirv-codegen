@@ -14,6 +14,7 @@ add_executable(tosa2spirv_parser_unittests
                ElementwiseUnaryOpsTest.cpp
                ImageOpsTest.cpp
                ParserTests.cpp
+               ParserUtilsTest.cpp
                ReductionOpsTest.cpp
                ScatterGatherOpsTest.cpp
                TensorOpsTest.cpp
@@ -21,6 +22,7 @@ add_executable(tosa2spirv_parser_unittests
 
 target_include_directories(tosa2spirv_parser_unittests
         PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/parsers/src>
         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/parsers/include>
         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/external>
@@ -29,7 +31,6 @@ target_include_directories(tosa2spirv_parser_unittests
 
 target_include_directories(tosa2spirv_parser_unittests
         PRIVATE
-        ${GOOGLETEST_PATH}/googletest/include
         ${SERIALIZATION_LIB_SOURCE_PATH}/include
         ${SERIALIZATION_LIB_SOURCE_PATH}/third_party/half/include
         ${SERIALIZATION_LIB_SOURCE_PATH}/third_party/flatbuffers/include

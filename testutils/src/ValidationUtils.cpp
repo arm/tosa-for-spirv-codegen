@@ -3,62 +3,50 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+#include <sstream>
+#include <stdexcept>
+
 #include <ValidationUtils.hpp>
 
 using namespace tosa2spirv;
 
 void CheckDataType(const spirv::Instruction* instr, tosa::DataType expectedDataType)
 {
-    if (instr->GetOpCode() != spv::OpTypeInt && instr->GetOpCode() != spv::OpTypeFloat &&
-        instr->GetOpCode() != spv::OpTypeBool)
-    {
-        std::ostringstream oss;
-        oss << "CheckDataType expected OpTypeInt/Float/Bool, but got: " << instr->GetOpCode();
-        throw std::invalid_argument(oss.str());
-    }
-
-    bool isValid = false;
-
-    unsigned int width = 0;
-    unsigned int qualifier = 0;
-
-    if (instr->GetOpCode() == spv::OpTypeInt)
-    {
-        width = instr->m_Operands[1].m_LiteralWord;
-        qualifier = instr->m_Operands[2].m_LiteralWord;
-    }
-    else if (instr->GetOpCode() == spv::OpTypeFloat)
-    {
-        width = instr->m_Operands[1].m_LiteralWord;
-    }
-
-    // Spirv OpCode Validation
+    std::ostringstream oss;
+    const auto& operands = instr->m_Operands;
     switch (instr->GetOpCode())
     {
-        case spv::OpTypeInt: isValid = (qualifier == 0) || (width >= 8 && width <= 32); break;
-        case spv::OpTypeFloat: isValid = width >= 16 && width <= 32; break;
-        case spv::OpTypeBool: isValid = true; break;
-        default: isValid = false; break;
+        case (spv::OpTypeFloat):
+        {
+            if (operands.size() != 3 && operands.size() != 2)
+            {
+                oss << "CheckDataType OpTypeFloat, has invalid operand size of: " << operands.size();
+                break;
+            }
+            break;
+        }
+        case (spv::OpTypeInt):
+        {
+            if (operands.size() != 3)
+            {
+                oss << "CheckDataType OpTypeInt, has invalid operand size of: " << operands.size();
+            }
+            break;
+        }
+        case (spv::OpTypeBool):
+        {
+            if (operands.size() != 1)
+            {
+                oss << "CheckDataType OpTypeBool, has invalid operand size of: " << operands.size();
+            }
+            break;
+        }
+        default: oss << "CheckDataType expected OpTypeInt/Float/Bool, but got: " << instr->GetOpCode();
     }
 
-    if (!isValid)
+    if (!oss.str().empty())
     {
-        std::ostringstream oss;
-        oss << "Invalid DataType Encoding: opcode=" << instr->GetOpCode() << ", width=" << width
-            << ", qualifier=" << qualifier;
         throw std::invalid_argument(oss.str());
-    }
-
-    if (expectedDataType == tosa::DataType::null_t)
-    {
-        // Dont care about the specific type if null_t
-        return;
-    }
-
-    const spirv::Instruction* typeInstr = instr;
-    if (instr->m_Operands[0].m_Type == spirv::INSTRUCTION_POINTER)
-    {
-        typeInstr = instr->m_Operands[0].m_InstructionPtr;
     }
 
     const auto typeCheck = [&](const spirv::Instruction* instruction) {
@@ -77,6 +65,9 @@ void CheckDataType(const spirv::Instruction* instr, tosa::DataType expectedDataT
             case tosa::DataType::uint32_t:
                 return instruction->m_Opcode == spv::OpTypeInt && instruction->m_Operands[1].m_LiteralWord == 32 &&
                        instruction->m_Operands[2].m_LiteralWord == 0;
+            case tosa::DataType::int48_t:
+                return instruction->m_Opcode == spv::OpTypeInt && instruction->m_Operands[1].m_LiteralWord == 64 &&
+                       instruction->m_Operands[2].m_LiteralWord == 0;
             case tosa::DataType::float16_t:
                 return instruction->m_Opcode == spv::OpTypeFloat && instruction->m_Operands[1].m_LiteralWord == 16;
             case tosa::DataType::float32_t:
@@ -93,16 +84,18 @@ void CheckDataType(const spirv::Instruction* instr, tosa::DataType expectedDataT
         std::ostringstream oss;
         oss << "Expected type does not match actual SPIR-V type.\n"
             << "  Expected: " << static_cast<int>(expectedDataType) << "\n"
-            << "  Got Op:   " << static_cast<int>(typeInstr->m_Opcode)
-            << ", width=" << typeInstr->m_Operands[1].m_LiteralWord
-            << ", qualifier=" << typeInstr->m_Operands[2].m_LiteralWord;
+            << "  Got Op:   " << static_cast<int>(instr->m_Opcode);
+        if (operands.size() == 2)
+            oss << ", width=" << instr->m_Operands[1].m_LiteralWord;
+        if (operands.size() == 3)
+            oss << ", qualifier=" << instr->m_Operands[2].m_LiteralWord;
         throw std::invalid_argument(oss.str());
     }
 }
 
 void CheckResID(const spirv::Operand& operand)
 {
-    if (operand.m_Type != spirv::RES_ID || (operand.m_Type == spirv::RES_ID && operand.m_LiteralWord == 0))
+    if (operand.m_Type != spirv::RES_ID || operand.m_LiteralWord == 0)
     {
         std::ostringstream oss;
         oss << "Invalid ResID: Type=" << operand.m_Type << ", Value=" << operand.m_LiteralWord;
@@ -112,32 +105,52 @@ void CheckResID(const spirv::Operand& operand)
 
 void CheckConstant(const spirv::Instruction* instruction,
                    const tosa::DataType& expectedDataType,
-                   std::optional<uint32_t> expectedValue)
+                   std::optional<uint32_t> expectedValue0,
+                   std::optional<uint32_t> expectedValue1)
 {
-    if (!instruction || instruction->m_Operands.size() < 3)
+    if (!instruction)
     {
         throw std::invalid_argument("Invalid instruction passed to CheckConstant");
+    }
+    if (expectedDataType != tosa::DataType::int48_t && instruction->m_Operands.size() != 3u)
+    {
+        throw std::invalid_argument("Int DataType must have 3 operands");
+    }
+    if (expectedDataType == tosa::DataType::int48_t && instruction->m_Operands.size() != 4u)
+    {
+        throw std::invalid_argument("Int48 DataType must have 4 operands");
     }
 
     if (instruction->GetOpCode() != spv::OpConstant ||
         instruction->m_Operands[0].m_Type != spirv::INSTRUCTION_POINTER ||
-        instruction->m_Operands[1].m_Type != spirv::RES_ID || instruction->m_Operands[2].m_Type != spirv::LITERAL_WORD)
+        instruction->m_Operands[1].m_Type != spirv::RES_ID ||
+        instruction->m_Operands[2].m_Type != spirv::LITERAL_WORD ||
+        (instruction->m_Operands.size() == 4 && instruction->m_Operands[3].m_Type != spirv::LITERAL_WORD))
     {
         std::ostringstream oss;
         oss << "Invalid Constant Data: OpCode=" << instruction->GetOpCode()
             << ", Operand[0] m_Type=" << instruction->m_Operands[0].m_Type
             << ", Operand[1] m_Type=" << instruction->m_Operands[1].m_Type
             << ", Operand[2] m_Type=" << instruction->m_Operands[2].m_Type;
+        if (instruction->m_Operands.size() == 4)
+            oss << ", Operand[3] m_Type=" << instruction->m_Operands[3].m_Type;
         throw std::invalid_argument(oss.str());
     }
 
     CheckDataType(instruction->m_Operands[0].m_InstructionPtr, expectedDataType);
     CheckResID(instruction->m_Operands[1]);
 
-    if (expectedValue.has_value() && instruction->m_Operands[2].m_LiteralWord != expectedValue.value())
+    if (expectedValue0.has_value() && instruction->m_Operands[2].m_LiteralWord != expectedValue0.value())
     {
         std::ostringstream oss;
-        oss << "Constant value mismatch. Expected: " << expectedValue.value()
+        oss << "Constant value mismatch. Expected: " << expectedValue0.value()
+            << ", Got: " << instruction->m_Operands[2].m_LiteralWord;
+        throw std::invalid_argument(oss.str());
+    }
+    if (expectedValue1.has_value() && instruction->m_Operands[2].m_LiteralWord != expectedValue1.value())
+    {
+        std::ostringstream oss;
+        oss << "Constant value mismatch. Expected: " << expectedValue1.value()
             << ", Got: " << instruction->m_Operands[2].m_LiteralWord;
         throw std::invalid_argument(oss.str());
     }
@@ -145,7 +158,8 @@ void CheckConstant(const spirv::Instruction* instruction,
 
 void CheckConstantComposite(const spirv::Instruction* instruction,
                             const std::vector<uint32_t>& expectedValues,
-                            tosa::DataType expectedType)
+                            tosa::DataType expectedConstantType,
+                            tosa::DataType expectedCompositeType)
 {
     const auto opcode = instruction->GetOpCode();
     if (opcode != spv::OpConstantComposite && opcode != spv::OpConstantCompositeReplicateEXT &&
@@ -170,52 +184,46 @@ void CheckConstantComposite(const spirv::Instruction* instruction,
         tensorTypeInstr->m_Operands[1].m_Type == spirv::INSTRUCTION_POINTER)
     {
         const auto* elementType = tensorTypeInstr->m_Operands[1].m_InstructionPtr;
-        CheckDataType(elementType, expectedType);
+        CheckDataType(elementType, expectedConstantType);
     }
     else
     {
-        CheckDataType(typeOp.m_InstructionPtr, expectedType);
+        CheckDataType(typeOp.m_InstructionPtr, expectedCompositeType);
     }
 
     CheckResID(resId);
 
-    if (!expectedValues.empty() && opcode == spv::OpConstantComposite)
+    if (expectedValues.empty() || opcode != spv::OpConstantComposite)
     {
-        size_t base = 2;
-        for (size_t i = 0; i < expectedValues.size(); ++i)
+        return;
+    }
+    const size_t base = 2;
+    const unsigned int constantSize = expectedCompositeType == tosa::DataType::int48_t ? 2 : 1;
+    for (size_t i = 0; i < expectedValues.size(); i += constantSize)
+    {
+        if (instruction->m_Operands.size() <= base + i)
         {
-            if (instruction->m_Operands.size() <= base + i)
-            {
-                std::ostringstream oss;
-                oss << "Missing value in composite constant at index " << i;
-                throw std::invalid_argument(oss.str());
-            }
-
-            const auto& op = instruction->m_Operands[base + i];
-
-            if (op.m_Type != spirv::INSTRUCTION_POINTER || !op.m_InstructionPtr ||
-                op.m_InstructionPtr->m_Opcode != spv::OpConstant)
-            {
-                std::ostringstream oss;
-                oss << "Invalid operand at index " << i << " in composite constant.";
-                throw std::invalid_argument(oss.str());
-            }
-
-            const uint32_t actual = op.m_InstructionPtr->m_Operands[2].m_LiteralWord;
-
-            if (actual != expectedValues[i])
-            {
-                std::ostringstream oss;
-                oss << "Mismatched value at index " << i << ": expected " << expectedValues[i] << ", got " << actual;
-                throw std::invalid_argument(oss.str());
-            }
+            std::ostringstream oss;
+            oss << "Missing value in composite constant at index " << i;
+            throw std::invalid_argument(oss.str());
         }
+
+        const auto constantOp = instruction->m_Operands[base + i];
+
+        if (constantOp.m_Type != spirv::INSTRUCTION_POINTER || !constantOp.m_InstructionPtr)
+        {
+            std::ostringstream oss;
+            oss << "Invalid operand at index " << i << " in composite constant.";
+            throw std::invalid_argument(oss.str());
+        }
+
+        CheckConstant(constantOp.m_InstructionPtr, expectedConstantType, expectedValues[i]);
     }
 }
 
 void CheckTensorType(const spirv::Instruction* instruction,
-                     tosa::DataType expectedDataType,
-                     uint32_t expectedRank,
+                     const tosa::DataType expectedDataType,
+                     const uint32_t expectedRank,
                      const std::vector<uint32_t>& expectedShape)
 {
     if (!instruction || instruction->GetOpCode() != spv::OpTypeTensorARM)
@@ -261,5 +269,5 @@ void CheckTensorType(const spirv::Instruction* instruction,
         throw std::invalid_argument("Invalid shape operand in tensor: not an instruction pointer.");
     }
     // Check constant composite inside shape
-    CheckConstantComposite(shapeOp.m_InstructionPtr, expectedShape, tosa::DataType::uint32_t);
+    CheckConstantComposite(shapeOp.m_InstructionPtr, expectedShape, tosa::DataType::uint32_t, expectedDataType);
 }

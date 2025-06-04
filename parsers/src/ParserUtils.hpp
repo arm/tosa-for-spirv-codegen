@@ -21,9 +21,14 @@ inline DataType GetDataTypeFromDType(const DType dType)
     switch (dType)
     {
         case DType_BOOL: return DataType::bool_t;
+        case DType_INT4: return DataType::int4_t;
         case DType_INT8: return DataType::int8_t;
         case DType_INT16: return DataType::int16_t;
         case DType_INT32: return DataType::int32_t;
+        case DType_INT48: return DataType::int48_t;
+        case DType_UINT8: return DataType::uint8_t;
+        case DType_UINT16: return DataType::uint16_t;
+        case DType_BF16: return DataType::bfloat16_t;
         case DType_FP16: return DataType::float16_t;
         case DType_FP32: return DataType::float32_t;
         default:
@@ -32,11 +37,74 @@ inline DataType GetDataTypeFromDType(const DType dType)
     }
 }
 
+inline std::vector<uint8_t> UnpackInt4Signed(const std::vector<uint8_t>& input, const Tensor& tensor)
+{
+    std::vector<uint8_t> output;
+    const size_t numElements = tensor.GetNumElements();
+    output.reserve(numElements);
+
+    if (input.size() * 2 < numElements)
+    {
+
+        throw std::invalid_argument("uint8_t vector too small for in4 tensor size");
+    }
+
+    for (size_t i = 0; i < numElements / 2; ++i)
+    {
+        uint8_t packed = input[i];
+        uint8_t low = packed & 0x0F;
+        uint8_t high = (packed >> 4) & 0x0F;
+
+        // Sign-extend 4-bit to 8-bit
+        if (low & 0x8)
+            low |= 0xF0;
+        if (high & 0x8)
+            high |= 0xF0;
+
+        output.push_back(low);
+        output.push_back(high);
+    }
+
+    if (numElements % 2 != 0)
+    {
+        uint8_t last = input[numElements / 2] & 0x0F;
+        if (last & 0x8)
+            last |= 0xF0;
+        output.push_back(last);
+    }
+
+    return output;
+}
+
+inline std::vector<int64_t> ConvertToInt64(const std::vector<uint8_t>& input, const Tensor& tensor)
+{
+    constexpr size_t int48Size = 6;
+    const size_t numElements = tensor.GetNumElements();
+    assert(input.size() >= numElements * int48Size);
+
+    std::vector<int64_t> output;
+    output.reserve(numElements);
+
+    for (size_t i = 0; i < numElements; ++i)
+    {
+        const size_t idx = i * int48Size;
+        uint64_t val = static_cast<uint64_t>(input[idx]) | (static_cast<uint64_t>(input[idx + 1]) << 8) |
+                       (static_cast<uint64_t>(input[idx + 2]) << 16) | (static_cast<uint64_t>(input[idx + 3]) << 24) |
+                       (static_cast<uint64_t>(input[idx + 4]) << 32) | (static_cast<uint64_t>(input[idx + 5]) << 40);
+
+        if (val & (1ull << 47))
+        {
+            val |= 0xFFFF'000000000000ULL;
+        }
+        output.push_back(static_cast<int64_t>(val));
+    }
+    return output;
+}
+
 inline std::vector<uint32_t> ConvertToUint32(const std::vector<uint8_t>& input, const Tensor& tensor)
 {
     unsigned int paddingBytes = 0;
     unsigned int stepSize = 1;
-    auto increment = 4;
     switch (tensor.GetDataType())
     {
         case DataType::int8_t:
@@ -51,24 +119,26 @@ inline std::vector<uint32_t> ConvertToUint32(const std::vector<uint8_t>& input, 
         case DataType::int32_t:
         case DataType::uint32_t:
         case DataType::float32_t: stepSize = 4; break;
-        default:;
+        default: break;
     }
-    // make vector of the size of input up to its size of elements
+
     if (input.size() < tensor.GetNumElements() * stepSize)
     {
-        throw(std::invalid_argument("Actual data size smaller than inferred data size"));
+
+        throw std::invalid_argument("input vector too small for infered tensor size");
     }
 
     std::vector<uint8_t> reducedInput{input.begin(), input.begin() + (tensor.GetNumElements() * stepSize)};
-    // for the length of the reduced vector, in steps of stepSize, insert
     std::vector<uint8_t> paddedInput;
     for (auto inputIt = reducedInput.begin(); inputIt != reducedInput.end(); std::advance(inputIt, stepSize))
     {
         paddedInput.insert(paddedInput.end(), inputIt, inputIt + stepSize);
         paddedInput.insert(paddedInput.end(), paddingBytes, 0u);
     }
-    std::vector<uint32_t> output;
+
     size_t i = 0;
+    const auto increment = 4;
+    std::vector<uint32_t> output;
     while (i + increment <= paddedInput.size())
     {
         uint32_t value = 0;
@@ -77,6 +147,7 @@ inline std::vector<uint32_t> ConvertToUint32(const std::vector<uint8_t>& input, 
         output.push_back(value);
         i += increment;
     }
+
     return output;
 }
 

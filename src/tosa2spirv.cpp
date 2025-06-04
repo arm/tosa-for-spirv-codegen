@@ -31,6 +31,7 @@ std::shared_ptr<Module> CreateModule(TOSAVersion version)
     module->EmplaceInstruction(OpCapability, {Operand{CapabilityShader}});
     module->EmplaceInstruction(OpCapability, {Operand{CapabilityInt8}});
     module->EmplaceInstruction(OpCapability, {Operand{CapabilityInt16}});
+    module->EmplaceInstruction(OpCapability, {Operand{CapabilityInt64}});
     module->EmplaceInstruction(OpCapability, {Operand{CapabilityFloat16}});
     module->EmplaceInstruction(OpCapability, {Operand{CapabilityGraphARM}});
     module->EmplaceInstruction(OpCapability, {Operand{CapabilityTensorsARM}});

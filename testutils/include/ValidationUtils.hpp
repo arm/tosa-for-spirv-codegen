@@ -7,7 +7,6 @@
 #include <Tensor.hpp>
 
 #include <optional>
-#include <sstream>
 
 using namespace tosa2spirv;
 
@@ -17,11 +16,13 @@ void CheckResID(const spirv::Operand& operand);
 
 void CheckConstant(const spirv::Instruction* instruction,
                    const tosa::DataType& expectedDataType,
-                   std::optional<uint32_t> expectedValue);
+                   std::optional<uint32_t> expectedValue0 = {},
+                   std::optional<uint32_t> expectedValue1 = {});
 
 void CheckConstantComposite(const spirv::Instruction* instruction,
                             const std::vector<uint32_t>& expectedValues,
-                            tosa::DataType expectedType);
+                            tosa::DataType expectedConstantType,
+                            tosa::DataType expectedCompositeType);
 
 void CheckTensorType(const spirv::Instruction* instruction,
                      tosa::DataType expectedDataType,

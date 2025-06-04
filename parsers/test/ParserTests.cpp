@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+#include "tosa2spirv.hpp"
 #include <ModuleComparator.hpp>
 #include <OpTestUtils.hpp>
 #include <TosaSerializationParser.hpp>
@@ -708,8 +709,6 @@ TEST(TOSA2SPIRV_PARSER, Conv2dIdentityConv2dDualOutput)
 
     const auto module1 = parser.GenerateSPIRVModule("main");
     const auto diff = testutils::CompareModules(module1, spirvmodels::Conv2DRescaleConv2DDualOutput);
-    const auto binary = tosa2spirv::WriteToBinary(module1);
-    std::string dis = testutils::DisassembleSPIRV(binary, true);
     EXPECT_TRUE(diff.empty());
 }
 

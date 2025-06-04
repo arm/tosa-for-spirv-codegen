@@ -16,6 +16,7 @@ using ConstantData = std::variant<const std::vector<uint8_t>,
                                   const std::vector<int8_t>,
                                   const std::vector<int16_t>,
                                   const std::vector<int32_t>,
+                                  const std::vector<int64_t>,
                                   const std::vector<float>>;
 
 using PointerPair = std::pair<const void*, std::size_t>;
