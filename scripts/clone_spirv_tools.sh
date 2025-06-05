@@ -12,7 +12,7 @@ source "$(dirname "$0")/scripts_common.sh"
 SPIRV_TOOLS_DIR=$EXTERNAL_DIR/SPIRV-Tools
 
 # Pinned SHA for main-with-ARM-patches branch
-SPIRV_TOOLS_REVISION="039dd9cf8888cba5eb50ca9d7361975d446afa71" # Rename TensorEXT to TensorARM in opt/val
+SPIRV_TOOLS_REVISION="9012a8de4fdba0039ccedac1922c31f7ac83a2c0" # Fix asm/disasm support for the MLGraph DebugInfo instruction set
 
 rm -rf $SPIRV_TOOLS_DIR
 
