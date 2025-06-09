@@ -19,6 +19,23 @@ pushd "$BUILD_DIR" > /dev/null
 
 # Make sure we are getting an x86-64 build of flatc
 FLATC_PATH="$EXTERNAL_DIR/flatbuffers/build/flatc"
+FLATC_NATIVE_BUILD_DIR="$EXTERNAL_DIR/flatbuffers/build"
+
+# Build native flatbuffers
+if [ -n "$FLATC_PATH" ]; then
+  mkdir -p "$FLATC_NATIVE_BUILD_DIR"
+  pushd "$FLATC_NATIVE_BUILD_DIR" > /dev/null
+
+  $CMAKE_PATH -DBUILD_TESTS=OFF .. || {
+    echo "Failed to configure native flatbuffers build."
+    exit 1
+  }
+
+  $CMAKE_PATH --build . -j$(nproc) || {
+    echo "Failed to build native flatbuffers (flatc)."
+    exit 1
+  }
+fi
 
 CMARGS="-DCMAKE_BUILD_TYPE=$BUILD_TYPE \
         -DARGPARSE_PATH=$EXTERNAL_DIR/argparse \
@@ -29,27 +46,6 @@ CMARGS="-DCMAKE_BUILD_TYPE=$BUILD_TYPE \
         -DFLATC_PATH=$FLATC_PATH"
 
 if [ "$TARGET" = "ANDROID" ]; then
-  ARCH_CHECK=$(file "$FLATC_PATH" | grep "x86-64")
-  if [ -z "$ARCH_CHECK" ]; then
-    echo "flatc not found at $FLATC_PATH. Attempting to build native flatc..."
-    FLATC_NATIVE_BUILD_DIR="$EXTERNAL_DIR/flatbuffers/build"
-
-    mkdir -p "$FLATC_NATIVE_BUILD_DIR"
-    pushd "$FLATC_NATIVE_BUILD_DIR" > /dev/null
-
-    $CMAKE_PATH -DBUILD_TESTS=OFF .. || {
-      echo "Failed to configure native flatbuffers build."
-      exit 1
-    }
-
-    $CMAKE_PATH --build . -j$(nproc) || {
-      echo "Failed to build native flatbuffers (flatc)."
-      exit 1
-    }
-
-    popd > /dev/null
-  fi
-
     CMARGS="$CMARGS \
             -DCMAKE_SYSTEM_NAME=Android \
             -DCMAKE_TOOLCHAIN_FILE=$NDK_DIR/build/cmake/android.toolchain.cmake \
