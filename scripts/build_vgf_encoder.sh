@@ -18,20 +18,21 @@ mkdir -p "$BUILD_DIR"
 pushd "$BUILD_DIR" > /dev/null
 
 # Make sure we are getting an x86-64 build of flatc
-FLATC_PATH="$EXTERNAL_DIR/serialization_lib/build/third_party/flatbuffers/flatc"
+FLATC_PATH="$EXTERNAL_DIR/flatbuffers/build/flatc"
 
 CMARGS="-DCMAKE_BUILD_TYPE=$BUILD_TYPE \
         -DARGPARSE_PATH=$EXTERNAL_DIR/argparse \
         -DJSON_PATH=$EXTERNAL_DIR/json \
         -DFLATBUFFERS_PATH=$EXTERNAL_DIR/flatbuffers \
         -DML_SDK_VGF_LIB_BUILD_TESTS=0 \
-        -DML_SDK_VGF_LIB_BUILD_TOOLS=1"
+        -DML_SDK_VGF_LIB_BUILD_TOOLS=1 \
+        -DFLATC_PATH=$FLATC_PATH"
 
 if [ "$TARGET" = "ANDROID" ]; then
   ARCH_CHECK=$(file "$FLATC_PATH" | grep "x86-64")
   if [ -z "$ARCH_CHECK" ]; then
     echo "flatc not found at $FLATC_PATH. Attempting to build native flatc..."
-    FLATC_NATIVE_BUILD_DIR="$EXTERNAL_DIR/serialization_lib/build-x86-64"
+    FLATC_NATIVE_BUILD_DIR="$EXTERNAL_DIR/flatbuffers/build"
 
     mkdir -p "$FLATC_NATIVE_BUILD_DIR"
     pushd "$FLATC_NATIVE_BUILD_DIR" > /dev/null
@@ -54,7 +55,8 @@ if [ "$TARGET" = "ANDROID" ]; then
             -DCMAKE_TOOLCHAIN_FILE=$NDK_DIR/build/cmake/android.toolchain.cmake \
             -DCMAKE_ANDROID_NDK=$NDK_DIR \
             -DANDROID_ABI=$ANDROID_ABI \
-            -DANDROID_PLATFORM=android-$ANDROID_API"
+            -DANDROID_PLATFORM=android-$ANDROID_API \
+            -DFLATC_PATH=$FLATC_PATH"
 fi
 
 CXXFLAGS="-fPIC" $CMAKE_PATH $CMARGS -S .. -B .
