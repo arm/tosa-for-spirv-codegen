@@ -35,6 +35,7 @@ if [ -n "$FLATC_PATH" ]; then
     echo "Failed to build native flatbuffers (flatc)."
     exit 1
   }
+  popd
 fi
 
 CMARGS="-DCMAKE_BUILD_TYPE=$BUILD_TYPE \
