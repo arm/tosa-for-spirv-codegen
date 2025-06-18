@@ -57,19 +57,32 @@ TEST(TOSA2SPIRV, FloatingPointAttributes)
 
     auto module = CreateModule(tosa2spirv::TOSAVersion{});
     auto graph = Graph{module};
+
     auto input = graph.AddInput(Tensor(DataType::float32_t, std::vector<unsigned int>{1, 224, 224, 3}), 0);
     auto weight = graph.AddInput(Tensor(DataType::float32_t, std::vector<unsigned int>{768, 16, 16, 3}), 0);
     auto bias = graph.AddInput(Tensor(DataType::float32_t, std::vector<unsigned int>{768}), 0);
     auto pad = Attribute({1, 1, 1, 1}, DataType::int32_t);
     auto stride = Attribute({1, 1}, DataType::int32_t);
     auto dilation = Attribute({1, 1}, DataType::int32_t);
-    auto input_zp = Attribute({0}, DataType::float32_t);
-    auto weight_zp = Attribute({1}, DataType::float32_t);
+    auto input_zp_attr = Attribute({1, 1, 1, 1}, DataType::float32_t);
+    auto input_zp = graph.AddTensorConstant(input_zp_attr);
+    auto weight_zp_attr = Attribute({1, 1, 1, 1}, DataType::float32_t);
+    auto weight_zp = graph.AddTensorConstant(weight_zp_attr);
+    auto acc_type = Attribute({1}, DataType::int32_t);
     auto local_bound = Attribute({false}, DataType::bool_t);
     auto output = Tensor(DataType::float32_t, std::vector<unsigned int>{1, 14, 14, 768});
-    // Check exception thrown if called before operator added to graph
-    const auto res =
-        graph.AddConv2dOperator(input, weight, bias, pad, stride, dilation, input_zp, weight_zp, local_bound, output);
+
+    const auto res = graph.AddConv2dOperator(input,
+                                             weight,
+                                             bias,
+                                             input_zp,
+                                             weight_zp,
+                                             pad,
+                                             stride,
+                                             dilation,
+                                             acc_type,
+                                             local_bound,
+                                             output);
     // Add output in place
     graph.AddOutput(res, 1);
     graph.FinalizeGraph();

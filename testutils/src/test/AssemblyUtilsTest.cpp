@@ -23,7 +23,7 @@ TEST(TESTUTILS, TestReader)
 {
     const auto module0 = LoadSPIRVDisassembly(spirvmodels::SimpleMaxpool2d);
     const auto binary0 = WriteToBinary(module0);
-    EXPECT_EQ(binary0.size(), 200);
+    EXPECT_EQ(binary0.size(), 201);
 }
 
 void RoundTripModel(const std::string& model)

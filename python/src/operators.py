@@ -26,16 +26,8 @@ class Operators:
 
         self.operator_list = []
         self.operator_name_list = []
-        self.operator_exception = [
-            "CUSTOM",
-            "CONST",
-            "IDENTITY",
-            "DIM",
-            "VARIABLE",
-            "VARIABLE_WRITE",
-            "VARIABLE_READ",
-        ]
-        self.unsupported_groups = ["custom", "control-flow", "variable"]
+        self.operator_exception = ['CUSTOM', 'CONST', 'IDENTITY', 'DIM', 'VARIABLE', 'VARIABLE_WRITE', 'VARIABLE_READ', 'CONST_SHAPE']
+        self.unsupported_groups = ['custom', 'control-flow', 'variable']
 
         for group in self.spec.operatorgroups:
             if group.name in self.unsupported_groups:
@@ -43,7 +35,6 @@ class Operators:
             for op in group.operators:
                 if op.name in self.operator_exception:
                     continue
-                op = apply_operator_fixes(op)
                 self.operator_list.append(op)
                 self.operator_name_list.append(operator_name_to_pascal_case(op.name))
 
@@ -104,6 +95,14 @@ def name_to_pascal_case(name, separator):
 
 
 def operator_name_to_pascal_case(name):
+    if name.upper() == "ARGMAX":
+        return "ArgMax"
+    if name.upper() == "INTDIV":
+        return "IntDiv"
+    if name.upper() == "FFT2D":
+        return "Fft2d"
+    if name.upper() == "RFFT2D":
+        return "Rfft2d"
     return name_to_pascal_case(name, "_")
 
 
@@ -119,4 +118,3 @@ def has_argument_category_name(arg, string):
         if category.name == string:
             has_name = True
     return has_name
-

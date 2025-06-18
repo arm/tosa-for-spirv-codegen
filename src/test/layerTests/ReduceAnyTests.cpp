@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// THIS FILE IS GENERATED WITH TOSA 0.80.0.
+// THIS FILE IS GENERATED WITH TOSA 1.0.0.
 // See tosa2spirv/python/code_generator.py and README
 
 #include <AssemblyUtils.hpp>
@@ -24,6 +24,7 @@ TEST(TOSA2SPIRV_LAYERS, ReduceAny)
     auto input = graph.AddInput(Tensor(DataType::bool_t, std::vector<unsigned int>{1, 1, 1, 1}), 0);
 
     auto axis = Attribute({1}, DataType::int32_t);
+
     auto output = Tensor(DataType::bool_t, std::vector<unsigned int>{1, 1, 1, 1});
 
     const auto res = graph.AddReduceAnyOperator(input, axis, output);
@@ -34,6 +35,7 @@ TEST(TOSA2SPIRV_LAYERS, ReduceAny)
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "REDUCE_ANY", outputStr);
+
     testutils::CheckConstant(DataType::int32_t, "REDUCE_ANY", outputStr, 1, 0);
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "REDUCE_ANY", outputStr);
 
@@ -42,6 +44,7 @@ TEST(TOSA2SPIRV_LAYERS, ReduceAny)
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "REDUCE_ANY", outputStr);
+
     testutils::CheckConstant(DataType::int32_t, "REDUCE_ANY", outputStr, 1, 0);
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "REDUCE_ANY", outputStr);
 }

@@ -53,9 +53,9 @@ set(FLATBUFFERS_LIBRARY libflatbuffers.a)
 set(FLATBUFFERS_PATH "${SERIALIZATION_LIB_BUILD_PATH}/third_party/flatbuffers")
 
 find_library(FLATBUFFERS_LIBRARY_PATH
-             NAMES ${FLATBUFFERS_LIBRARY}
-             HINTS ${FLATBUFFERS_PATH}
-             NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
+        NAMES ${FLATBUFFERS_LIBRARY}
+        HINTS ${SERIALIZATION_LIB_BUILD_PATH}/third_party/flatbuffers/
+        NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
 
 if(NOT FLATBUFFERS_LIBRARY_PATH)
     message(WARNING "Flatbuffers library (${FLATBUFFERS_LIBRARY}) not found.")

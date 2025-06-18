@@ -15,7 +15,7 @@ using tosa2spirv::tosa::DataType;
 namespace testutils
 {
 
-std::string ExpandValues(const std::vector<int>& values);
+std::string ExpandValues(const std::vector<int>& values, const std::string& dataType = "uint");
 
 std::string AddSpacers(int index);
 
@@ -39,12 +39,15 @@ void CheckOutput(const std::vector<int>& values,
 void CheckConstCompositeTensor(const std::vector<int>& values,
                                const std::string& instruction,
                                const std::string& goldenSPIRV,
-                               const int index);
+                               const int index,
+                               const std::string& dataType = "uint");
 
 void CheckGraphConstant(const std::vector<int>& values,
                         DataType dataType,
                         const std::string& instruction,
-                        const std::string& goldenSPIRV);
+                        const std::string& goldenSPIRV,
+                        int index,
+                        int identifier);
 
 void CheckConstant(DataType dataType,
                    const std::string& instruction,

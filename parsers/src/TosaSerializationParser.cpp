@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <ParserUtils.hpp>
 #include <TosaSerializationParser.hpp>
+#include <ParserUtils.hpp>
 
 namespace tosa2spirv::parsers
 {
@@ -29,7 +29,7 @@ bool IsTensorConstant(TosaSerializationBasicBlock* block, const std::string_view
         {
             if (outputTensorName == tensorName)
             {
-                return op->GetOp() == Op_CONST;
+                return op->GetOp() == Op_CONST || op->GetOp() == Op_CONST_SHAPE;
             }
         }
     }
@@ -54,6 +54,7 @@ ResId TosaSerializationParser::InitializeInputTensor(Graph& graph, const std::st
     {
         return input->second;
     }
+
     // If the input is not a constant and is not resolved something has gone wrong
     if (!IsTensorConstant(m_Block, inputName))
     {
@@ -61,7 +62,25 @@ ResId TosaSerializationParser::InitializeInputTensor(Graph& graph, const std::st
     }
 
     // Constants are created at this point to maintain order with the VulcanMLBackend
-    const TosaSerializationTensor* constTosaTensor = m_Block->GetTensorByName(inputName);
+    bool nameExists = false;
+    for (const auto& tensorPtr : m_Block->GetTensors())
+    {
+        if (tensorPtr && tensorPtr->GetName() == inputName)
+        {
+            nameExists = true;
+            break;
+        }
+    }
+    TosaSerializationTensor* constTosaTensor;
+    if (nameExists)
+    {
+        constTosaTensor = m_Block->GetTensorByName(inputName);
+    }
+    else
+    {
+        throw std::runtime_error("TosaSerializationParser: m_Block->GetTensorByName() returned null for: " + inputName +
+                                 ".");
+    }
     const auto constTensor =
         Tensor(GetDataTypeFromDType(constTosaTensor->GetDtype()), ConvertTensorShape(constTosaTensor->GetShape()));
 
@@ -101,6 +120,7 @@ ResId TosaSerializationParser::InitializeInputTensor(Graph& graph, const std::st
         const Attribute constantAttribute{vec, constTensor.GetDataType(), constTensor.GetTensorShape()};
         constantResId = graph.AddTensorConstant(constantAttribute);
     }
+
     m_OpNameResIdMap.try_emplace(inputName, constantResId);
     return constantResId;
 }
@@ -130,24 +150,21 @@ std::shared_ptr<spirv::Module> TosaSerializationParser::GenerateSPIRVModule(cons
     // Loop through all operators and start to build up the SPIRV graph
     for (const auto& op : m_Block->GetOperators())
     {
-        ParseOperator(op, graph);
+        ParseOperator(op.get(), graph);
     }
 
     // Now that we have parsed the graph we can resolve the resIds of the output tensors
     for (const auto& outputName : m_Block->GetOutputs())
     {
-        ResId resId;
         auto it = m_OpNameResIdMap.find(outputName);
         if (it != m_OpNameResIdMap.end())
         {
-            resId = it->second;
+            graph.AddOutput(it->second, bindingId++);
         }
         else
         {
-            // Likely a disconnected tensor that we need to resolve
-            resId = InitializeInputTensor(graph, outputName);
+            throw std::runtime_error("Output name " + outputName + " not found in m_OpNameResIdMap.");
         }
-        graph.AddOutput(resId, bindingId++);
     }
 
     graph.FinalizeGraph();
@@ -160,6 +177,10 @@ void TosaSerializationParser::ParseOperator(TosaSerializationOperator* op, Graph
     Op flatbufferEnum = op->GetOp();
 
     if (flatbufferEnum == Op_CONST)
+    {
+        return;
+    }
+    if (flatbufferEnum == Op_CONST_SHAPE)
     {
         return;
     }
@@ -188,167 +209,311 @@ void TosaSerializationParser::ParseOperator(TosaSerializationOperator* op, Graph
 
     for (const auto& outputName : outputNames)
     {
-        TosaSerializationTensor const* outputTosaTensor = m_Block->GetTensorByName(outputName);
+        const TosaSerializationTensor* outputTosaTensor = m_Block->GetTensorByName(outputName);
+        if (!outputTosaTensor)
+        {
+            throw std::runtime_error("ParseOperator: m_Block->GetTensorByName(outputName) returned null.");
+        }
         outputTensors.emplace_back(GetDataTypeFromDType(outputTosaTensor->GetDtype()),
                                    ConvertTensorShape(outputTosaTensor->GetShape()));
     }
 
-    std::vector<Attribute> attributes;
-    switch (op->GetAttributeType())
-    {
-        case Attribute_NONE: break;
-        case Attribute_AxisAttribute:
+    auto DTypeToInt = [](DType dtype) -> int {
+        switch (dtype)
         {
-            TosaAxisAttribute attribute = op->GetAttribute();
+            case DType::DType_INT32: return 1;
+            case DType::DType_FP16: return 2;
+            case DType::DType_FP32: return 3;
+            case DType::DType_INT48: return 4;
+            default:
+                throw std::runtime_error("Acc_type: Unsupported DType: " + std::to_string(static_cast<int>(dtype)));
+        }
+    };
+
+    std::vector<tosa2spirv::tosa::Attribute> attributes;
+    auto attr = op->GetAttributeType();
+    switch (attr)
+    {
+        case Attribute_NONE:
+        case Attribute_MatMulAttribute:
+        case Attribute_ErfAttribute:
+        case Attribute_SigmoidAttribute:
+        case Attribute_TanhAttribute:
+        case Attribute_AddAttribute:
+        case Attribute_BitwiseAndAttribute:
+        case Attribute_BitwiseOrAttribute:
+        case Attribute_BitwiseXorAttribute:
+        case Attribute_IntDivAttribute:
+        case Attribute_LogicalAndAttribute:
+        case Attribute_LogicalLeftShiftAttribute:
+        case Attribute_LogicalRightShiftAttribute:
+        case Attribute_LogicalOrAttribute:
+        case Attribute_LogicalXorAttribute:
+        case Attribute_MulAttribute:
+        case Attribute_PowAttribute:
+        case Attribute_SubAttribute:
+        case Attribute_TableAttribute:
+        case Attribute_AbsAttribute:
+        case Attribute_BitwiseNotAttribute:
+        case Attribute_CeilAttribute:
+        case Attribute_ClzAttribute:
+        case Attribute_CosAttribute:
+        case Attribute_ExpAttribute:
+        case Attribute_FloorAttribute:
+        case Attribute_LogAttribute:
+        case Attribute_LogicalNotAttribute:
+        case Attribute_NegateAttribute:
+        case Attribute_ReciprocalAttribute:
+        case Attribute_RsqrtAttribute:
+        case Attribute_SinAttribute:
+        case Attribute_SelectAttribute:
+        case Attribute_EqualAttribute:
+        case Attribute_GreaterAttribute:
+        case Attribute_GreaterEqualAttribute:
+        case Attribute_PadAttribute:
+        case Attribute_ReshapeAttribute:
+        case Attribute_SliceAttribute:
+        case Attribute_TileAttribute:
+        case Attribute_GatherAttribute:
+        case Attribute_ScatterAttribute:
+        case Attribute_CastAttribute:
+        case Attribute_ConstAttribute:
+        case Attribute_IdentityAttribute:
+        case Attribute_VariableAttribute:
+        case Attribute_VariableWriteAttribute:
+        case Attribute_VariableReadAttribute:
+        case Attribute_ConstShapeAttribute: break;
+        case Attribute_ClampAttribute:
+        {
+            auto dataType = inputDataTypes[0];
+
+            auto uint8ToFloat32 = [](const std::vector<unsigned char>& bytes) {
+                if (bytes.size() < 4)
+                {
+                    throw std::runtime_error("Not enough bytes to convert to float32");
+                }
+                float value;
+                std::memcpy(&value, bytes.data(), sizeof(float));
+                return value;
+            };
+            auto uint8ToFloat16 = [](const std::vector<unsigned char>& bytes) {
+                if (bytes.size() < 2)
+                {
+                    throw std::runtime_error("Not enough bytes to convert to float16");
+                }
+                float value;
+                std::memcpy(&value, bytes.data(), sizeof(float));
+                return value;
+            };
+
+            auto uint8ToInt16 = [](const std::vector<unsigned char>& bytes) {
+                if (bytes.size() < 2)
+                {
+                    throw std::runtime_error("Not enough bytes to convert to int16");
+                }
+                int16_t value;
+                std::memcpy(&value, bytes.data(), sizeof(int16_t));
+                return value;
+            };
+
+            TosaClampAttribute attribute = op->GetAttribute();
+
+            auto minVal = attribute.min_val();
+            auto maxVal = attribute.max_val();
+            switch (dataType)
+            {
+                case tosa::DataType::int16_t:
+                {
+                    attributes.emplace_back(uint8ToInt16(minVal), dataType);
+                    attributes.emplace_back(uint8ToInt16(maxVal), dataType);
+                    break;
+                }
+                case tosa::DataType::float32_t:
+                {
+                    attributes.emplace_back(uint8ToFloat32(minVal), dataType);
+                    attributes.emplace_back(uint8ToFloat32(maxVal), dataType);
+                    break;
+                }
+                case tosa::DataType::float16_t:
+                case tosa::DataType::bfloat16_t:
+                {
+                    attributes.emplace_back(uint8ToFloat16(minVal), dataType);
+                    attributes.emplace_back(uint8ToFloat16(maxVal), dataType);
+                    break;
+                }
+                case tosa::DataType::int8_t:
+                {
+                    attributes.emplace_back(static_cast<int8_t>(minVal[0]), dataType);
+                    attributes.emplace_back(static_cast<int8_t>(maxVal[0]), dataType);
+                    break;
+                }
+                default: throw std::runtime_error("Unsupported data type for CLAMP attributes.");
+            }
+
+            attributes.emplace_back(static_cast<int32_t>(attribute.nan_mode()));
+            break;
+        }
+        case Attribute_ReduceAllAttribute:
+        {
+            TosaReduceAllAttribute attribute = op->GetAttribute();
             attributes.emplace_back(attribute.axis());
             break;
         }
-        case Attribute_PoolAttribute:
+        case Attribute_ReduceAnyAttribute:
         {
-            TosaPoolAttribute attribute = op->GetAttribute();
+            TosaReduceAnyAttribute attribute = op->GetAttribute();
+            attributes.emplace_back(attribute.axis());
+            break;
+        }
+        case Attribute_ReduceMaxAttribute:
+        {
+            TosaReduceMaxAttribute attribute = op->GetAttribute();
+            attributes.emplace_back(attribute.axis());
+            attributes.emplace_back(static_cast<int32_t>(attribute.nan_mode()));
+            break;
+        }
+        case Attribute_ReduceMinAttribute:
+        {
+            TosaReduceMinAttribute attribute = op->GetAttribute();
+            attributes.emplace_back(attribute.axis());
+            attributes.emplace_back(static_cast<int32_t>(attribute.nan_mode()));
+            break;
+        }
+        case Attribute_ReduceProductAttribute:
+        {
+            TosaReduceProductAttribute attribute = op->GetAttribute();
+            attributes.emplace_back(attribute.axis());
+            break;
+        }
+        case Attribute_ReduceSumAttribute:
+        {
+            TosaReduceSumAttribute attribute = op->GetAttribute();
+            attributes.emplace_back(attribute.axis());
+            break;
+        }
+        case Attribute_ReverseAttribute:
+        {
+            TosaReverseAttribute attribute = op->GetAttribute();
+            attributes.emplace_back(attribute.axis());
+            break;
+        }
+        case Attribute_ArgMaxAttribute:
+        {
+            TosaArgMaxAttribute attribute = op->GetAttribute();
+            attributes.emplace_back(attribute.axis());
+            attributes.emplace_back(static_cast<int32_t>(attribute.nan_mode()));
+            break;
+        }
+        case Attribute_AvgPool2dAttribute:
+        {
+            TosaAvgPool2dAttribute attribute = op->GetAttribute();
             attributes.emplace_back(attribute.kernel());
             attributes.emplace_back(attribute.stride());
             attributes.emplace_back(attribute.pad());
-
-            if (operatorEnum == OperatorEnum::MaxPool2d)
-            {
-                break;
-            }
-            attributes.emplace_back(ConvertAvgPoolAccType(attribute));
-            attributes.emplace_back(attribute.input_zp(), inputDataTypes[0]);
-            attributes.emplace_back(attribute.output_zp(), outputTensors[0].GetDataType());
+            attributes.emplace_back(DTypeToInt(attribute.acc_type()));
             break;
         }
-        case Attribute_ConvAttribute:
+        case Attribute_MaxPool2dAttribute:
         {
-            TosaConvAttribute attribute = op->GetAttribute();
+            TosaMaxPool2dAttribute attribute = op->GetAttribute();
+            attributes.emplace_back(attribute.kernel());
+            attributes.emplace_back(attribute.stride());
+            attributes.emplace_back(attribute.pad());
+            attributes.emplace_back(static_cast<int32_t>(attribute.nan_mode()));
+            break;
+        }
+        case Attribute_MinimumAttribute:
+        {
+            TosaMinimumAttribute attribute = op->GetAttribute();
+            attributes.emplace_back(static_cast<int32_t>(attribute.nan_mode()));
+            break;
+        }
+        case Attribute_MaximumAttribute:
+        {
+            TosaMaximumAttribute attribute = op->GetAttribute();
+            attributes.emplace_back(static_cast<int32_t>(attribute.nan_mode()));
+            break;
+        }
+        case Attribute_ConcatAttribute:
+        {
+            TosaConcatAttribute attribute = op->GetAttribute();
+            attributes.emplace_back(attribute.axis());
+            break;
+        }
+        case Attribute_FFT2dAttribute:
+        {
+            TosaFFT2dAttribute attribute = op->GetAttribute();
+            attributes.emplace_back(attribute.inverse());
+            attributes.emplace_back(attribute.local_bound());
+            break;
+        }
+        case Attribute_RFFT2dAttribute:
+        {
+            TosaFFT2dAttribute attribute = op->GetAttribute();
+            attributes.emplace_back(attribute.local_bound());
+            break;
+        }
+        case Attribute_Conv2dAttribute:
+        {
+            TosaConv2dAttribute attribute = op->GetAttribute();
             attributes.emplace_back(attribute.pad());
             attributes.emplace_back(attribute.stride());
             attributes.emplace_back(attribute.dilation());
-            attributes.emplace_back(attribute.input_zp(), inputDataTypes[0]);
-            attributes.emplace_back(attribute.weight_zp(), inputDataTypes[1]);
+            attributes.emplace_back(DTypeToInt(attribute.acc_type()));
             attributes.emplace_back(attribute.local_bound());
             break;
         }
-        case Attribute_TransposeConvAttribute:
+        case Attribute_Conv3dAttribute:
         {
-            TosaTransposeConvAttribute attribute = op->GetAttribute();
+            TosaConv3dAttribute attribute = op->GetAttribute();
+            attributes.emplace_back(attribute.pad());
+            attributes.emplace_back(attribute.stride());
+            attributes.emplace_back(attribute.dilation());
+            attributes.emplace_back(DTypeToInt(attribute.acc_type()));
+            attributes.emplace_back(attribute.local_bound());
+            break;
+        }
+        case Attribute_TransposeConv2dAttribute:
+        {
+            TosaTransposeConv2dAttribute attribute = op->GetAttribute();
             attributes.emplace_back(attribute.out_pad());
             attributes.emplace_back(attribute.stride());
-            attributes.emplace_back(attribute.output_shape());
-            attributes.emplace_back(attribute.input_zp(), inputDataTypes[0]);
-            attributes.emplace_back(attribute.weight_zp(), inputDataTypes[1]);
+            attributes.emplace_back(DTypeToInt(attribute.acc_type()));
             attributes.emplace_back(attribute.local_bound());
             break;
         }
-        case Attribute_PadAttribute:
+        case Attribute_DepthwiseConv2dAttribute:
         {
-            TosaPadAttribute attribute = op->GetAttribute();
-            const auto inputName = op->GetInputTensorNames()[0];
-            TosaSerializationTensor* const inputTosaTensor = m_Block->GetTensorByName(inputName);
-            auto paddingTensor =
-                Tensor(DataType::int32_t, {static_cast<unsigned int>(inputTosaTensor->GetShape().size()), 2u});
+            TosaDepthwiseConv2dAttribute attribute = op->GetAttribute();
+            attributes.emplace_back(attribute.pad());
+            attributes.emplace_back(attribute.stride());
+            attributes.emplace_back(attribute.dilation());
 
-            ConstantData constant{attribute.padding()};
-            const auto padding = AddExternalConstant(graph, paddingTensor, constant, "padding");
-            attributes.emplace_back(padding);
-            attributes.emplace_back(std::vector{attribute.pad_const_int()}, inputDataTypes[0]);
+            attributes.emplace_back(DTypeToInt(attribute.acc_type()));
+            attributes.emplace_back(attribute.local_bound());
             break;
         }
-        case Attribute_ReshapeAttribute:
+        case Attribute_ArithmeticRightShiftAttribute:
         {
-            TosaReshapeAttribute attribute = op->GetAttribute();
-            attributes.emplace_back(attribute.new_shape());
-            break;
-        }
-        case Attribute_SliceAttribute:
-        {
-            TosaSliceAttribute attribute = op->GetAttribute();
-            const auto sliceStartTensorValues = ConvertTensorShape(attribute.start());
-
-            attributes.emplace_back(attribute.start(), DataType::uint32_t);
-            attributes.emplace_back(attribute.size(), DataType::uint32_t);
-            break;
-        }
-        case Attribute_TileAttribute:
-        {
-            TosaTileAttribute attribute = op->GetAttribute();
-            attributes.emplace_back(attribute.multiples());
-            break;
-        }
-        case Attribute_ResizeAttribute:
-        {
-            TosaResizeAttribute attribute = op->GetAttribute();
-            attributes.emplace_back(attribute.scale(), DataType::uint32_t);
-            attributes.emplace_back(attribute.offset(), DataType::uint32_t);
-            attributes.emplace_back(attribute.border(), DataType::uint32_t);
-
-            uint32_t mode = attribute.mode() == 1 ? 0 : 1;
-            std::vector modeVector = {mode};
-            attributes.emplace_back(modeVector);
-            break;
-        }
-        case Attribute_ClampAttribute:
-        {
-            TosaClampAttribute attribute = op->GetAttribute();
-            attributes.emplace_back(std::vector{attribute.min_int()}, inputDataTypes[0]);
-            attributes.emplace_back(std::vector{attribute.max_int()}, inputDataTypes[0]);
+            TosaArithmeticRightShiftAttribute attribute = op->GetAttribute();
+            attributes.emplace_back(attribute.round());
             break;
         }
         case Attribute_RescaleAttribute:
         {
             TosaRescaleAttribute attribute = op->GetAttribute();
 
-            auto multiplierTensor =
-                Tensor(DataType::int32_t, std::vector{static_cast<unsigned int>(attribute.multiplier().size())});
-            ConstantData multiplierConstant{attribute.multiplier()};
-            const auto multiplier = AddExternalConstant(graph, multiplierTensor, multiplierConstant, "multiplier");
-
-            auto shiftTensor =
-                Tensor(DataType::int8_t, std::vector{static_cast<unsigned int>(attribute.shift().size())});
-
-            std::vector<int8_t> int8Vector;
-            const std::vector<int32_t>& int32Vector = attribute.shift();
-            int8Vector.reserve(int32Vector.size());
-            std::transform(int32Vector.begin(),
-                           int32Vector.end(),
-                           std::back_inserter(int8Vector),
-                           [](const int32_t value) { return static_cast<int8_t>(value); });
-
-            ConstantData shiftConstant{std::move(int8Vector)};
-            const auto shift = AddExternalConstant(graph, shiftTensor, shiftConstant, "shift");
-
-            attributes.emplace_back(attribute.input_zp(), inputDataTypes[0]);
-            attributes.emplace_back(attribute.output_zp(), outputTensors[0].GetDataType());
-            attributes.emplace_back(multiplier);
-            attributes.emplace_back(shift);
             attributes.emplace_back(attribute.scale32());
-            attributes.emplace_back(attribute.double_round());
+            attributes.emplace_back(static_cast<int32_t>(attribute.rounding_mode()));
             attributes.emplace_back(attribute.per_channel());
             attributes.emplace_back(attribute.input_unsigned());
             attributes.emplace_back(attribute.output_unsigned());
             break;
         }
-        case Attribute_MulAttribute:
+        case Attribute_ResizeAttribute:
         {
-            TosaMulAttribute attribute = op->GetAttribute();
-
-            std::vector<int32_t> int32Vector = {attribute.shift()};
-            std::vector<int8_t> int8Vector;
-            int8Vector.reserve(int32Vector.size());
-
-            std::transform(int32Vector.begin(),
-                           int32Vector.end(),
-                           std::back_inserter(int8Vector),
-                           [](const int32_t value) { return static_cast<int8_t>(value); });
-            attributes.emplace_back(std::move(int8Vector), DataType::int8_t, Tensor::TensorShape{1u});
-
-            break;
-        }
-        case Attribute_ArithmeticRightShiftAttribute:
-        {
-            TosaArithmeticRightShiftAttribute attribute = op->GetAttribute();
-            attributes.emplace_back(std::vector{attribute.round()});
+            TosaResizeAttribute attribute = op->GetAttribute();
+            attributes.emplace_back(static_cast<int32_t>(attribute.mode()));
             break;
         }
         case Attribute_TransposeAttribute:
@@ -357,73 +522,9 @@ void TosaSerializationParser::ParseOperator(TosaSerializationOperator* op, Graph
             attributes.emplace_back(attribute.perms());
             break;
         }
-        case Attribute_TableAttribute:
-        {
-            TosaTableAttribute attribute = op->GetAttribute();
-            const auto inputName = op->GetInputTensorNames()[0];
-            const auto inputDataType = GetDataTypeFromDType(m_Block->GetTensorByName(inputName)->GetDtype());
-            DataType datatype = attribute.table().size() > 256 ? DataType::int16_t : DataType::int8_t;
-            auto tableTensor = Tensor(datatype, {static_cast<unsigned int>(attribute.table().size())});
-            ResId tableConstantResId;
-            // if int8 we need to convert from int16 given by attribute
-            if (inputDataType == DataType::int8_t)
-            {
-                std::vector<int8_t> int8Vector;
-                const std::vector<int16_t>& int16Vector = attribute.table();
-                int8Vector.reserve(int16Vector.size());
-                std::transform(int16Vector.begin(),
-                               int16Vector.end(),
-                               std::back_inserter(int8Vector),
-                               [](const int16_t value) { return static_cast<int8_t>(value); });
-                const auto table = ConstantData{std::move(int8Vector)};
-                tableConstantResId = AddExternalConstant(graph, tableTensor, table, "table");
-            }
-            else
-            {
-                ConstantData table{attribute.table()};
-                tableConstantResId = AddExternalConstant(graph, tableTensor, table, "table");
-            }
-            attributes.emplace_back(tableConstantResId);
-            break;
-        }
-        case Attribute_MatMulAttribute:
-        {
-            TosaMatMulAttribute attribute = op->GetAttribute();
-            attributes.emplace_back(attribute.a_zp(), inputDataTypes[0]);
-            attributes.emplace_back(attribute.b_zp(), inputDataTypes[1]);
-            break;
-        }
-        case Attribute_FullyConnectedAttribute:
-        {
-            TosaFullyConnectedAttribute attribute = op->GetAttribute();
-            attributes.emplace_back(attribute.input_zp(), inputDataTypes[0]);
-            attributes.emplace_back(attribute.weight_zp(), inputDataTypes[1]);
-            break;
-        }
-        case Attribute_NegateAttribute:
-        {
-            TosaNegateAttribute attribute = op->GetAttribute();
-            attributes.emplace_back(attribute.input1_zp(), inputDataTypes[0]);
-            attributes.emplace_back(attribute.output_zp(), inputDataTypes[0]);
-            break;
-        }
-        case Attribute_RFFTAttribute:
-        {
-            break;
-        }
-        case Attribute_FFTAttribute:
-        {
-            TosaFFTAttribute attribute = op->GetAttribute();
-            attributes.emplace_back(attribute.inverse());
-            attributes.emplace_back(attribute.local_bound());
-            break;
-        }
-        case Attribute_CondIfAttribute:
-        case Attribute_CustomAttribute:
-        case Attribute_WhileLoopAttribute:
         default:
         {
-            throw std::runtime_error("Unsupported attribute type");
+            throw std::runtime_error("Unsupported attribute type: " + std::to_string(static_cast<int>(attr)));
         }
     }
 
@@ -438,4 +539,4 @@ void TosaSerializationParser::ParseOperator(TosaSerializationOperator* op, Graph
     }
 }
 
-} // namespace tosa2spirv::parsers
+}  // namespace tosa2spirv::parsers

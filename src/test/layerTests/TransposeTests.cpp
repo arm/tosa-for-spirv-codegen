@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// THIS FILE IS GENERATED WITH TOSA 0.80.0.
+// THIS FILE IS GENERATED WITH TOSA 1.0.0.
 // See tosa2spirv/python/code_generator.py and README
 
 #include <AssemblyUtils.hpp>
@@ -24,6 +24,7 @@ TEST(TOSA2SPIRV_LAYERS, Transpose)
     auto input1 = graph.AddInput(Tensor(DataType::bool_t, std::vector<unsigned int>{1, 1, 1, 1}), 0);
 
     auto perms = Attribute({1, 1, 1, 1}, DataType::int32_t);
+
     auto output = Tensor(DataType::bool_t, std::vector<unsigned int>{1, 1, 1, 1});
 
     const auto res = graph.AddTransposeOperator(input1, perms, output);
@@ -34,6 +35,7 @@ TEST(TOSA2SPIRV_LAYERS, Transpose)
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "TRANSPOSE", outputStr);
+
     testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "TRANSPOSE", outputStr, 0);
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "TRANSPOSE", outputStr);
 
@@ -42,6 +44,7 @@ TEST(TOSA2SPIRV_LAYERS, Transpose)
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "TRANSPOSE", outputStr);
+
     testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "TRANSPOSE", outputStr, 0);
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "TRANSPOSE", outputStr);
 }

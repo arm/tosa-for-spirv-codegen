@@ -22,13 +22,20 @@ TEST(TESTUTILS, ModuleComparator)
     auto module0 = CreateModule(TOSAVersion{});
     auto graph0 = Graph(module0);
 
-    const auto input0 = graph0.AddInput(Tensor(DataType::int8_t, std::vector<unsigned int>{1, 1, 1, 1}), 0);
-    const auto kernel = Attribute({1, 1}, DataType::int32_t);
-    const auto stride = Attribute({1, 1}, DataType::int32_t);
-    const auto pad = Attribute({1, 1, 1, 1}, DataType::int32_t);
-    const auto outputShape = Tensor(DataType::int8_t, std::vector<unsigned int>{1, 1, 1, 1});
+    auto input0 = graph0.AddInput(Tensor(DataType::int8_t, std::vector<unsigned int>{1, 1, 1, 1}), 0);
 
-    const auto out0 = graph0.AddMaxPool2dOperator(input0, kernel, stride, pad, outputShape);
+    auto kernel = Attribute({1, 1}, DataType::int32_t);
+
+    auto stride = Attribute({1, 1}, DataType::int32_t);
+
+    auto pad = Attribute({1, 1, 1, 1}, DataType::int32_t);
+
+    auto nan_mode = Attribute({1}, DataType::int32_t);
+
+    auto outputShape = Tensor(DataType::int8_t, std::vector<unsigned int>{1, 1, 1, 1});
+
+    const auto out0 = graph0.AddMaxPool2dOperator(input0, kernel, stride, pad, nan_mode, outputShape);
+
     graph0.AddOutput(out0, 0);
     graph0.FinalizeGraph();
     const auto diff0 = CompareModules(module0, module0);
@@ -38,7 +45,8 @@ TEST(TESTUTILS, ModuleComparator)
     auto graph1 = Graph(module1);
     const auto input1 = graph1.AddInput(Tensor(DataType::int8_t, std::vector<unsigned int>{1, 1, 1, 2}), 0);
 
-    const auto out1 = graph1.AddMaxPool2dOperator(input1, kernel, stride, pad, outputShape);
+    const auto out1 = graph1.AddMaxPool2dOperator(input1, kernel, stride, pad, nan_mode, outputShape);
+
     graph1.AddOutput(out1, 0);
     graph1.FinalizeGraph();
 

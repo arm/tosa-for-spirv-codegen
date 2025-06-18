@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// THIS FILE IS GENERATED WITH TOSA 0.80.0.
+// THIS FILE IS GENERATED WITH TOSA 1.0.0.
 // See tosa2spirv/python/code_generator.py and README
 
 #include <AssemblyUtils.hpp>
@@ -21,12 +21,13 @@ TEST(TOSA2SPIRV_LAYERS, Reverse)
     auto module = CreateModule(tosa2spirv::TOSAVersion{});
     auto graph = Graph(module);
 
-    auto input = graph.AddInput(Tensor(DataType::bool_t, std::vector<unsigned int>{1, 1, 1, 1}), 0);
+    auto input1 = graph.AddInput(Tensor(DataType::bool_t, std::vector<unsigned int>{1, 1, 1, 1}), 0);
 
     auto axis = Attribute({1}, DataType::int32_t);
+
     auto output = Tensor(DataType::bool_t, std::vector<unsigned int>{1, 1, 1, 1});
 
-    const auto res = graph.AddReverseOperator(input, axis, output);
+    const auto res = graph.AddReverseOperator(input1, axis, output);
     graph.AddOutput(res, 0);
     graph.FinalizeGraph();
 
@@ -34,6 +35,7 @@ TEST(TOSA2SPIRV_LAYERS, Reverse)
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "REVERSE", outputStr);
+
     testutils::CheckConstant(DataType::int32_t, "REVERSE", outputStr, 1, 0);
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "REVERSE", outputStr);
 
@@ -42,6 +44,7 @@ TEST(TOSA2SPIRV_LAYERS, Reverse)
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "REVERSE", outputStr);
+
     testutils::CheckConstant(DataType::int32_t, "REVERSE", outputStr, 1, 0);
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "REVERSE", outputStr);
 }

@@ -16,13 +16,21 @@
 namespace testutils
 {
 
-std::string ExpandValues(const std::vector<int>& values)
+std::string ExpandValues(const std::vector<int>& values, const std::string& dataType)
 {
     std::string result;
 
     for (const int i : values)
     {
-        result += "%uint_" + std::to_string(i) + ' ';
+        if (dataType == "bool")
+        {
+            std::string str = (i == 1) ? "true" : "false";
+            result += "%" + str + ' ';
+        }
+        else
+        {
+            result += "%" + dataType + "_" + std::to_string(i) + ' ';
+        }
     }
 
     return result;
@@ -370,7 +378,8 @@ void CheckOutputTensor(const std::vector<int>& values,
 void CheckConstCompositeTensor(const std::vector<int>& values,
                                const std::string& instruction,
                                const std::string& goldenSPIRV,
-                               const int index)
+                               const int index,
+                               const std::string& dataType)
 {
     // Parse the golden spir-v, find the instruction, then split out its arguments for later reference
 
@@ -423,7 +432,7 @@ void CheckConstCompositeTensor(const std::vector<int>& values,
     {
         check = R"(
         CHECK: )" +
-                args[index] + R"( = OpConstantCompositeReplicateEXT{{.*}})" + ExpandValues({values[0]}) + R"(
+                args[index] + R"( = OpConstantCompositeReplicateEXT{{.*}})" + ExpandValues({values[0]}, dataType) + R"(
         )";
     }
     else
@@ -442,13 +451,17 @@ void CheckConstCompositeTensor(const std::vector<int>& values,
 void CheckGraphConstant(const std::vector<int>& values,
                         DataType dataType,
                         const std::string& instruction,
-                        const std::string& goldenSPIRV)
+                        const std::string& goldenSPIRV,
+                        const int index,
+                        const int identifier)
 {
     const std::string check = CreateEffceeCheckFromDataType(dataType) + R"(
-        CHECK:      [[TENSOR:%\w+]] = OpTypeTensorARM [[DATATYPE]] {{%\w+}} {{%\w+}}
-        CHECK: [[GRAPH_CONST:%\w+]] = OpGraphConstantARM [[TENSOR]]
+        CHECK:      [[TENSOR:%\w+]] = OpTypeTensorARM [[DATATYPE]] %uint_)" +
+                              std::to_string(values.size()) + R"( {{%\w+}}
+        CHECK: [[GRAPH_CONST:%\w+]] = OpGraphConstantARM [[TENSOR]] )" +
+                              std::to_string(identifier) + R"(
         CHECK:                        )" +
-                              instruction + R"({{.*}}[[GRAPH_CONST]]
+                              instruction + R"( )" + AddSpacers(index) + R"({{.*}}[[GRAPH_CONST]]
     )";
 
     auto result = effcee::Match(goldenSPIRV, check);
@@ -493,8 +506,7 @@ void CheckBoolConstant(DataType dataType,
     const std::string check = CreateEffceeCheckFromDataType(dataType) + R"(
         CHECK: )" + flagStr + R"( = OpConstant{{True|False}} [[DATATYPE]]
         CHECK:                   )" +
-                              instruction + R"( )" + AddSpacers(index) + flagStr; //+ R"(
-    //)";
+                              instruction + R"( )" + AddSpacers(index) + flagStr;
 
     auto result = effcee::Match(goldenSPIRV, check);
 

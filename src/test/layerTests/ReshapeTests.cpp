@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// THIS FILE IS GENERATED WITH TOSA 0.80.0.
+// THIS FILE IS GENERATED WITH TOSA 1.0.0.
 // See tosa2spirv/python/code_generator.py and README
 
 #include <AssemblyUtils.hpp>
@@ -23,7 +23,9 @@ TEST(TOSA2SPIRV_LAYERS, Reshape)
 
     auto input1 = graph.AddInput(Tensor(DataType::bool_t, std::vector<unsigned int>{1, 1, 1, 1}), 0);
 
-    auto shape = Attribute({1, 1, 1, 1}, DataType::int32_t);
+    auto shape_attr = Attribute({1, 1, 1, 1}, DataType::int32_t);
+    auto shape = graph.AddTensorConstant(shape_attr);
+
     auto output = Tensor(DataType::bool_t, std::vector<unsigned int>{1, 1, 1, 1});
 
     const auto res = graph.AddReshapeOperator(input1, shape, output);
@@ -34,7 +36,9 @@ TEST(TOSA2SPIRV_LAYERS, Reshape)
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "RESHAPE", outputStr);
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "RESHAPE", outputStr, 1);
+
+    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "RESHAPE", outputStr, 1, "uint");
+
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "RESHAPE", outputStr);
 
     // Write binary a second time to ensure IDs remain consistent.
@@ -42,6 +46,8 @@ TEST(TOSA2SPIRV_LAYERS, Reshape)
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "RESHAPE", outputStr);
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "RESHAPE", outputStr, 1);
+
+    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "RESHAPE", outputStr, 1, "uint");
+
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "RESHAPE", outputStr);
 }

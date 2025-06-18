@@ -7,7 +7,7 @@
 
 #include <Instruction.hpp>
 
-#include <spirv/unified1/TOSA.000080.2.h>
+#include <spirv/unified1/TOSA.001000.1.h>
 #include <spirv/unified1/spirv.hpp>
 #include <string>
 

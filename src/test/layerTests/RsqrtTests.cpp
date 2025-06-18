@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// THIS FILE IS GENERATED WITH TOSA 0.80.0.
+// THIS FILE IS GENERATED WITH TOSA 1.0.0.
 // See tosa2spirv/python/code_generator.py and README
 
 #include <AssemblyUtils.hpp>

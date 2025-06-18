@@ -15,16 +15,16 @@ target_include_directories(tosa2spirv_generator_unittests
                            $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/external>)
 
 target_include_directories(tosa2spirv_generator_unittests
-                           PRIVATE
-                           ${GOOGLETEST_PATH}/googletest/include
-                           ${SERIALIZATION_LIB_SOURCE_PATH}/include
-                           ${SERIALIZATION_LIB_SOURCE_PATH}/third_party/half/include
-                           ${SERIALIZATION_LIB_SOURCE_PATH}/third_party/flatbuffers/include
-                           ${SPIRV_HEADERS_SOURCE_PATH}/include
-                           ${SPIRV_TOOLS_SOURCE_PATH}/include
-                           ${VGF_ENCODER_PATH}/include
-                           ${NLOHMANN_PATH}/single_include
-                           ${VGF_ENCODER_PATH}/vgf_dump/include)
+        PRIVATE
+        ${GOOGLETEST_PATH}/googletest/include
+        ${SERIALIZATION_LIB_SOURCE_PATH}/include
+        ${SERIALIZATION_LIB_SOURCE_PATH}/third_party/half/include
+        ${FLATBUFFERS_SOURCE_PATH}/include
+        ${SPIRV_HEADERS_SOURCE_PATH}/include
+        ${SPIRV_TOOLS_SOURCE_PATH}/include
+        ${VGF_ENCODER_PATH}/include
+        ${NLOHMANN_PATH}/single_include
+        ${VGF_ENCODER_PATH}/vgf_dump/include)
 
 # Link unittests and libstatic_vgf_dump.a to enable use of the VGF encoder class.
 set(VGF_DUMP_LIBRARY libstatic_vgf_dump.a)

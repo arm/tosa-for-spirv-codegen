@@ -1,81 +1,47 @@
 {
   "version": {
-    "_major": 0,
-    "_minor": 80,
-    "_patch": 1,
-    "_draft": false
+    "_major": 1,
+    "_minor": 0,
+    "_patch": 0
   },
   "regions": [
     {
       "name": "main",
       "blocks": [
         {
-          "name": "main",
+          "name": "max_pool2d",
           "operators": [
             {
               "op": "MAX_POOL2D",
-              "attribute_type": "PoolAttribute",
+              "attribute_type": "MaxPool2dAttribute",
               "attribute": {
-                "pad": [
-                  0,
-                  0,
-                  0,
-                  0
-                ],
-                "kernel": [
-                  2,
-                  2
-                ],
-                "stride": [
-                  2,
-                  2
-                ],
-                "accum_dtype": "INT8"
+                "kernel": [2, 2],
+                "stride": [2, 2],
+                "pad": [1, 1, 1, 1],
+                "nan_mode": "PROPAGATE"
               },
-              "inputs": [
-                "input_1"
-              ],
-              "outputs": [
-                "output0_2"
-              ]
+              "inputs": ["input1"],
+              "outputs": ["output1"]
             }
           ],
           "tensors": [
             {
-              "name": "input_1",
-              "shape": [
-                1,
-                16,
-                16,
-                16
-              ],
+              "name": "input1",
+              "shape": [1, 1, 4, 4],
               "type": "INT8",
-              "data": [
-
-              ],
+              "data": [],
               "variable_name": ""
             },
             {
-              "name": "output0_2",
-              "shape": [
-                1,
-                8,
-                8,
-                16
-              ],
+              "name": "output1",
+              "shape": [1, 1, 3, 3],
               "type": "INT8",
-              "data": [
-
-              ],
+              "data": [],
               "variable_name": ""
             }
           ],
-          "inputs": [
-            "input_1"
-          ],
-          "outputs": [
-            "output0_2"
-          ]
+          "inputs": ["input1"],
+          "outputs": ["output1"]
         }
       ]
     }

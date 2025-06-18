@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// THIS FILE IS GENERATED WITH TOSA 0.80.0.
+// THIS FILE IS GENERATED WITH TOSA 1.0.0.
 // See tosa2spirv/python/code_generator.py and README
 
 #include <AssemblyUtils.hpp>
@@ -23,8 +23,12 @@ TEST(TOSA2SPIRV_LAYERS, Negate)
 
     auto input1 = graph.AddInput(Tensor(DataType::int8_t, std::vector<unsigned int>{1, 1, 1, 1}), 0);
 
-    auto input1_zp = Attribute({1}, DataType::int8_t);
-    auto output_zp = Attribute({1}, DataType::int8_t);
+    auto input1_zp_attr = Attribute({1, 1, 1, 1}, DataType::int8_t);
+    auto input1_zp = graph.AddTensorConstant(input1_zp_attr);
+
+    auto output_zp_attr = Attribute({1, 1, 1, 1}, DataType::int8_t);
+    auto output_zp = graph.AddTensorConstant(output_zp_attr);
+
     auto output = Tensor(DataType::int8_t, std::vector<unsigned int>{1, 1, 1, 1});
 
     const auto res = graph.AddNegateOperator(input1, input1_zp, output_zp, output);
@@ -35,8 +39,11 @@ TEST(TOSA2SPIRV_LAYERS, Negate)
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "NEGATE", outputStr);
-    testutils::CheckConstant(DataType::int8_t, "NEGATE", outputStr, 1, 0);
-    testutils::CheckConstant(DataType::int8_t, "NEGATE", outputStr, 1, 1);
+
+    testutils::CheckConstCompositeTensor({1}, "NEGATE", outputStr, 1, "uchar");
+
+    testutils::CheckConstCompositeTensor({1}, "NEGATE", outputStr, 2, "uchar");
+
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "NEGATE", outputStr);
 
     // Write binary a second time to ensure IDs remain consistent.
@@ -44,7 +51,10 @@ TEST(TOSA2SPIRV_LAYERS, Negate)
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "NEGATE", outputStr);
-    testutils::CheckConstant(DataType::int8_t, "NEGATE", outputStr, 1, 0);
-    testutils::CheckConstant(DataType::int8_t, "NEGATE", outputStr, 1, 1);
+
+    testutils::CheckConstCompositeTensor({1}, "NEGATE", outputStr, 1, "uchar");
+
+    testutils::CheckConstCompositeTensor({1}, "NEGATE", outputStr, 2, "uchar");
+
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "NEGATE", outputStr);
 }

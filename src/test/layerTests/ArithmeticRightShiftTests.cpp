@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// THIS FILE IS GENERATED WITH TOSA 0.80.0.
+// THIS FILE IS GENERATED WITH TOSA 1.0.0.
 // See tosa2spirv/python/code_generator.py and README
 
 #include <AssemblyUtils.hpp>
@@ -26,6 +26,7 @@ TEST(TOSA2SPIRV_LAYERS, ArithmeticRightShift)
     auto input2 = graph.AddInput(Tensor(DataType::int8_t, std::vector<unsigned int>{1, 1, 1, 1}), 0);
 
     auto round = Attribute({1}, DataType::bool_t);
+
     auto output = Tensor(DataType::int8_t, std::vector<unsigned int>{1, 1, 1, 1});
 
     const auto res = graph.AddArithmeticRightShiftOperator(input1, input2, round, output);
@@ -37,7 +38,8 @@ TEST(TOSA2SPIRV_LAYERS, ArithmeticRightShift)
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr);
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr);
-    testutils::CheckBoolConstant(DataType::bool_t, "ARITHMETIC_RIGHT_SHIFT", outputStr, true, 0);
+
+    testutils::CheckBoolConstant(DataType::bool_t, "ARITHMETIC_RIGHT_SHIFT", outputStr, 1, 0);
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr);
 
     // Write binary a second time to ensure IDs remain consistent.
@@ -46,6 +48,7 @@ TEST(TOSA2SPIRV_LAYERS, ArithmeticRightShift)
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr);
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr);
-    testutils::CheckBoolConstant(DataType::bool_t, "ARITHMETIC_RIGHT_SHIFT", outputStr, true, 0);
+
+    testutils::CheckBoolConstant(DataType::bool_t, "ARITHMETIC_RIGHT_SHIFT", outputStr, 1, 0);
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr);
 }

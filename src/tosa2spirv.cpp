@@ -41,7 +41,8 @@ std::shared_ptr<Module> CreateModule(TOSAVersion version)
     module->EmplaceInstruction(OpExtension, {Operand{"SPV_ARM_tensors"}});
     module->EmplaceInstruction(OpExtension, {Operand{"SPV_EXT_replicated_composites"}});
 
-    module->EmplaceInstruction(OpExtInstImport, {RESID, Operand{"TOSA.000080.2"}});
+    const std::string versionStr = "TOSA.001000.1";
+    module->EmplaceInstruction(OpExtInstImport, {RESID, Operand{versionStr}});
 
     module->EmplaceInstruction(OpMemoryModel, {Operand(AddressingModelLogical), Operand(MemoryModelVulkan)});
 

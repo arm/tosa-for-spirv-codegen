@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// THIS FILE IS GENERATED WITH TOSA 0.80.0. DO NOT EDIT!
+// THIS FILE IS GENERATED WITH TOSA 1.0.0. DO NOT EDIT!
 // See tosa2spirv/python/code_generator.py and README
 
 #include <AssemblyUtils.hpp>
@@ -17,22 +17,32 @@ using namespace tosa2spirv::parsers;
 TEST(TOSA2SPIRV_PARSER, Cast)
 {
     // Create Tensors
+    std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
+    std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
     std::string inputName = "input";
     std::string outputName = "output";
 
     std::vector<int32_t> inputShape = {1, 1, 1, 1};
     std::vector<int32_t> outputShape = {1, 1, 1, 1};
 
-    auto* inputTensor = new TosaSerializationTensor(inputName, inputShape, DType::DType_BOOL, {});
-    auto* outputTensor = new TosaSerializationTensor(outputName, outputShape, DType::DType_INT8, {});
+    auto inputTensor =
+        std::make_unique<TosaSerializationTensor>(inputName, inputShape, DType::DType_BOOL, std::vector<uint8_t>{});
+    tensors.push_back(std::move(inputTensor));
+    auto outputTensor =
+        std::make_unique<TosaSerializationTensor>(outputName, outputShape, DType::DType_INT8, std::vector<uint8_t>{});
+    tensors.push_back(std::move(outputTensor));
 
     // Create Operator
-    auto op =
-        new tosa::TosaSerializationOperator(Op::Op_CAST, Attribute::Attribute_NONE, nullptr, {inputName}, {outputName});
+    auto op = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CAST,
+                                                                Attribute::Attribute_NONE,
+                                                                nullptr,
+                                                                std::vector<std::string>{inputName},
+                                                                std::vector<std::string>{outputName});
+    ops.push_back(std::move(op));
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("cast", "main", {op}, {inputTensor, outputTensor}, {inputName}, {outputName});
+    TosaSerializationBasicBlock block("cast", "main", std::move(ops), std::move(tensors), {inputName}, {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
@@ -44,59 +54,119 @@ TEST(TOSA2SPIRV_PARSER, Cast)
 
 TEST(TOSA2SPIRV_PARSER, Rescale)
 {
-    int8_t input_zp = 1;
-    int8_t output_zp = 1;
-    std::vector<int32_t> multiplier = {1};
-    std::vector<int32_t> shift = {1};
     bool scale32 = true;
-    bool double_round = true;
+    int32_t rounding_mode = 1;
     bool per_channel = true;
     bool input_unsigned = true;
     bool output_unsigned = true;
     // Create Attribute
-    TosaRescaleAttribute attribute(input_zp,
-                                   output_zp,
-                                   multiplier,
-                                   shift,
-                                   scale32,
-                                   double_round,
+    TosaRescaleAttribute attribute(scale32,
+                                   static_cast<const RoundingMode>(rounding_mode),
                                    per_channel,
                                    input_unsigned,
                                    output_unsigned);
 
     // Create Tensors
+    std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
+    std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
     std::string inputName = "input";
+    std::string multiplierName = "multiplier";
+    std::string shiftName = "shift";
+    std::string input_zpName = "input_zp";
+    std::string output_zpName = "output_zp";
     std::string outputName = "output";
 
     std::vector<int32_t> inputShape = {1, 1, 1, 1};
+    std::vector<int32_t> multiplierShape = {1};
+    std::vector<int32_t> shiftShape = {1};
+    std::vector<int32_t> input_zpShape = {1};
+    std::vector<int32_t> output_zpShape = {1};
     std::vector<int32_t> outputShape = {1, 1, 1, 1};
 
-    auto* inputTensor = new TosaSerializationTensor(inputName, inputShape, DType::DType_INT8, {});
-    auto* outputTensor = new TosaSerializationTensor(outputName, outputShape, DType::DType_INT8, {});
+    auto inputTensor =
+        std::make_unique<TosaSerializationTensor>(inputName, inputShape, DType::DType_INT8, std::vector<uint8_t>{});
+    tensors.push_back(std::move(inputTensor));
+    auto multiplierTensor = std::make_unique<TosaSerializationTensor>(multiplierName,
+                                                                      multiplierShape,
+                                                                      DType::DType_INT32,
+                                                                      std::vector<uint8_t>{{0, 0, 0, 1}});
+    tensors.push_back(std::move(multiplierTensor));
+    auto multiplierOp = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST,
+                                                                          Attribute::Attribute_NONE,
+                                                                          nullptr,
+                                                                          std::vector<std::string>{},
+                                                                          std::vector<std::string>{multiplierName});
+    ops.push_back(std::move(multiplierOp));
+    auto shiftTensor =
+        std::make_unique<TosaSerializationTensor>(shiftName, shiftShape, DType::DType_INT8, std::vector<uint8_t>{1});
+    tensors.push_back(std::move(shiftTensor));
+    auto shiftOp = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST,
+                                                                     Attribute::Attribute_NONE,
+                                                                     nullptr,
+                                                                     std::vector<std::string>{},
+                                                                     std::vector<std::string>{shiftName});
+    ops.push_back(std::move(shiftOp));
+    auto input_zpTensor = std::make_unique<TosaSerializationTensor>(input_zpName,
+                                                                    input_zpShape,
+                                                                    DType::DType_INT8,
+                                                                    std::vector<uint8_t>{1});
+    tensors.push_back(std::move(input_zpTensor));
+    auto input_zpOp = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST,
+                                                                        Attribute::Attribute_NONE,
+                                                                        nullptr,
+                                                                        std::vector<std::string>{},
+                                                                        std::vector<std::string>{input_zpName});
+    ops.push_back(std::move(input_zpOp));
+    auto output_zpTensor = std::make_unique<TosaSerializationTensor>(output_zpName,
+                                                                     output_zpShape,
+                                                                     DType::DType_INT8,
+                                                                     std::vector<uint8_t>{1});
+    tensors.push_back(std::move(output_zpTensor));
+    auto output_zpOp = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST,
+                                                                         Attribute::Attribute_NONE,
+                                                                         nullptr,
+                                                                         std::vector<std::string>{},
+                                                                         std::vector<std::string>{output_zpName});
+    ops.push_back(std::move(output_zpOp));
+    auto outputTensor =
+        std::make_unique<TosaSerializationTensor>(outputName, outputShape, DType::DType_INT8, std::vector<uint8_t>{});
+    tensors.push_back(std::move(outputTensor));
 
     // Create Operator
-    auto op = new tosa::TosaSerializationOperator(Op::Op_RESCALE,
-                                                  Attribute::Attribute_RescaleAttribute,
-                                                  &attribute,
-                                                  {inputName},
-                                                  {outputName});
+    auto op = std::make_unique<tosa::TosaSerializationOperator>(
+        Op::Op_RESCALE,
+        Attribute::Attribute_RescaleAttribute,
+        &attribute,
+        std::vector<std::string>{inputName, multiplierName, shiftName, input_zpName, output_zpName},
+        std::vector<std::string>{outputName});
+    ops.push_back(std::move(op));
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("rescale", "main", {op}, {inputTensor, outputTensor}, {inputName}, {outputName});
+    TosaSerializationBasicBlock block("rescale", "main", std::move(ops), std::move(tensors), {inputName}, {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "RESCALE", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "RESCALE", outputStr);
-    testutils::CheckConstant(DataType::int8_t, "RESCALE", outputStr, 1, 0);
-    testutils::CheckConstant(DataType::int8_t, "RESCALE", outputStr, 1, 1);
 
-    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, true, 4);
-    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, true, 5);
-    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, true, 6);
-    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, true, 7);
-    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, true, 8);
+    testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 6, "uint");
+
+    testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 7, "uchar");
+
+    testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 8, "uchar");
+
+    testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 9, "uchar");
+
+    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 0);
+
+    testutils::CheckConstant(DataType::int32_t, "RESCALE", outputStr, 1, 1);
+
+    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 2);
+
+    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 3);
+
+    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 4);
+    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "RESCALE", outputStr);
 }

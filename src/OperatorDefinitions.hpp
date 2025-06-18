@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <spirv/unified1/TOSA.000080.2.h>
+#include <spirv/unified1/TOSA.001000.1.h>
 
 namespace tosa2spirv::tosa
 {
@@ -25,7 +25,7 @@ enum class Category
     Scalar,
     // Tensor describes the shape of another tensor. Fixed shape of {n},
     // n being the number of dimensions of the described tensor
-    Shaped,
+    Shape,
     // List of n homogenous tensors
     TensorList,
     // Tensor representing a tosa graph

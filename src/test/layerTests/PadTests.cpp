@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// THIS FILE IS GENERATED WITH TOSA 0.80.0.
+// THIS FILE IS GENERATED WITH TOSA 1.0.0.
 // See tosa2spirv/python/code_generator.py and README
 
 #include <AssemblyUtils.hpp>
@@ -23,11 +23,12 @@ TEST(TOSA2SPIRV_LAYERS, Pad)
 
     auto input1 = graph.AddInput(Tensor(DataType::bool_t, std::vector<unsigned int>{1, 1, 1, 1}), 0);
 
-    auto paddingTensor = Tensor(DataType::int32_t, {1, 1, 1, 1});
-    const auto paddingConstant = graph.AddGraphConstant(paddingTensor);
-    auto padding = Attribute(paddingConstant);
+    auto padding_attr = Attribute({1, 1, 1, 1}, DataType::int32_t);
+    auto padding = graph.AddTensorConstant(padding_attr);
 
-    auto pad_const = Attribute({1}, DataType::bool_t);
+    auto pad_const_attr = Attribute({1, 1, 1, 1}, DataType::bool_t);
+    auto pad_const = graph.AddTensorConstant(pad_const_attr);
+
     auto output = Tensor(DataType::bool_t, std::vector<unsigned int>{1, 1, 1, 1});
 
     const auto res = graph.AddPadOperator(input1, padding, pad_const, output);
@@ -38,7 +39,11 @@ TEST(TOSA2SPIRV_LAYERS, Pad)
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "PAD", outputStr);
-    testutils::CheckBoolConstant(DataType::bool_t, "PAD", outputStr, true, 0);
+
+    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "PAD", outputStr, 1, "uint");
+
+    testutils::CheckConstCompositeTensor({1}, "PAD", outputStr, 2, "bool");
+
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "PAD", outputStr);
 
     // Write binary a second time to ensure IDs remain consistent.
@@ -46,6 +51,10 @@ TEST(TOSA2SPIRV_LAYERS, Pad)
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "PAD", outputStr);
-    testutils::CheckBoolConstant(DataType::bool_t, "PAD", outputStr, true, 0);
+
+    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "PAD", outputStr, 1, "uint");
+
+    testutils::CheckConstCompositeTensor({1}, "PAD", outputStr, 2, "bool");
+
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "PAD", outputStr);
 }

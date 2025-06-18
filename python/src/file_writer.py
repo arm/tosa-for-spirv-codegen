@@ -31,7 +31,7 @@ class FileWriter:
 
         if start_line_num == 0:
             raise Exception(
-                "Could not find generated code start of generated code section in"
+                "Could not find generated code start of generated code section in: "
                 + file_dir
                 + "\n"
                 "Start of generated code section is identified by string: \n"

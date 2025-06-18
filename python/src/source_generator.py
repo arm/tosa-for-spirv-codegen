@@ -9,8 +9,8 @@ import sys
 
 # Add tosa.py directory to paths python searches for modules
 sys.path.append("./external/tosa_specification/tools")
-# Add tosa_spirv.py directory to paths python searches for modules
-sys.path.append("./external/ngp-runtime/scripts")
+sys.path.append('./external/ngp-runtime/scripts/tosaspv-1.0')
+
 import tosa
 import tosa_spirv
 
@@ -23,6 +23,7 @@ class SourceGenerator:
 
         self.graph_header_path = "include/tosa/Graph.hpp"
         self.op_def_path = "src/OperatorDefinitions.cpp"
+        self.parser_utils_path = "parsers/src/ParserUtils.hpp"
         self.tosa_operator_enum_path = "include/tosa/OperatorEnum.hpp"
         self.spec = tosa.TOSASpec("./external/tosa_specification/tosa.xml")
 
@@ -44,8 +45,10 @@ class SourceGenerator:
             generate_add_operator_declare(op, file)
             generate_add_operator_body(op, file)
 
-    def generate_op_enum_map(self):
-        file = FileWriter(self.op_def_path, "OPERATOR ENUM MAP SECTION BEGIN", "OPERATOR ENUM MAP SECTION END")
+    def generate_op_name_map(self):
+        file = FileWriter(self.op_def_path,
+                        "OPERATOR ENUM MAP SECTION BEGIN",
+                         "OPERATOR ENUM MAP SECTION END")
         print("[Code Generator] Generating {} ...".format(file.get_dir()))
 
         file.start_block()
@@ -57,11 +60,24 @@ class SourceGenerator:
             )
             file.end_block()
 
+    def generate_op_enum_map(self):
+        file = FileWriter(self.parser_utils_path,
+                        "OPERATOR NAME MAP SECTION BEGIN",
+                         "OPERATOR NAME MAP SECTION END")
+        print("[Code Generator] Generating {} ...".format(file.get_dir()))
+
+        file.start_block()
+        for op in self._operator_list:
+            file.start_block()
+            file.write("case Op_" + op.name + ":  return OperatorEnum::" + operator_name_to_pascal_case(op.name) + ";\n")
+            file.end_block()
+
     def generate_op_enums(self):
         file = FileWriter(self.tosa_operator_enum_path, "OPERATOR ENUM SECTION BEGIN", "OPERATOR ENUM SECTION END")
         print("[Code Generator] Generating {} ...".format(file.get_dir()))
 
-        file.write("switch (operatorType){")
+
+        file.write("enum class OperatorEnum" + "\n{\n")
         for name in self._operator_name_list:
             file.start_block()
             file.write(name + ",\n")
@@ -119,8 +135,8 @@ def generate_operator_definition(op):
 
         category = tosa_spirv.TOSAType.type_category_for_arg(arg)
         tensor_type = "Ranked"
-        if category == tosa_spirv.TOSAType.ARRAY:
-            tensor_type = "Array"
+        if category == tosa_spirv.TOSAType.SHAPE:
+            tensor_type = "Shape"
         elif category == tosa_spirv.TOSAType.ENUM:
             tensor_type = "Enum"
         elif category == tosa_spirv.TOSAType.SCALAR:

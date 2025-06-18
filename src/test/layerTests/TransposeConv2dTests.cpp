@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// THIS FILE IS GENERATED WITH TOSA 0.80.0.
+// THIS FILE IS GENERATED WITH TOSA 1.0.0.
 // See tosa2spirv/python/code_generator.py and README
 
 #include <AssemblyUtils.hpp>
@@ -27,22 +27,30 @@ TEST(TOSA2SPIRV_LAYERS, TransposeConv2d)
 
     auto bias = graph.AddInput(Tensor(DataType::int32_t, std::vector<unsigned int>{1, 1, 1, 1}), 0);
 
+    auto input_zp_attr = Attribute({1, 1, 1, 1}, DataType::int8_t);
+    auto input_zp = graph.AddTensorConstant(input_zp_attr);
+
+    auto weight_zp_attr = Attribute({1, 1, 1, 1}, DataType::int8_t);
+    auto weight_zp = graph.AddTensorConstant(weight_zp_attr);
+
     auto out_pad = Attribute({1, 1, 1, 1}, DataType::int32_t);
+
     auto stride = Attribute({1, 1}, DataType::int32_t);
-    auto out_shape = Attribute({1, 1, 1, 1}, DataType::int32_t);
-    auto input_zp = Attribute({1}, DataType::int8_t);
-    auto weight_zp = Attribute({1}, DataType::int8_t);
+
+    auto acc_type = Attribute({1}, DataType::int32_t);
+
     auto local_bound = Attribute({1}, DataType::bool_t);
+
     auto output = Tensor(DataType::int32_t, std::vector<unsigned int>{1, 1, 1, 1});
 
     const auto res = graph.AddTransposeConv2dOperator(input,
                                                       weight,
                                                       bias,
-                                                      out_pad,
-                                                      stride,
-                                                      out_shape,
                                                       input_zp,
                                                       weight_zp,
+                                                      out_pad,
+                                                      stride,
+                                                      acc_type,
                                                       local_bound,
                                                       output);
     graph.AddOutput(res, 0);
@@ -54,12 +62,18 @@ TEST(TOSA2SPIRV_LAYERS, TransposeConv2d)
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "TRANSPOSE_CONV2D", outputStr);
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "TRANSPOSE_CONV2D", outputStr);
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "TRANSPOSE_CONV2D", outputStr);
+
+    testutils::CheckConstCompositeTensor({1}, "TRANSPOSE_CONV2D", outputStr, 7, "uchar");
+
+    testutils::CheckConstCompositeTensor({1}, "TRANSPOSE_CONV2D", outputStr, 8, "uchar");
+
     testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "TRANSPOSE_CONV2D", outputStr, 0);
+
     testutils::CheckConstCompositeTensor({1, 1}, "TRANSPOSE_CONV2D", outputStr, 1);
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "TRANSPOSE_CONV2D", outputStr, 2);
-    testutils::CheckConstant(DataType::int8_t, "TRANSPOSE_CONV2D", outputStr, 1, 3);
-    testutils::CheckConstant(DataType::int8_t, "TRANSPOSE_CONV2D", outputStr, 1, 4);
-    testutils::CheckBoolConstant(DataType::bool_t, "TRANSPOSE_CONV2D", outputStr, true, 5);
+
+    testutils::CheckConstant(DataType::int32_t, "TRANSPOSE_CONV2D", outputStr, 1, 2);
+
+    testutils::CheckBoolConstant(DataType::bool_t, "TRANSPOSE_CONV2D", outputStr, 1, 3);
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "TRANSPOSE_CONV2D", outputStr);
 
     // Write binary a second time to ensure IDs remain consistent.
@@ -69,11 +83,17 @@ TEST(TOSA2SPIRV_LAYERS, TransposeConv2d)
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "TRANSPOSE_CONV2D", outputStr);
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "TRANSPOSE_CONV2D", outputStr);
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "TRANSPOSE_CONV2D", outputStr);
+
+    testutils::CheckConstCompositeTensor({1}, "TRANSPOSE_CONV2D", outputStr, 7, "uchar");
+
+    testutils::CheckConstCompositeTensor({1}, "TRANSPOSE_CONV2D", outputStr, 8, "uchar");
+
     testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "TRANSPOSE_CONV2D", outputStr, 0);
+
     testutils::CheckConstCompositeTensor({1, 1}, "TRANSPOSE_CONV2D", outputStr, 1);
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "TRANSPOSE_CONV2D", outputStr, 2);
-    testutils::CheckConstant(DataType::int8_t, "TRANSPOSE_CONV2D", outputStr, 1, 3);
-    testutils::CheckConstant(DataType::int8_t, "TRANSPOSE_CONV2D", outputStr, 1, 4);
-    testutils::CheckBoolConstant(DataType::bool_t, "TRANSPOSE_CONV2D", outputStr, true, 5);
+
+    testutils::CheckConstant(DataType::int32_t, "TRANSPOSE_CONV2D", outputStr, 1, 2);
+
+    testutils::CheckBoolConstant(DataType::bool_t, "TRANSPOSE_CONV2D", outputStr, 1, 3);
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "TRANSPOSE_CONV2D", outputStr);
 }

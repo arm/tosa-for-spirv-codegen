@@ -28,15 +28,16 @@ enum class DataType
     int8_t = 1,
     int16_t = 2,
     int32_t = 3,
-    uint8_t = 4,
-    uint16_t = 5,
-    uint32_t = 6,
-    int48_t = 7,
-    float16_t = 8,
-    float32_t = 9,
-    bfloat16_t = 10,
-    bool_t = 11,
-    null_t = 12,
+    int48_t = 4,
+    int64_t = 5,
+    uint8_t = 6,
+    uint16_t = 7,
+    uint32_t = 8,
+    float16_t = 9,
+    float32_t = 10,
+    bfloat16_t = 11,
+    bool_t = 12,
+    null_t = 13,
 };
 
 /// tosa2spirv's implementation of TOSA tensor.
@@ -147,8 +148,7 @@ class Attribute
               std::enable_if_t<std::is_arithmetic_v<std::decay_t<T>>, bool> = true>
     Attribute(std::initializer_list<T> data, const DataType dataType = DT, const Tensor::TensorShape& shape = {})
         : Attribute(std::vector(data), dataType, shape)
-    {
-    }
+        {}
 
     explicit Attribute(const ResId resId)
         : m_ResId(resId){};

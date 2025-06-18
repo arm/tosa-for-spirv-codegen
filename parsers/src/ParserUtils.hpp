@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// THIS FILE IS GENERATED WITH TOSA 0.80.0. DO NOT EDIT!}},
+// THIS FILE IS GENERATED WITH TOSA 1.0. DO NOT EDIT!
 // See tosa2spirv/python/source_generator.py and README
 
 #pragma once
@@ -26,11 +26,10 @@ inline DataType GetDataTypeFromDType(const DType dType)
         case DType_INT16: return DataType::int16_t;
         case DType_INT32: return DataType::int32_t;
         case DType_INT48: return DataType::int48_t;
-        case DType_UINT8: return DataType::uint8_t;
-        case DType_UINT16: return DataType::uint16_t;
         case DType_BF16: return DataType::bfloat16_t;
         case DType_FP16: return DataType::float16_t;
         case DType_FP32: return DataType::float32_t;
+        case DType_SHAPE: return DataType::int64_t;
         default:
             throw std::invalid_argument("ERROR: No Corresponding DataType for DType " +
                                         std::string(EnumNamesDType()[dType]) + ".");
@@ -105,8 +104,10 @@ inline std::vector<uint32_t> ConvertToUint32(const std::vector<uint8_t>& input, 
 {
     unsigned int paddingBytes = 0;
     unsigned int stepSize = 1;
+    auto increment = 4;
     switch (tensor.GetDataType())
     {
+        case DataType::bool_t:
         case DataType::int8_t:
         case DataType::uint8_t: paddingBytes = 3; break;
         case DataType::int16_t:
@@ -119,6 +120,10 @@ inline std::vector<uint32_t> ConvertToUint32(const std::vector<uint8_t>& input, 
         case DataType::int32_t:
         case DataType::uint32_t:
         case DataType::float32_t: stepSize = 4; break;
+        case DataType::int64_t:
+            stepSize = 8;
+            increment = 8;
+            break;
         default: break;
     }
 
@@ -137,7 +142,6 @@ inline std::vector<uint32_t> ConvertToUint32(const std::vector<uint8_t>& input, 
     }
 
     size_t i = 0;
-    const auto increment = 4;
     std::vector<uint32_t> output;
     while (i + increment <= paddedInput.size())
     {
@@ -187,35 +191,23 @@ inline std::vector<uint32_t> ConvertTensorShape(std::vector<int16_t> shape)
     return unsignedShape;
 }
 
-inline int32_t ConvertAvgPoolAccType(const TosaPoolAttribute& attribute)
-{
-    int32_t convertedAccSize = 0;
-    switch (attribute.accum_dtype())
-    {
-        case (DType_INT32): convertedAccSize = 0; break;
-        case (DType_FP16): convertedAccSize = 1; break;
-        case (DType_FP32): convertedAccSize = 2; break;
-        default: throw std::invalid_argument("TosaSerializationParser::ParseAvgPool2d(): accum_dtype not supported.");
-    }
-    return convertedAccSize;
-}
-
 inline OperatorEnum OperatorEnumMap(const Op op)
 {
     switch (op)
     {
-        case Op_ARGMAX: return OperatorEnum::Argmax;
+        // OPERATOR NAME MAP SECTION BEGIN
+        case Op_ARGMAX: return OperatorEnum::ArgMax;
         case Op_AVG_POOL2D: return OperatorEnum::AvgPool2d;
         case Op_CONV2D: return OperatorEnum::Conv2d;
         case Op_CONV3D: return OperatorEnum::Conv3d;
         case Op_DEPTHWISE_CONV2D: return OperatorEnum::DepthwiseConv2d;
         case Op_FFT2D: return OperatorEnum::Fft2d;
-        case Op_FULLY_CONNECTED: return OperatorEnum::FullyConnected;
         case Op_MATMUL: return OperatorEnum::Matmul;
         case Op_MAX_POOL2D: return OperatorEnum::MaxPool2d;
         case Op_RFFT2D: return OperatorEnum::Rfft2d;
         case Op_TRANSPOSE_CONV2D: return OperatorEnum::TransposeConv2d;
         case Op_CLAMP: return OperatorEnum::Clamp;
+        case Op_ERF: return OperatorEnum::Erf;
         case Op_SIGMOID: return OperatorEnum::Sigmoid;
         case Op_TANH: return OperatorEnum::Tanh;
         case Op_ADD: return OperatorEnum::Add;
@@ -223,7 +215,7 @@ inline OperatorEnum OperatorEnumMap(const Op op)
         case Op_BITWISE_AND: return OperatorEnum::BitwiseAnd;
         case Op_BITWISE_OR: return OperatorEnum::BitwiseOr;
         case Op_BITWISE_XOR: return OperatorEnum::BitwiseXor;
-        case Op_INTDIV: return OperatorEnum::Intdiv;
+        case Op_INTDIV: return OperatorEnum::IntDiv;
         case Op_LOGICAL_AND: return OperatorEnum::LogicalAnd;
         case Op_LOGICAL_LEFT_SHIFT: return OperatorEnum::LogicalLeftShift;
         case Op_LOGICAL_RIGHT_SHIFT: return OperatorEnum::LogicalRightShift;
@@ -239,6 +231,7 @@ inline OperatorEnum OperatorEnumMap(const Op op)
         case Op_BITWISE_NOT: return OperatorEnum::BitwiseNot;
         case Op_CEIL: return OperatorEnum::Ceil;
         case Op_CLZ: return OperatorEnum::Clz;
+        case Op_COS: return OperatorEnum::Cos;
         case Op_EXP: return OperatorEnum::Exp;
         case Op_FLOOR: return OperatorEnum::Floor;
         case Op_LOG: return OperatorEnum::Log;
@@ -246,6 +239,7 @@ inline OperatorEnum OperatorEnumMap(const Op op)
         case Op_NEGATE: return OperatorEnum::Negate;
         case Op_RECIPROCAL: return OperatorEnum::Reciprocal;
         case Op_RSQRT: return OperatorEnum::Rsqrt;
+        case Op_SIN: return OperatorEnum::Sin;
         case Op_SELECT: return OperatorEnum::Select;
         case Op_EQUAL: return OperatorEnum::Equal;
         case Op_GREATER: return OperatorEnum::Greater;
@@ -268,7 +262,7 @@ inline OperatorEnum OperatorEnumMap(const Op op)
         case Op_RESIZE: return OperatorEnum::Resize;
         case Op_CAST: return OperatorEnum::Cast;
         case Op_RESCALE: return OperatorEnum::Rescale;
-        case Op_ERF: return OperatorEnum::Erf;
+        // OPERATOR NAME MAP SECTION END
         default:
             std::cerr << "ERROR: Operator " << EnumNameOp(op) << " is currently unsupported" << std::endl;
             throw std::exception();

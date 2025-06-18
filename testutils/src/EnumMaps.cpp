@@ -121,7 +121,6 @@ static const std::unordered_map<std::string, TOSAInstructions>& getTosaInstructi
         tmp.emplace("CONV3D", TOSACONV3D);
         tmp.emplace("DEPTHWISE_CONV2D", TOSADEPTHWISE_CONV2D);
         tmp.emplace("FFT2D", TOSAFFT2D);
-        tmp.emplace("FULLY_CONNECTED", TOSAFULLY_CONNECTED);
         tmp.emplace("MATMUL", TOSAMATMUL);
         tmp.emplace("MAX_POOL2D", TOSAMAX_POOL2D);
         tmp.emplace("RFFT2D", TOSARFFT2D);
@@ -151,6 +150,7 @@ static const std::unordered_map<std::string, TOSAInstructions>& getTosaInstructi
         tmp.emplace("BITWISE_NOT", TOSABITWISE_NOT);
         tmp.emplace("CEIL", TOSACEIL);
         tmp.emplace("CLZ", TOSACLZ);
+        tmp.emplace("COS", TOSACOS);
         tmp.emplace("EXP", TOSAEXP);
         tmp.emplace("FLOOR", TOSAFLOOR);
         tmp.emplace("LOG", TOSALOG);
@@ -158,6 +158,7 @@ static const std::unordered_map<std::string, TOSAInstructions>& getTosaInstructi
         tmp.emplace("NEGATE", TOSANEGATE);
         tmp.emplace("RECIPROCAL", TOSARECIPROCAL);
         tmp.emplace("RSQRT", TOSARSQRT);
+        tmp.emplace("SIN", TOSASIN);
         tmp.emplace("SELECT", TOSASELECT);
         tmp.emplace("EQUAL", TOSAEQUAL);
         tmp.emplace("GREATER", TOSAGREATER);
@@ -170,7 +171,6 @@ static const std::unordered_map<std::string, TOSAInstructions>& getTosaInstructi
         tmp.emplace("REDUCE_SUM", TOSAREDUCE_SUM);
         tmp.emplace("CONCAT", TOSACONCAT);
         tmp.emplace("PAD", TOSAPAD);
-        tmp.emplace("DIM", TOSADIM);
         tmp.emplace("RESHAPE", TOSARESHAPE);
         tmp.emplace("REVERSE", TOSAREVERSE);
         tmp.emplace("SLICE", TOSASLICE);

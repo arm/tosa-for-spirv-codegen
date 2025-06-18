@@ -22,6 +22,7 @@ option(BUILD_UNITTESTS "Build UnitTests for tosa2spirv" ON)
 
 set(ARGPARSE_SOURCE_PATH ${CMAKE_SOURCE_DIR}/external/argparse CACHE PATH "")
 set(SERIALIZATION_LIB_SOURCE_PATH ${CMAKE_SOURCE_DIR}/external/serialization_lib CACHE PATH "")
+set(FLATBUFFERS_SOURCE_PATH ${CMAKE_SOURCE_DIR}/external/flatbuffers CACHE PATH "")
 set(SPIRV_TOOLS_SOURCE_PATH ${CMAKE_SOURCE_DIR}/external/SPIRV-Tools CACHE PATH "")
 set(SPIRV_HEADERS_SOURCE_PATH ${CMAKE_SOURCE_DIR}/external/SPIRV-Headers/include CACHE PATH "")
 set(GOOGLETEST_PATH ${CMAKE_SOURCE_DIR}/external/googletest CACHE PATH "")

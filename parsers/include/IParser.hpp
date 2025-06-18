@@ -36,7 +36,7 @@ class IParser
     protected:
     /// Protected constructor, this abstract class should only be initialized by derived class constructors.
     IParser()
-        : m_Version(TOSAVersion::v0_80)
+        : m_Version(TOSAVersion::v1_0)
     {
     }
 

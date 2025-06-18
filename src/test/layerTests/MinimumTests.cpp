@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// THIS FILE IS GENERATED WITH TOSA 0.80.0.
+// THIS FILE IS GENERATED WITH TOSA 1.0.0.
 // See tosa2spirv/python/code_generator.py and README
 
 #include <AssemblyUtils.hpp>
@@ -25,9 +25,11 @@ TEST(TOSA2SPIRV_LAYERS, Minimum)
 
     auto input2 = graph.AddInput(Tensor(DataType::int32_t, std::vector<unsigned int>{1, 1, 1, 1}), 0);
 
+    auto nan_mode = Attribute({1}, DataType::int32_t);
+
     auto output = Tensor(DataType::int32_t, std::vector<unsigned int>{1, 1, 1, 1});
 
-    const auto res = graph.AddMinimumOperator(input1, input2, output);
+    const auto res = graph.AddMinimumOperator(input1, input2, nan_mode, output);
     graph.AddOutput(res, 0);
     graph.FinalizeGraph();
 
@@ -36,6 +38,8 @@ TEST(TOSA2SPIRV_LAYERS, Minimum)
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "MINIMUM", outputStr);
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "MINIMUM", outputStr);
+
+    testutils::CheckConstant(DataType::int32_t, "MINIMUM", outputStr, 1, 0);
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "MINIMUM", outputStr);
 
     // Write binary a second time to ensure IDs remain consistent.
@@ -44,5 +48,7 @@ TEST(TOSA2SPIRV_LAYERS, Minimum)
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "MINIMUM", outputStr);
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "MINIMUM", outputStr);
+
+    testutils::CheckConstant(DataType::int32_t, "MINIMUM", outputStr, 1, 0);
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "MINIMUM", outputStr);
 }

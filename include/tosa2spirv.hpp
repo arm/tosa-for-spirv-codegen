@@ -20,7 +20,7 @@ class Module;
 /// Refer to https://www.mlplatform.org/tosa/roadmap.html
 enum class TOSAVersion
 {
-    v0_80
+    v1_0
 };
 
 /// Factory function creating a tosa2spirv Module

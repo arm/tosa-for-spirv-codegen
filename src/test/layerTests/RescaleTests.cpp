@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// THIS FILE IS GENERATED WITH TOSA 0.80.0.
+// THIS FILE IS GENERATED WITH TOSA 1.0.0.
 // See tosa2spirv/python/code_generator.py and README
 
 #include <AssemblyUtils.hpp>
@@ -23,35 +23,41 @@ TEST(TOSA2SPIRV_LAYERS, Rescale)
 
     auto input = graph.AddInput(Tensor(DataType::int8_t, std::vector<unsigned int>{1, 1, 1, 1}), 0);
 
-    auto output = Tensor(DataType::int8_t, std::vector<unsigned int>{1, 1, 1, 1});
+    auto multiplier_attr = Attribute({1}, DataType::int32_t);
+    auto multiplier = graph.AddTensorConstant(multiplier_attr);
 
-    auto input_zp = Attribute({1}, DataType::int8_t);
-    auto output_zp = Attribute({1}, DataType::int8_t);
-    auto multiplierTensor = Tensor(DataType::int32_t, {1});
-    const auto multiplierConstant = graph.AddGraphConstant(multiplierTensor);
-    auto multiplier = Attribute(multiplierConstant);
+    auto shift_attr = Attribute({1}, DataType::int8_t);
+    auto shift = graph.AddTensorConstant(shift_attr);
 
-    auto shiftTensor = Tensor(DataType::int8_t, {1});
-    const auto shiftConstant = graph.AddGraphConstant(shiftTensor);
-    auto shift = Attribute(shiftConstant);
+    auto input_zp_attr = Attribute({1, 1, 1, 1}, DataType::int8_t);
+    auto input_zp = graph.AddTensorConstant(input_zp_attr);
+
+    auto output_zp_attr = Attribute({1, 1, 1, 1}, DataType::int8_t);
+    auto output_zp = graph.AddTensorConstant(output_zp_attr);
 
     auto scale32 = Attribute({1}, DataType::bool_t);
-    auto double_round = Attribute({1}, DataType::bool_t);
+
+    auto rounding_mode = Attribute({1}, DataType::int32_t);
+
     auto per_channel = Attribute({1}, DataType::bool_t);
+
     auto input_unsigned = Attribute({1}, DataType::bool_t);
+
     auto output_unsigned = Attribute({1}, DataType::bool_t);
 
+    auto output = Tensor(DataType::int8_t, std::vector<unsigned int>{1, 1, 1, 1});
+
     const auto res = graph.AddRescaleOperator(input,
-                                              output,
-                                              input_zp,
-                                              output_zp,
                                               multiplier,
                                               shift,
+                                              input_zp,
+                                              output_zp,
                                               scale32,
-                                              double_round,
+                                              rounding_mode,
                                               per_channel,
                                               input_unsigned,
-                                              output_unsigned);
+                                              output_unsigned,
+                                              output);
     graph.AddOutput(res, 0);
     graph.FinalizeGraph();
 
@@ -59,28 +65,48 @@ TEST(TOSA2SPIRV_LAYERS, Rescale)
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "RESCALE", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "RESCALE", outputStr);
-    testutils::CheckConstant(DataType::int8_t, "RESCALE", outputStr, 1, 0);
-    testutils::CheckConstant(DataType::int8_t, "RESCALE", outputStr, 1, 1);
 
-    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, true, 4);
-    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, true, 5);
-    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, true, 6);
-    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, true, 7);
-    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, true, 8);
+    testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 6, "uint");
+
+    testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 7, "uchar");
+
+    testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 8, "uchar");
+
+    testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 9, "uchar");
+
+    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 0);
+
+    testutils::CheckConstant(DataType::int32_t, "RESCALE", outputStr, 1, 1);
+
+    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 2);
+
+    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 3);
+
+    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 4);
+    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "RESCALE", outputStr);
 
     // Write binary a second time to ensure IDs remain consistent.
     binary = tosa2spirv::WriteToBinary(module);
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "RESCALE", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "RESCALE", outputStr);
-    testutils::CheckConstant(DataType::int8_t, "RESCALE", outputStr, 1, 0);
-    testutils::CheckConstant(DataType::int8_t, "RESCALE", outputStr, 1, 1);
 
-    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, true, 4);
-    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, true, 5);
-    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, true, 6);
-    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, true, 7);
-    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, true, 8);
+    testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 6, "uint");
+
+    testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 7, "uchar");
+
+    testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 8, "uchar");
+
+    testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 9, "uchar");
+
+    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 0);
+
+    testutils::CheckConstant(DataType::int32_t, "RESCALE", outputStr, 1, 1);
+
+    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 2);
+
+    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 3);
+
+    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 4);
+    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "RESCALE", outputStr);
 }

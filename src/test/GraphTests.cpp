@@ -58,7 +58,7 @@ TEST(TOSA2SPIRV, InitialiseSpirvTools)
 
 TEST(TOSA2SPIRV, TestModuleInitialization)
 {
-    const auto module = CreateModule(TOSAVersion{});
+    const auto module = CreateModule(TOSAVersion::v1_0);
     EXPECT_TRUE(module);
 
     const auto binary = WriteToBinary(module);

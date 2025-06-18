@@ -110,12 +110,6 @@ int main(const int argc, char** argv)
 
     auto module = parser.GenerateSPIRVModule("main");
 
-    // Free tensor data after being parsed
-    for (auto* tensor : mainBlock->GetTensors())
-    {
-        tensor->SetData(std::vector<uint8_t>());
-    }
-
     if (!outputFile.empty())
     {
         // Write the companion file
@@ -191,4 +185,4 @@ void LoadGraph(TosaSerializationHandler& handler,
     }
 }
 
-} // namespace tosa2spirv::generator
+} // tosa2spirv::generator

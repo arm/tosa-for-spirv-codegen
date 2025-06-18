@@ -25,9 +25,9 @@ Operand CreateDataType(const DataType datatype, Module& module)
         case DataType::int16_t:
         case DataType::uint16_t: return module.EmplaceInstruction(OpTypeInt, {RESID, Operand{16U}, Operand{0U}});
         case DataType::int32_t:
-        case DataType::uint32_t: return module.EmplaceInstruction(OpTypeInt, {RESID, Operand{32U}, Operand{0U}});
+        case DataType::uint32_t:
+        case DataType::int64_t: return module.EmplaceInstruction(OpTypeInt, {RESID, Operand{32U}, Operand{0U}});
         case DataType::int48_t: return module.EmplaceInstruction(OpTypeInt, {RESID, Operand{64U}, Operand{0U}});
-
         case DataType::float16_t: return module.EmplaceInstruction(OpTypeFloat, {RESID, Operand{16U}});
         case DataType::float32_t: return module.EmplaceInstruction(OpTypeFloat, {RESID, Operand{32U}});
         case DataType::bfloat16_t: return module.EmplaceInstruction(OpTypeFloat, {RESID, Operand{16U}, Operand{2U}});
@@ -96,6 +96,34 @@ CreateConstantComposite(const std::vector<uint32_t>& array, const Operand& typeI
     return module.EmplaceInstruction(OpConstantComposite, operands);
 }
 
+Operand CreateConstantCompositeTyped(const std::vector<uint32_t>& array,
+                                     const Operand& typeId,
+                                     Module& module,
+                                     const DataType type)
+{
+    std::vector<Operand> operands{typeId, RESID};
+    const auto uniformValue =
+        std::all_of(array.cbegin(), array.cend(), [&](const uint32_t value) { return value == array[0]; });
+    if (uniformValue)
+    {
+        if (array.empty() || array[0] == 0)
+        {
+            return module.EmplaceInstruction(OpConstantNull, {typeId, RESID});
+        }
+
+        const auto constant = CreateConstant(array[0], type, module);
+        return module.EmplaceInstruction(OpConstantCompositeReplicateEXT, {typeId, RESID, constant});
+    }
+
+    const auto scalarType = CreateDataType(type, module);
+    for (const auto val : array)
+    {
+        // Create Constant value instruction for scalar value inside the vector e.g the 2 in {2,2}.
+        operands.push_back(module.EmplaceInstruction(OpConstant, {scalarType, RESID, Operand{val}}));
+    }
+    return module.EmplaceInstruction(OpConstantComposite, operands);
+}
+
 Operand CreateTensor(const Tensor& tensor, Module& module)
 {
     const Operand rankValue(static_cast<unsigned int>(tensor.GetTensorShape().size()));
@@ -114,7 +142,7 @@ Operand CreateAttribute(const Attribute& attribute, Module& module)
     {
         return CreateConstantCompositeDouble(attribute.GetData(), tensor, module);
     }
-    return CreateConstantComposite(attribute.GetData(), tensor, module);
+    return CreateConstantCompositeTyped(attribute.GetData(), tensor, module, attribute.GetTensor().GetDataType());
 }
 
 } // namespace tosa2spirv::spirv

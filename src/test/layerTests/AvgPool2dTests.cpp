@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// THIS FILE IS GENERATED WITH TOSA 0.80.0.
+// THIS FILE IS GENERATED WITH TOSA 1.0.0.
 // See tosa2spirv/python/code_generator.py and README
 
 #include <AssemblyUtils.hpp>
@@ -23,15 +23,23 @@ TEST(TOSA2SPIRV_LAYERS, AvgPool2d)
 
     auto input = graph.AddInput(Tensor(DataType::int8_t, std::vector<unsigned int>{1, 1, 1, 1}), 0);
 
+    auto input_zp_attr = Attribute({1, 1, 1, 1}, DataType::int8_t);
+    auto input_zp = graph.AddTensorConstant(input_zp_attr);
+
+    auto output_zp_attr = Attribute({1, 1, 1, 1}, DataType::int8_t);
+    auto output_zp = graph.AddTensorConstant(output_zp_attr);
+
     auto kernel = Attribute({1, 1}, DataType::int32_t);
+
     auto stride = Attribute({1, 1}, DataType::int32_t);
+
     auto pad = Attribute({1, 1, 1, 1}, DataType::int32_t);
-    auto acc_size = Attribute({1}, DataType::int32_t);
-    auto input_zp = Attribute({1}, DataType::int8_t);
-    auto output_zp = Attribute({1}, DataType::int8_t);
+
+    auto acc_type = Attribute({1}, DataType::int32_t);
+
     auto output = Tensor(DataType::int8_t, std::vector<unsigned int>{1, 1, 1, 1});
 
-    const auto res = graph.AddAvgPool2dOperator(input, kernel, stride, pad, acc_size, input_zp, output_zp, output);
+    const auto res = graph.AddAvgPool2dOperator(input, input_zp, output_zp, kernel, stride, pad, acc_type, output);
     graph.AddOutput(res, 0);
     graph.FinalizeGraph();
 
@@ -39,12 +47,18 @@ TEST(TOSA2SPIRV_LAYERS, AvgPool2d)
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "AVG_POOL2D", outputStr);
+
+    testutils::CheckConstCompositeTensor({1}, "AVG_POOL2D", outputStr, 5, "uchar");
+
+    testutils::CheckConstCompositeTensor({1}, "AVG_POOL2D", outputStr, 6, "uchar");
+
     testutils::CheckConstCompositeTensor({1, 1}, "AVG_POOL2D", outputStr, 0);
+
     testutils::CheckConstCompositeTensor({1, 1}, "AVG_POOL2D", outputStr, 1);
+
     testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "AVG_POOL2D", outputStr, 2);
+
     testutils::CheckConstant(DataType::int32_t, "AVG_POOL2D", outputStr, 1, 3);
-    testutils::CheckConstant(DataType::int8_t, "AVG_POOL2D", outputStr, 1, 4);
-    testutils::CheckConstant(DataType::int8_t, "AVG_POOL2D", outputStr, 1, 5);
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "AVG_POOL2D", outputStr);
 
     // Write binary a second time to ensure IDs remain consistent.
@@ -52,11 +66,17 @@ TEST(TOSA2SPIRV_LAYERS, AvgPool2d)
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "AVG_POOL2D", outputStr);
+
+    testutils::CheckConstCompositeTensor({1}, "AVG_POOL2D", outputStr, 5, "uchar");
+
+    testutils::CheckConstCompositeTensor({1}, "AVG_POOL2D", outputStr, 6, "uchar");
+
     testutils::CheckConstCompositeTensor({1, 1}, "AVG_POOL2D", outputStr, 0);
+
     testutils::CheckConstCompositeTensor({1, 1}, "AVG_POOL2D", outputStr, 1);
+
     testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "AVG_POOL2D", outputStr, 2);
+
     testutils::CheckConstant(DataType::int32_t, "AVG_POOL2D", outputStr, 1, 3);
-    testutils::CheckConstant(DataType::int8_t, "AVG_POOL2D", outputStr, 1, 4);
-    testutils::CheckConstant(DataType::int8_t, "AVG_POOL2D", outputStr, 1, 5);
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "AVG_POOL2D", outputStr);
 }

@@ -19,7 +19,7 @@ target_include_directories(tosa2spirvGenerator PRIVATE ${ARGPARSE_SOURCE_PATH}/i
 
 # Include headers for dependencies and sub dependencies of the TOSA Serialization Library
 target_include_directories(tosa2spirvGenerator PRIVATE ${SERIALIZATION_LIB_SOURCE_PATH}/include)
-target_include_directories(tosa2spirvGenerator PRIVATE ${SERIALIZATION_LIB_SOURCE_PATH}/third_party/flatbuffers/include)
+target_include_directories(tosa2spirvGenerator PRIVATE ${FLATBUFFERS_SOURCE_PATH}/include)
 target_include_directories(tosa2spirvGenerator PRIVATE ${SERIALIZATION_LIB_SOURCE_PATH}/third_party/half/include)
 
 # Include header for nlohman json header only library

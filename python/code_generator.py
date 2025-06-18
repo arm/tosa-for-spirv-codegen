@@ -28,8 +28,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-u",
         "--unit_test_enabled",
-        help="-u 1 (by default) to generate unit tests with unimplemented"
-             " exceptions to src/test/layerTests, -u 0 to disable",
+        help="-u 1 (by default) to generate unit tests, -u 0 to disable",
         default=1,
     )
     parser.add_argument(
@@ -49,8 +48,10 @@ if __name__ == "__main__":
 
     if int(args.definitions_enabled) == 1:
         code_generator.generate_op_names()
+        code_generator.generate_op_name_map()
         code_generator.generate_op_enum_map()
         code_generator.generate_op_definitions()
+        code_generator.generate_op_enums()
 
     xml_path = "./external/tosa_specification/tosa.xml"
     input_template_dir = "python/templates"

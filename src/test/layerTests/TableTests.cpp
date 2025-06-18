@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// THIS FILE IS GENERATED WITH TOSA 0.80.0.
+// THIS FILE IS GENERATED WITH TOSA 1.0.0.
 // See tosa2spirv/python/code_generator.py and README
 
 #include <AssemblyUtils.hpp>
@@ -21,15 +21,14 @@ TEST(TOSA2SPIRV_LAYERS, Table)
     auto module = CreateModule(tosa2spirv::TOSAVersion{});
     auto graph = Graph(module);
 
-    auto input = graph.AddInput(Tensor(DataType::int8_t, std::vector<unsigned int>{1, 1, 1, 1}), 0);
+    auto input1 = graph.AddInput(Tensor(DataType::int8_t, std::vector<unsigned int>{1, 1, 1, 1}), 0);
 
-    auto tableTensor = Tensor(DataType::int8_t, {1, 1, 1, 1});
-    const auto tableConstant = graph.AddGraphConstant(tableTensor);
-    auto table = Attribute(tableConstant);
+    auto table_attr = Attribute({1, 1, 1, 1}, DataType::int8_t);
+    auto table = graph.AddTensorConstant(table_attr);
 
     auto output = Tensor(DataType::int8_t, std::vector<unsigned int>{1, 1, 1, 1});
 
-    const auto res = graph.AddTableOperator(input, table, output);
+    const auto res = graph.AddTableOperator(input1, table, output);
     graph.AddOutput(res, 0);
     graph.FinalizeGraph();
 
@@ -37,6 +36,9 @@ TEST(TOSA2SPIRV_LAYERS, Table)
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "TABLE", outputStr);
+
+    testutils::CheckConstCompositeTensor({1}, "TABLE", outputStr, 1, "uchar");
+
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "TABLE", outputStr);
 
     // Write binary a second time to ensure IDs remain consistent.
@@ -44,5 +46,8 @@ TEST(TOSA2SPIRV_LAYERS, Table)
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "TABLE", outputStr);
+
+    testutils::CheckConstCompositeTensor({1}, "TABLE", outputStr, 1, "uchar");
+
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "TABLE", outputStr);
 }

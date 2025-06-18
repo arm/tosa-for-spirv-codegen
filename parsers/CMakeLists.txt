@@ -14,7 +14,7 @@ set(FLATBUFFERS_PATH "${SERIALIZATION_LIB_BUILD_PATH}/third_party/flatbuffers")
 
 find_library(FLATBUFFERS_LIBRARY_PATH
              NAMES ${FLATBUFFERS_LIBRARY}
-             HINTS ${FLATBUFFERS_PATH}
+             HINTS ${SERIALIZATION_LIB_BUILD_PATH}/_deps/flatbuffers-build
              NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
 
 if(FLATBUFFERS_LIBRARY_PATH)
@@ -24,6 +24,9 @@ if(FLATBUFFERS_LIBRARY_PATH)
 else()
     message(WARNING "Flatbuffers library (${FLATBUFFERS_LIBRARY}) not found.")
 endif()
+
+
+target_include_directories(tosaSerializationParser PRIVATE ${FLATBUFFERS_SOURCE_PATH}/include)
 
 # Find TOSA Serialization Library
 set(TOSA_SERIALIZATION_LIBRARY libtosa_serialization_lib.a)
@@ -47,8 +50,6 @@ target_include_directories(tosaSerializationParser PRIVATE ${CMAKE_SOURCE_DIR}/p
 
 # Include headers for dependencies and sub dependencies of the TOSA Serialization Library
 target_include_directories(tosaSerializationParser PRIVATE ${SERIALIZATION_LIB_SOURCE_PATH}/include)
-target_include_directories(tosaSerializationParser PRIVATE
-        ${SERIALIZATION_LIB_SOURCE_PATH}/third_party/flatbuffers/include)
 target_include_directories(tosaSerializationParser PRIVATE ${SERIALIZATION_LIB_SOURCE_PATH}/third_party/half/include)
 
 # Include SPIR-V headers

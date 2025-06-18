@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// THIS FILE IS GENERATED WITH TOSA 0.80.0.
+// THIS FILE IS GENERATED WITH TOSA 1.0.0.
 // See tosa2spirv/python/code_generator.py and README
 
 #include <AssemblyUtils.hpp>
@@ -23,7 +23,9 @@ TEST(TOSA2SPIRV_LAYERS, Tile)
 
     auto input1 = graph.AddInput(Tensor(DataType::bool_t, std::vector<unsigned int>{1, 1, 1, 1}), 0);
 
-    auto multiples = Attribute({1, 1, 1, 1}, DataType::int32_t);
+    auto multiples_attr = Attribute({1, 1, 1, 1}, DataType::int32_t);
+    auto multiples = graph.AddTensorConstant(multiples_attr);
+
     auto output = Tensor(DataType::bool_t, std::vector<unsigned int>{1, 1, 1, 1});
 
     const auto res = graph.AddTileOperator(input1, multiples, output);
@@ -34,7 +36,9 @@ TEST(TOSA2SPIRV_LAYERS, Tile)
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "TILE", outputStr);
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "TILE", outputStr, 1);
+
+    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "TILE", outputStr, 1, "uint");
+
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "TILE", outputStr);
 
     // Write binary a second time to ensure IDs remain consistent.
@@ -42,6 +46,8 @@ TEST(TOSA2SPIRV_LAYERS, Tile)
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "TILE", outputStr);
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "TILE", outputStr, 1);
+
+    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "TILE", outputStr, 1, "uint");
+
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "TILE", outputStr);
 }

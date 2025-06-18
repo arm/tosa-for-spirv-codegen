@@ -10,7 +10,7 @@ add_executable(tosa2spirv_unittests
         TensorTests.cpp
         layerTests/AbsTests.cpp
         layerTests/AddTests.cpp
-        layerTests/ArgmaxTests.cpp
+        layerTests/ArgMaxTests.cpp
         layerTests/ArithmeticRightShiftTests.cpp
         layerTests/AvgPool2dTests.cpp
         layerTests/BitwiseAndTests.cpp
@@ -20,6 +20,7 @@ add_executable(tosa2spirv_unittests
         layerTests/CastTests.cpp
         layerTests/CeilTests.cpp
         layerTests/ClampTests.cpp
+        layerTests/CosTests.cpp
         layerTests/ResizeTests.cpp
         layerTests/SliceTests.cpp
         layerTests/ClzTests.cpp
@@ -33,11 +34,10 @@ add_executable(tosa2spirv_unittests
         layerTests/TileTests.cpp
         layerTests/Fft2dTests.cpp
         layerTests/FloorTests.cpp
-        layerTests/FullyConnectedTests.cpp
         layerTests/GatherTests.cpp
         layerTests/GreaterTests.cpp
         layerTests/GreaterEqualTests.cpp
-        layerTests/IntdivTests.cpp
+        layerTests/IntDivTests.cpp
         layerTests/LogTests.cpp
         layerTests/LogicalAndTests.cpp
         layerTests/LogicalLeftShiftTests.cpp
@@ -69,6 +69,7 @@ add_executable(tosa2spirv_unittests
         layerTests/ScatterTests.cpp
         layerTests/SelectTests.cpp
         layerTests/SigmoidTests.cpp
+        layerTests/SinTests.cpp
         layerTests/SliceTests.cpp
         layerTests/SubTests.cpp
         layerTests/TableTests.cpp

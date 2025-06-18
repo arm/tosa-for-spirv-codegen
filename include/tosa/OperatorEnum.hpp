@@ -8,17 +8,16 @@
 namespace tosa2spirv::tosa
 {
 // See tosa2spirv/python/source_generator.py and README
-// THIS SECTION IS GENERATED WITH TOSA 0.80.0. DO NOT EDIT!
-// OPERATOR ENUM NAME SECTION BEGIN
+// THIS SECTION IS GENERATED WITH TOSA 1.0. DO NOT EDIT!
+// OPERATOR ENUM SECTION BEGIN
 enum class OperatorEnum
 {
-    Argmax,
+    ArgMax,
     AvgPool2d,
     Conv2d,
     Conv3d,
     DepthwiseConv2d,
     Fft2d,
-    FullyConnected,
     Matmul,
     MaxPool2d,
     Rfft2d,
@@ -32,7 +31,7 @@ enum class OperatorEnum
     BitwiseAnd,
     BitwiseOr,
     BitwiseXor,
-    Intdiv,
+    IntDiv,
     LogicalAnd,
     LogicalLeftShift,
     LogicalRightShift,
@@ -48,6 +47,7 @@ enum class OperatorEnum
     BitwiseNot,
     Ceil,
     Clz,
+    Cos,
     Exp,
     Floor,
     Log,
@@ -55,6 +55,7 @@ enum class OperatorEnum
     Negate,
     Reciprocal,
     Rsqrt,
+    Sin,
     Select,
     Equal,
     Greater,
@@ -77,6 +78,5 @@ enum class OperatorEnum
     Resize,
     Cast,
     Rescale,
-};
-// OPERATOR ENUM NAME SECTION END
+}; // OPERATOR ENUM SECTION END
 } // namespace tosa2spirv::tosa

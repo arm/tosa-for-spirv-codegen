@@ -13,15 +13,15 @@ namespace tosa2spirv::tosa
 {
 
 // See tosa2spirv/python/source_generator.py and README
-// THIS SECTION IS GENERATED WITH TOSA 0.80.0. DO NOT EDIT!
+// THIS SECTION IS GENERATED WITH TOSA 1.0. DO NOT EDIT!
 std::string GetOperatorName(const OperatorEnum op)
 {
     // OPERATOR ENUM NAME SECTION BEGIN
     switch (op)
     {
-        case OperatorEnum::Argmax:
+        case OperatorEnum::ArgMax:
         {
-            return {"Argmax"};
+            return {"ArgMax"};
         }
         case OperatorEnum::AvgPool2d:
         {
@@ -42,10 +42,6 @@ std::string GetOperatorName(const OperatorEnum op)
         case OperatorEnum::Fft2d:
         {
             return {"Fft2d"};
-        }
-        case OperatorEnum::FullyConnected:
-        {
-            return {"Fullyconnected"};
         }
         case OperatorEnum::Matmul:
         {
@@ -99,9 +95,9 @@ std::string GetOperatorName(const OperatorEnum op)
         {
             return {"Bitwisexor"};
         }
-        case OperatorEnum::Intdiv:
+        case OperatorEnum::IntDiv:
         {
-            return {"Intdiv"};
+            return {"IntDiv"};
         }
         case OperatorEnum::LogicalAnd:
         {
@@ -163,6 +159,10 @@ std::string GetOperatorName(const OperatorEnum op)
         {
             return {"Clz"};
         }
+        case OperatorEnum::Cos:
+        {
+            return {"Cos"};
+        }
         case OperatorEnum::Exp:
         {
             return {"Exp"};
@@ -190,6 +190,10 @@ std::string GetOperatorName(const OperatorEnum op)
         case OperatorEnum::Rsqrt:
         {
             return {"Rsqrt"};
+        }
+        case OperatorEnum::Sin:
+        {
+            return {"Sin"};
         }
         case OperatorEnum::Select:
         {
@@ -279,7 +283,7 @@ std::string GetOperatorName(const OperatorEnum op)
         {
             return {"Rescale"};
         }
-        // OPERATOR ENUM NAME SECTION END
+            // OPERATOR ENUM NAME SECTION END
         default: throw std::invalid_argument("Invalid OperatorEnum");
     }
 }
@@ -289,41 +293,32 @@ OperatorDefinition GetOperatorDefinition(const OperatorEnum op)
     // OPERATOR DEFINITION SECTION BEGIN
     switch (op)
     {
-        case OperatorEnum::Argmax:
-        case OperatorEnum::ReduceAll:
-        case OperatorEnum::ReduceAny:
+        case OperatorEnum::ArgMax:
         case OperatorEnum::ReduceMax:
         case OperatorEnum::ReduceMin:
-        case OperatorEnum::ReduceProduct:
-        case OperatorEnum::ReduceSum:
-        case OperatorEnum::Concat:
-        case OperatorEnum::Reverse:
         {
-            static constexpr std::array<AttributeDefinition, 1> definitions{{{Category::Scalar, Metadata::None}}};
-            return {1, 1, 1, definitions.data()};
+            static constexpr std::array<AttributeDefinition, 2> definitions{
+                {{Category::Scalar, Metadata::None}, {Category::Enum, Metadata::None}}};
+            return {1, 1, 2, definitions.data()};
         }
         case OperatorEnum::AvgPool2d:
         {
-            static constexpr std::array<AttributeDefinition, 6> definitions{{{Category::Array, Metadata::None},
-                                                                             {Category::Array, Metadata::None},
-                                                                             {Category::Array, Metadata::None},
-                                                                             {Category::Enum, Metadata::None},
-                                                                             {Category::Scalar, Metadata::None},
-                                                                             {Category::Scalar, Metadata::None}}};
-            return {1, 1, 6, definitions.data()};
+            static constexpr std::array<AttributeDefinition, 4> definitions{{{Category::Ranked, Metadata::None},
+                                                                             {Category::Ranked, Metadata::None},
+                                                                             {Category::Ranked, Metadata::None},
+                                                                             {Category::Enum, Metadata::None}}};
+            return {3, 1, 4, definitions.data()};
         }
         case OperatorEnum::Conv2d:
         case OperatorEnum::Conv3d:
         case OperatorEnum::DepthwiseConv2d:
-        case OperatorEnum::TransposeConv2d:
         {
-            static constexpr std::array<AttributeDefinition, 6> definitions{{{Category::Array, Metadata::None},
-                                                                             {Category::Array, Metadata::None},
-                                                                             {Category::Array, Metadata::None},
-                                                                             {Category::Scalar, Metadata::None},
-                                                                             {Category::Scalar, Metadata::None},
+            static constexpr std::array<AttributeDefinition, 5> definitions{{{Category::Ranked, Metadata::None},
+                                                                             {Category::Ranked, Metadata::None},
+                                                                             {Category::Ranked, Metadata::None},
+                                                                             {Category::Enum, Metadata::None},
                                                                              {Category::Scalar, Metadata::None}}};
-            return {3, 1, 6, definitions.data()};
+            return {5, 1, 5, definitions.data()};
         }
         case OperatorEnum::Fft2d:
         {
@@ -331,35 +326,37 @@ OperatorDefinition GetOperatorDefinition(const OperatorEnum op)
                 {{Category::Scalar, Metadata::None}, {Category::Scalar, Metadata::None}}};
             return {2, 2, 2, definitions.data()};
         }
-        case OperatorEnum::FullyConnected:
-        {
-            static constexpr std::array<AttributeDefinition, 2> definitions{
-                {{Category::Scalar, Metadata::None}, {Category::Scalar, Metadata::None}}};
-            return {3, 1, 2, definitions.data()};
-        }
         case OperatorEnum::Matmul:
         {
-            static constexpr std::array<AttributeDefinition, 2> definitions{
-                {{Category::Scalar, Metadata::None}, {Category::Scalar, Metadata::None}}};
-            return {2, 1, 2, definitions.data()};
+            return {4, 1, 0, nullptr};
         }
         case OperatorEnum::MaxPool2d:
         {
-            static constexpr std::array<AttributeDefinition, 3> definitions{{{Category::Array, Metadata::None},
-                                                                             {Category::Array, Metadata::None},
-                                                                             {Category::Array, Metadata::None}}};
-            return {1, 1, 3, definitions.data()};
+            static constexpr std::array<AttributeDefinition, 4> definitions{{{Category::Ranked, Metadata::None},
+                                                                             {Category::Ranked, Metadata::None},
+                                                                             {Category::Ranked, Metadata::None},
+                                                                             {Category::Enum, Metadata::None}}};
+            return {1, 1, 4, definitions.data()};
         }
         case OperatorEnum::Rfft2d:
         {
-            return {1, 2, 0, nullptr};
+            static constexpr std::array<AttributeDefinition, 1> definitions{{{Category::Scalar, Metadata::None}}};
+            return {1, 2, 1, definitions.data()};
+        }
+        case OperatorEnum::TransposeConv2d:
+        {
+            static constexpr std::array<AttributeDefinition, 4> definitions{{{Category::Ranked, Metadata::None},
+                                                                             {Category::Ranked, Metadata::None},
+                                                                             {Category::Enum, Metadata::None},
+                                                                             {Category::Scalar, Metadata::None}}};
+            return {5, 1, 4, definitions.data()};
         }
         case OperatorEnum::Clamp:
-        case OperatorEnum::Negate:
         {
-            static constexpr std::array<AttributeDefinition, 2> definitions{
-                {{Category::Scalar, Metadata::None}, {Category::Scalar, Metadata::None}}};
-            return {1, 1, 2, definitions.data()};
+            static constexpr std::array<AttributeDefinition, 3> definitions{{{Category::Scalar, Metadata::None},
+                                                                             {Category::Scalar, Metadata::None},
+                                                                             {Category::Enum, Metadata::None}}};
+            return {1, 1, 3, definitions.data()};
         }
         case OperatorEnum::Erf:
         case OperatorEnum::Sigmoid:
@@ -368,12 +365,14 @@ OperatorDefinition GetOperatorDefinition(const OperatorEnum op)
         case OperatorEnum::BitwiseNot:
         case OperatorEnum::Ceil:
         case OperatorEnum::Clz:
+        case OperatorEnum::Cos:
         case OperatorEnum::Exp:
         case OperatorEnum::Floor:
         case OperatorEnum::Log:
         case OperatorEnum::LogicalNot:
         case OperatorEnum::Reciprocal:
         case OperatorEnum::Rsqrt:
+        case OperatorEnum::Sin:
         case OperatorEnum::Cast:
         {
             return {1, 1, 0, nullptr};
@@ -382,57 +381,53 @@ OperatorDefinition GetOperatorDefinition(const OperatorEnum op)
         case OperatorEnum::BitwiseAnd:
         case OperatorEnum::BitwiseOr:
         case OperatorEnum::BitwiseXor:
-        case OperatorEnum::Intdiv:
+        case OperatorEnum::IntDiv:
         case OperatorEnum::LogicalAnd:
         case OperatorEnum::LogicalLeftShift:
         case OperatorEnum::LogicalRightShift:
         case OperatorEnum::LogicalOr:
         case OperatorEnum::LogicalXor:
-        case OperatorEnum::Maximum:
-        case OperatorEnum::Minimum:
         case OperatorEnum::Pow:
         case OperatorEnum::Sub:
+        case OperatorEnum::Table:
         case OperatorEnum::Equal:
         case OperatorEnum::Greater:
         case OperatorEnum::GreaterEqual:
+        case OperatorEnum::Reshape:
+        case OperatorEnum::Tile:
         case OperatorEnum::Gather:
         {
             return {2, 1, 0, nullptr};
         }
         case OperatorEnum::ArithmeticRightShift:
-        case OperatorEnum::Mul:
         {
             static constexpr std::array<AttributeDefinition, 1> definitions{{{Category::Scalar, Metadata::None}}};
             return {2, 1, 1, definitions.data()};
         }
-        case OperatorEnum::Table:
+        case OperatorEnum::Maximum:
+        case OperatorEnum::Minimum:
         {
-            static constexpr std::array<AttributeDefinition, 1> definitions{
-                {{Category::GraphConstant, Metadata::None}}};
-            return {1, 1, 1, definitions.data()};
+            static constexpr std::array<AttributeDefinition, 1> definitions{{{Category::Enum, Metadata::None}}};
+            return {2, 1, 1, definitions.data()};
         }
+        case OperatorEnum::Mul:
+        case OperatorEnum::Negate:
         case OperatorEnum::Select:
+        case OperatorEnum::Pad:
+        case OperatorEnum::Slice:
         case OperatorEnum::Scatter:
         {
             return {3, 1, 0, nullptr};
         }
-        case OperatorEnum::Pad:
+        case OperatorEnum::ReduceAll:
+        case OperatorEnum::ReduceAny:
+        case OperatorEnum::ReduceProduct:
+        case OperatorEnum::ReduceSum:
+        case OperatorEnum::Concat:
+        case OperatorEnum::Reverse:
         {
-            static constexpr std::array<AttributeDefinition, 2> definitions{
-                {{Category::GraphConstant, Metadata::Shape}, {Category::Scalar, Metadata::None}}};
-            return {1, 1, 2, definitions.data()};
-        }
-        case OperatorEnum::Reshape:
-        case OperatorEnum::Tile:
-        {
-            static constexpr std::array<AttributeDefinition, 1> definitions{{{Category::Ranked, Metadata::Shape}}};
+            static constexpr std::array<AttributeDefinition, 1> definitions{{{Category::Scalar, Metadata::None}}};
             return {1, 1, 1, definitions.data()};
-        }
-        case OperatorEnum::Slice:
-        {
-            static constexpr std::array<AttributeDefinition, 2> definitions{
-                {{Category::Ranked, Metadata::None}, {Category::Ranked, Metadata::None}}};
-            return {1, 1, 2, definitions.data()};
         }
         case OperatorEnum::Transpose:
         {
@@ -441,27 +436,21 @@ OperatorDefinition GetOperatorDefinition(const OperatorEnum op)
         }
         case OperatorEnum::Resize:
         {
-            static constexpr std::array<AttributeDefinition, 4> definitions{{{Category::Array, Metadata::Shape},
-                                                                             {Category::Array, Metadata::Shape},
-                                                                             {Category::Array, Metadata::Shape},
-                                                                             {Category::Enum, Metadata::None}}};
-            return {1, 1, 4, definitions.data()};
+            static constexpr std::array<AttributeDefinition, 1> definitions{{{Category::Enum, Metadata::None}}};
+            return {4, 1, 1, definitions.data()};
         }
         case OperatorEnum::Rescale:
         {
-            static constexpr std::array<AttributeDefinition, 9> definitions{{{Category::Scalar, Metadata::None},
-                                                                             {Category::Scalar, Metadata::None},
-                                                                             {Category::GraphConstant, Metadata::None},
-                                                                             {Category::GraphConstant, Metadata::None},
-                                                                             {Category::Scalar, Metadata::None},
-                                                                             {Category::Scalar, Metadata::None},
+            static constexpr std::array<AttributeDefinition, 5> definitions{{{Category::Scalar, Metadata::None},
+                                                                             {Category::Enum, Metadata::None},
                                                                              {Category::Scalar, Metadata::None},
                                                                              {Category::Scalar, Metadata::None},
                                                                              {Category::Scalar, Metadata::None}}};
-            return {1, 1, 9, definitions.data()};
+            return {5, 1, 5, definitions.data()};
         }
-        // OPERATOR DEFINITION SECTION END
-        default: return {};
+            { // OPERATOR DEFINITION SECTION END
+                default: return {};
+            }
     }
 }
 
@@ -470,13 +459,12 @@ TOSAInstructions GetTOSAInstructions(const OperatorEnum operatorType)
     // OPERATOR ENUM MAP SECTION BEGIN
     switch (operatorType)
     {
-        case OperatorEnum::Argmax: return TOSAARGMAX;
+        case OperatorEnum::ArgMax: return TOSAARGMAX;
         case OperatorEnum::AvgPool2d: return TOSAAVG_POOL2D;
         case OperatorEnum::Conv2d: return TOSACONV2D;
         case OperatorEnum::Conv3d: return TOSACONV3D;
         case OperatorEnum::DepthwiseConv2d: return TOSADEPTHWISE_CONV2D;
         case OperatorEnum::Fft2d: return TOSAFFT2D;
-        case OperatorEnum::FullyConnected: return TOSAFULLY_CONNECTED;
         case OperatorEnum::Matmul: return TOSAMATMUL;
         case OperatorEnum::MaxPool2d: return TOSAMAX_POOL2D;
         case OperatorEnum::Rfft2d: return TOSARFFT2D;
@@ -490,7 +478,7 @@ TOSAInstructions GetTOSAInstructions(const OperatorEnum operatorType)
         case OperatorEnum::BitwiseAnd: return TOSABITWISE_AND;
         case OperatorEnum::BitwiseOr: return TOSABITWISE_OR;
         case OperatorEnum::BitwiseXor: return TOSABITWISE_XOR;
-        case OperatorEnum::Intdiv: return TOSAINTDIV;
+        case OperatorEnum::IntDiv: return TOSAINTDIV;
         case OperatorEnum::LogicalAnd: return TOSALOGICAL_AND;
         case OperatorEnum::LogicalLeftShift: return TOSALOGICAL_LEFT_SHIFT;
         case OperatorEnum::LogicalRightShift: return TOSALOGICAL_RIGHT_SHIFT;
@@ -506,6 +494,7 @@ TOSAInstructions GetTOSAInstructions(const OperatorEnum operatorType)
         case OperatorEnum::BitwiseNot: return TOSABITWISE_NOT;
         case OperatorEnum::Ceil: return TOSACEIL;
         case OperatorEnum::Clz: return TOSACLZ;
+        case OperatorEnum::Cos: return TOSACOS;
         case OperatorEnum::Exp: return TOSAEXP;
         case OperatorEnum::Floor: return TOSAFLOOR;
         case OperatorEnum::Log: return TOSALOG;
@@ -513,6 +502,7 @@ TOSAInstructions GetTOSAInstructions(const OperatorEnum operatorType)
         case OperatorEnum::Negate: return TOSANEGATE;
         case OperatorEnum::Reciprocal: return TOSARECIPROCAL;
         case OperatorEnum::Rsqrt: return TOSARSQRT;
+        case OperatorEnum::Sin: return TOSASIN;
         case OperatorEnum::Select: return TOSASELECT;
         case OperatorEnum::Equal: return TOSAEQUAL;
         case OperatorEnum::Greater: return TOSAGREATER;
@@ -534,8 +524,9 @@ TOSAInstructions GetTOSAInstructions(const OperatorEnum operatorType)
         case OperatorEnum::Scatter: return TOSASCATTER;
         case OperatorEnum::Resize: return TOSARESIZE;
         case OperatorEnum::Cast: return TOSACAST;
-        case OperatorEnum::Rescale: return TOSARESCALE;
-        // OPERATOR ENUM MAP SECTION END
+        case OperatorEnum::Rescale:
+            return TOSARESCALE;
+            // OPERATOR ENUM MAP SECTION END
         default: throw std::invalid_argument("Invalid OperatorEnum");
     }
 }

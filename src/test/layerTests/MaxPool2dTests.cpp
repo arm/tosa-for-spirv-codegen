@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// THIS FILE IS GENERATED WITH TOSA 0.80.0.
+// THIS FILE IS GENERATED WITH TOSA 1.0.0.
 // See tosa2spirv/python/code_generator.py and README
 
 #include <AssemblyUtils.hpp>
@@ -24,11 +24,16 @@ TEST(TOSA2SPIRV_LAYERS, MaxPool2d)
     auto input = graph.AddInput(Tensor(DataType::int8_t, std::vector<unsigned int>{1, 1, 1, 1}), 0);
 
     auto kernel = Attribute({1, 1}, DataType::int32_t);
+
     auto stride = Attribute({1, 1}, DataType::int32_t);
+
     auto pad = Attribute({1, 1, 1, 1}, DataType::int32_t);
+
+    auto nan_mode = Attribute({1}, DataType::int32_t);
+
     auto output = Tensor(DataType::int8_t, std::vector<unsigned int>{1, 1, 1, 1});
 
-    const auto res = graph.AddMaxPool2dOperator(input, kernel, stride, pad, output);
+    const auto res = graph.AddMaxPool2dOperator(input, kernel, stride, pad, nan_mode, output);
     graph.AddOutput(res, 0);
     graph.FinalizeGraph();
 
@@ -36,9 +41,14 @@ TEST(TOSA2SPIRV_LAYERS, MaxPool2d)
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MAX_POOL2D", outputStr);
+
     testutils::CheckConstCompositeTensor({1, 1}, "MAX_POOL2D", outputStr, 0);
+
     testutils::CheckConstCompositeTensor({1, 1}, "MAX_POOL2D", outputStr, 1);
+
     testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "MAX_POOL2D", outputStr, 2);
+
+    testutils::CheckConstant(DataType::int32_t, "MAX_POOL2D", outputStr, 1, 3);
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "MAX_POOL2D", outputStr);
 
     // Write binary a second time to ensure IDs remain consistent.
@@ -46,8 +56,13 @@ TEST(TOSA2SPIRV_LAYERS, MaxPool2d)
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MAX_POOL2D", outputStr);
+
     testutils::CheckConstCompositeTensor({1, 1}, "MAX_POOL2D", outputStr, 0);
+
     testutils::CheckConstCompositeTensor({1, 1}, "MAX_POOL2D", outputStr, 1);
+
     testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "MAX_POOL2D", outputStr, 2);
+
+    testutils::CheckConstant(DataType::int32_t, "MAX_POOL2D", outputStr, 1, 3);
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "MAX_POOL2D", outputStr);
 }

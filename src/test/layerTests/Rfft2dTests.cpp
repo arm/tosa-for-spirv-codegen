@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// THIS FILE IS GENERATED WITH TOSA 0.80.0.
+// THIS FILE IS GENERATED WITH TOSA 1.0.0.
 // See tosa2spirv/python/code_generator.py and README
 
 #include <AssemblyUtils.hpp>
@@ -21,13 +21,15 @@ TEST(TOSA2SPIRV_LAYERS, Rfft2d)
     auto module = CreateModule(tosa2spirv::TOSAVersion{});
     auto graph = Graph(module);
 
-    auto input = graph.AddInput(Tensor(DataType::float32_t, std::vector<unsigned int>{1, 1, 1, 1}), 0);
+    auto input_real = graph.AddInput(Tensor(DataType::float32_t, std::vector<unsigned int>{1, 1, 1, 1}), 0);
+
+    auto local_bound = Attribute({1}, DataType::bool_t);
 
     auto output_real = Tensor(DataType::float32_t, std::vector<unsigned int>{1, 1, 1, 1});
 
     auto output_imag = Tensor(DataType::float32_t, std::vector<unsigned int>{1, 1, 1, 1});
 
-    const auto res = graph.AddRfft2dOperator(input, output_real, output_imag);
+    const auto res = graph.AddRfft2dOperator(input_real, local_bound, output_real, output_imag);
     graph.AddOutput(res[0], 0);
     graph.AddOutput(res[1], 0);
     graph.FinalizeGraph();
@@ -36,6 +38,8 @@ TEST(TOSA2SPIRV_LAYERS, Rfft2d)
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float32_t, "RFFT2D", outputStr);
+
+    testutils::CheckBoolConstant(DataType::bool_t, "RFFT2D", outputStr, 1, 0);
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float32_t, "RFFT2D", outputStr);
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float32_t, "RFFT2D", outputStr);
 
@@ -44,6 +48,8 @@ TEST(TOSA2SPIRV_LAYERS, Rfft2d)
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float32_t, "RFFT2D", outputStr);
+
+    testutils::CheckBoolConstant(DataType::bool_t, "RFFT2D", outputStr, 1, 0);
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float32_t, "RFFT2D", outputStr);
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float32_t, "RFFT2D", outputStr);
 }

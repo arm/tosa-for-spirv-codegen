@@ -18,7 +18,8 @@ add_executable(tosa2spirv_parser_unittests
                ReductionOpsTest.cpp
                ScatterGatherOpsTest.cpp
                TensorOpsTest.cpp
-               TypeConversionOpsTest.cpp)
+               TypeConversionOpsTest.cpp
+)
 
 target_include_directories(tosa2spirv_parser_unittests
         PRIVATE
@@ -33,7 +34,7 @@ target_include_directories(tosa2spirv_parser_unittests
         PRIVATE
         ${SERIALIZATION_LIB_SOURCE_PATH}/include
         ${SERIALIZATION_LIB_SOURCE_PATH}/third_party/half/include
-        ${SERIALIZATION_LIB_SOURCE_PATH}/third_party/flatbuffers/include
+        ${FLATBUFFERS_SOURCE_PATH}/include
         ${SPIRV_HEADERS_SOURCE_PATH}/include
         ${SPIRV_TOOLS_SOURCE_PATH}/include)
 

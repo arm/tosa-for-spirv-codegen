@@ -2,7 +2,6 @@
 // Copyright © 2023-2025 Arm Ltd and Contributors. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 //
-#include <fstream>
 
 #include <AssemblyUtils.hpp>
 #include <ModuleComparator.hpp>
@@ -17,131 +16,272 @@
 #include <vgf/decoder.hpp>
 #include <vgf/vgf_dump.hpp>
 
+#include <fstream>
+
 using namespace tosa;
 
-TosaSerializationBasicBlock GeneratorSimpleMaxpool2dModel()
+std::unique_ptr<TosaSerializationBasicBlock> GeneratorSimpleMaxpool2dModel()
 {
     // Create Attribute
-    std::vector<int> pad = {1, 1, 1, 1};
-    std::vector<int> kernel = {2, 2};
-    std::vector<int> stride = {2, 2};
     DType dType = DType::DType_INT8;
-    TosaPoolAttribute attribute(pad, kernel, stride, 0, 0, dType);
+    std::vector<int32_t> kernel = {2, 2};
+    std::vector<int32_t> stride = {2, 2};
+    std::vector<int32_t> pad = {1, 1, 1, 1};
+    int32_t nan_mode = 1;
+    TosaMaxPool2dAttribute attribute(kernel, stride, pad, static_cast<NanPropagationMode>(nan_mode));
 
     // Create Tensors
+    std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
+    std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
     std::string inputName = "input1";
     std::string outputName = "output1";
     std::vector<int32_t> inputShape = {1, 1, 4, 4};
     std::vector<int32_t> outputShape = {1, 1, 3, 3};
 
-    auto* inputTensor = new TosaSerializationTensor(inputName, inputShape, dType, {});
-    auto* outputTensor = new TosaSerializationTensor(outputName, outputShape, dType, {});
+    auto inputTensor =
+        std::make_unique<TosaSerializationTensor>(inputName, inputShape, DType::DType_INT8, std::vector<uint8_t>{});
+    tensors.push_back(std::move(inputTensor));
+    auto outputTensor =
+        std::make_unique<TosaSerializationTensor>(outputName, outputShape, DType::DType_INT8, std::vector<uint8_t>{});
+    tensors.push_back(std::move(outputTensor));
 
     // Create Operator
-    auto op = new tosa::TosaSerializationOperator(Op::Op_MAX_POOL2D,
-                                                  Attribute::Attribute_PoolAttribute,
-                                                  &attribute,
-                                                  {inputName},
-                                                  {outputName});
+    auto op = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_MAX_POOL2D,
+                                                                Attribute::Attribute_MaxPool2dAttribute,
+                                                                &attribute,
+                                                                std::vector<std::string>{inputName},
+                                                                std::vector<std::string>{outputName});
+    ops.push_back(std::move(op));
 
     // Create a tosa single-op basic block
-    // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("max_pool_2d",
-                                      "main",
-                                      {op},
-                                      {inputTensor, outputTensor},
-                                      {inputName},
-                                      {outputName});
-
-    return block;
+    auto block = std::make_unique<TosaSerializationBasicBlock>("max_pool2d",
+                                                               "main",
+                                                               std::move(ops),
+                                                               std::move(tensors),
+                                                               std::vector<std::string>{inputName},
+                                                               std::vector<std::string>{outputName});
+    return std::move(block);
 }
 
 // CONV 2D
-TosaSerializationBasicBlock GeneratorSimpleConv2dModel()
+std::unique_ptr<TosaSerializationBasicBlock> GeneratorSimpleConv2dModel()
 {
     // Create Attribute
     std::vector<int32_t> pad = {1, 1, 1, 1};
     std::vector<int32_t> dilation = {1, 1};
     std::vector<int32_t> stride = {2, 2};
-    std::vector<int8_t> input_zp = {-127};
-    std::vector<int8_t> weight_zp = {1};
-    TosaConvAttribute attribute(pad, stride, dilation, input_zp[0], weight_zp[0], true);
+    int32_t acc_type = 1;
+    bool local_bound = true;
+    TosaConv2dAttribute attribute(pad, stride, dilation, local_bound, DType_INT32);
 
     // Create Tensors
+    std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
+    std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
     std::string inputName = "input1";
-    std::string weightsName = "weights";
+    std::string weightName = "weights";
     std::string biasName = "bias";
     std::string outputName = "output1";
+    std::string input_zpName = "input_zp";
+    std::string weight_zpName = "weight_zp";
     std::vector<int32_t> inputShape = {1, 5, 5, 1};
-    std::vector<int32_t> weightsShape = {1, 3, 3, 1};
-    std::vector<int32_t> biasShape = {1};
+    std::vector<int32_t> weightShape = {1, 3, 6, 1};
+    std::vector<int32_t> biasShape = {1, 3, 6, 1};
     std::vector<int32_t> outputShape = {1, 3, 3, 1};
+    std::vector<int32_t> input_zpShape = {1};
+    std::vector<int32_t> weight_zpShape = {1};
 
-    auto* inputTensor = new TosaSerializationTensor(inputName, inputShape, DType::DType_INT8, {});
+    auto inputTensor =
+        std::make_unique<TosaSerializationTensor>(inputName, inputShape, DType::DType_INT8, std::vector<uint8_t>{});
+    tensors.push_back(std::move(inputTensor));
 
-    auto* weightsTensor =
-        new TosaSerializationTensor(weightsName, weightsShape, DType::DType_INT8, {1, 2, 3, 4, 5, 6, 7, 8, 9});
+    auto weightTensor = std::make_unique<TosaSerializationTensor>(
+        weightName,
+        weightShape,
+        DType::DType_INT8,
+        std::vector<uint8_t>{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18});
+    tensors.push_back(std::move(weightTensor));
 
-    auto* biasTensor = new TosaSerializationTensor(biasName, biasShape, DType::DType_INT32, {2, 0, 0, 0});
-    auto* outputTensor = new TosaSerializationTensor(outputName, outputShape, DType::DType_INT32, {});
+    auto biasTensor = std::make_unique<TosaSerializationTensor>(
+        biasName,
+        biasShape,
+        DType::DType_INT32,
+        std::vector<uint8_t>{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18});
+    tensors.push_back(std::move(biasTensor));
+
+    auto outputTensor =
+        std::make_unique<TosaSerializationTensor>(outputName, outputShape, DType::DType_INT32, std::vector<uint8_t>{});
+    tensors.push_back(std::move(outputTensor));
 
     // Create Operator
-    auto weightsOp =
-        new tosa::TosaSerializationOperator(Op::Op_CONST, Attribute::Attribute_NONE, nullptr, {}, {weightsName});
-    auto biasOp = new tosa::TosaSerializationOperator(Op::Op_CONST, Attribute::Attribute_NONE, nullptr, {}, {biasName});
-    auto op = new tosa::TosaSerializationOperator(Op::Op_CONV2D,
-                                                  Attribute::Attribute_ConvAttribute,
-                                                  &attribute,
-                                                  {inputName, weightsName, biasName},
-                                                  {outputName});
+    auto weightOp = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST,
+                                                                      Attribute::Attribute_NONE,
+                                                                      nullptr,
+                                                                      std::vector<std::string>{},
+                                                                      std::vector<std::string>{weightName});
+    ops.push_back(std::move(weightOp));
+
+    auto biasOp = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST,
+                                                                    Attribute::Attribute_NONE,
+                                                                    nullptr,
+                                                                    std::vector<std::string>{},
+                                                                    std::vector<std::string>{biasName});
+    ops.push_back(std::move(biasOp));
+
+    auto input_zpTensor = std::make_unique<TosaSerializationTensor>(input_zpName,
+                                                                    input_zpShape,
+                                                                    DType::DType_INT8,
+                                                                    std::vector<uint8_t>{1});
+    tensors.push_back(std::move(input_zpTensor));
+
+    auto input_zpOp = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST,
+                                                                        Attribute::Attribute_NONE,
+                                                                        nullptr,
+                                                                        std::vector<std::string>{},
+                                                                        std::vector<std::string>{input_zpName});
+    ops.push_back(std::move(input_zpOp));
+
+    auto weight_zpTensor = std::make_unique<TosaSerializationTensor>(weight_zpName,
+                                                                     weight_zpShape,
+                                                                     DType::DType_INT8,
+                                                                     std::vector<uint8_t>{1});
+    tensors.push_back(std::move(weight_zpTensor));
+
+    auto weight_zpOp = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST,
+                                                                         Attribute::Attribute_NONE,
+                                                                         nullptr,
+                                                                         std::vector<std::string>{},
+                                                                         std::vector<std::string>{weight_zpName});
+    ops.push_back(std::move(weight_zpOp));
+
+    auto op = std::make_unique<tosa::TosaSerializationOperator>(
+        Op::Op_CONV2D,
+        Attribute::Attribute_Conv2dAttribute,
+        &attribute,
+        std::vector<std::string>{inputName, weightName, biasName, input_zpName, weight_zpName},
+        std::vector<std::string>{outputName});
+    ops.push_back(std::move(op));
 
     // Create a tosa single-op basic block
-    // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("conv_2d",
-                                      "main",
-                                      {weightsOp, biasOp, op},
-                                      {inputTensor, weightsTensor, biasTensor, outputTensor},
-                                      {inputName},
-                                      {outputName});
+    auto block = std::make_unique<TosaSerializationBasicBlock>("max_pool2d",
+                                                               "main",
+                                                               std::move(ops),
+                                                               std::move(tensors),
+                                                               std::vector<std::string>{inputName},
+                                                               std::vector<std::string>{outputName});
 
-    return block;
+    return std::move(block);
 }
 
 // Rescale
-TosaSerializationBasicBlock GeneratorSimpleRescaleModel()
+std::unique_ptr<TosaSerializationBasicBlock> GeneratorSimpleRescaleModel()
 {
     // Create Attribute
     std::vector<int8_t> input_zp = {20};
     std::vector<int8_t> output_zp = {-128};
     std::vector<int32_t> multiplier = {60, 60, 60, 60};
     std::vector<int32_t> shift = {30, 30, 30, 30};
+
     bool scale32 = true;
-    bool double_round = false;
+    int32_t rounding_mode = 1;
     bool per_channel = true;
-    TosaRescaleAttribute
-        attribute(input_zp[0], output_zp[0], multiplier, shift, scale32, double_round, per_channel, true, true);
+    bool input_unsigned = true;
+    bool output_unsigned = true;
+    // Create Attribute
+    TosaRescaleAttribute attribute(scale32,
+                                   static_cast<const RoundingMode>(rounding_mode),
+                                   per_channel,
+                                   input_unsigned,
+                                   output_unsigned);
 
     // Create Tensors
+    std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
+    std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
     std::string inputName = "input1";
+    std::string multiplierName = "multiplier";
+    std::string shiftName = "shift";
+    std::string input_zpName = "input_zp";
+    std::string output_zpName = "output_zp";
     std::string outputName = "output1";
     std::vector<int32_t> inputShape = {1, 1, 4, 4};
+    std::vector<int32_t> multiplierShape = {18};
+    std::vector<int32_t> shiftShape = {18};
+    std::vector<int32_t> input_zpShape = {1};
+    std::vector<int32_t> output_zpShape = {1};
     std::vector<int32_t> outputShape = {1, 1, 4, 4};
 
-    auto* inputTensor = new TosaSerializationTensor(inputName, inputShape, DType::DType_INT8, {});
-    auto* outputTensor = new TosaSerializationTensor(outputName, outputShape, DType::DType_INT8, {});
+    auto inputTensor =
+        std::make_unique<TosaSerializationTensor>(inputName, inputShape, DType::DType_INT8, std::vector<uint8_t>{});
+    tensors.push_back(std::move(inputTensor));
+    auto outputTensor =
+        std::make_unique<TosaSerializationTensor>(outputName, outputShape, DType::DType_INT8, std::vector<uint8_t>{});
+    tensors.push_back(std::move(outputTensor));
+
+    auto multiplierTensor = std::make_unique<TosaSerializationTensor>(
+        multiplierName,
+        multiplierShape,
+        DType::DType_INT32,
+        std::vector<uint8_t>{{0, 0, 0, 1,  0, 0, 0, 2,  0, 0, 0, 3,  0, 0, 0, 4,  0, 0, 0, 5,  0, 0, 0, 6,
+                              0, 0, 0, 7,  0, 0, 0, 8,  0, 0, 0, 9,  0, 0, 0, 10, 0, 0, 0, 11, 0, 0, 0, 12,
+                              0, 0, 0, 13, 0, 0, 0, 14, 0, 0, 0, 15, 0, 0, 0, 16, 0, 0, 0, 17, 0, 0, 0, 18}});
+    tensors.push_back(std::move(multiplierTensor));
+    auto multiplierOp = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST,
+                                                                          Attribute::Attribute_NONE,
+                                                                          nullptr,
+                                                                          std::vector<std::string>{},
+                                                                          std::vector<std::string>{multiplierName});
+    ops.push_back(std::move(multiplierOp));
+    auto shiftTensor = std::make_unique<TosaSerializationTensor>(
+        shiftName,
+        shiftShape,
+        DType::DType_INT8,
+        std::vector<uint8_t>{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18});
+    tensors.push_back(std::move(shiftTensor));
+    auto shiftOp = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST,
+                                                                     Attribute::Attribute_NONE,
+                                                                     nullptr,
+                                                                     std::vector<std::string>{},
+                                                                     std::vector<std::string>{shiftName});
+    ops.push_back(std::move(shiftOp));
+    auto input_zpTensor = std::make_unique<TosaSerializationTensor>(input_zpName,
+                                                                    input_zpShape,
+                                                                    DType::DType_INT8,
+                                                                    std::vector<uint8_t>{1});
+    tensors.push_back(std::move(input_zpTensor));
+    auto input_zpOp = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST,
+                                                                        Attribute::Attribute_NONE,
+                                                                        nullptr,
+                                                                        std::vector<std::string>{},
+                                                                        std::vector<std::string>{input_zpName});
+    ops.push_back(std::move(input_zpOp));
+    auto output_zpTensor = std::make_unique<TosaSerializationTensor>(output_zpName,
+                                                                     output_zpShape,
+                                                                     DType::DType_INT8,
+                                                                     std::vector<uint8_t>{1});
+    tensors.push_back(std::move(output_zpTensor));
+    auto output_zpOp = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST,
+                                                                         Attribute::Attribute_NONE,
+                                                                         nullptr,
+                                                                         std::vector<std::string>{},
+                                                                         std::vector<std::string>{output_zpName});
+    ops.push_back(std::move(output_zpOp));
 
     // Create Operator
-    auto op = new tosa::TosaSerializationOperator(Op::Op_RESCALE,
-                                                  Attribute::Attribute_RescaleAttribute,
-                                                  &attribute,
-                                                  {inputName},
-                                                  {outputName});
-
+    auto op = std::make_unique<tosa::TosaSerializationOperator>(
+        Op::Op_RESCALE,
+        Attribute::Attribute_RescaleAttribute,
+        &attribute,
+        std::vector<std::string>{inputName, multiplierName, shiftName, input_zpName, output_zpName},
+        std::vector<std::string>{outputName});
+    ops.push_back(std::move(op));
     // Create a tosa single-op basic block
-    // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("rescale", "main", {op}, {inputTensor, outputTensor}, {inputName}, {outputName});
+    auto block = std::make_unique<TosaSerializationBasicBlock>("rescale",
+                                                               "main",
+                                                               std::move(ops),
+                                                               std::move(tensors),
+                                                               std::vector<std::string>{inputName},
+                                                               std::vector<std::string>{outputName});
 
-    return block;
+    return std::move(block);
 }
 
 TEST(TOSA2SPIRV_GENERATOR, GeneratorTestExampleTosaFile)
@@ -171,7 +311,7 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorTestExampleTosaFile)
     }
 
     // Get the main block from the handler so that we can parse it
-    auto mainBlock = handler.GetMainRegion()->GetBlockByName("main");
+    auto mainBlock = handler.GetMainRegion()->GetBlockByName("max_pool2d");
     if (mainBlock == nullptr)
     {
         throw std::runtime_error("Please ensure there is a block called \"main\" within the TOSA graph.");
@@ -214,49 +354,18 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorTestExampleJsonFile)
 
     auto companion = nlohmann::json::parse(fileStream);
 
-    std::string expectedJson("{\"regions\":["
-                             "{\"blocks\":["
-                             "{\"inputs\":["
-                             "\"input_1\"],"
-                             "\"name\":"
-                             "\"main\","
-                             "\"operators\":["
-                             "{\"attribute\":"
-                             "{\"accum_dtype\":\"INT8\","
-                             "\"kernel\":[2,2],"
-                             "\"pad\":[0,0,0,0],"
-                             "\"stride\":[2,2]},"
-                             "\"attribute_type\":"
-                             "\"PoolAttribute\","
-                             "\"inputs\":["
-                             "\"input_1\"],"
-                             "\"op\":\"MAX_POOL2D\","
-                             "\"outputs\":["
-                             "\"output0_2\"]}],"
-                             "\"outputs\":["
-                             "\"output0_2\"],"
-                             "\"tensors\":["
-                             "{\"data\":[],"
-                             "\"name\":\"input_1\","
-                             "\"shape\":[1,16,16,16],"
-                             "\"type\":\"INT8\","
-                             "\"variable_name\":\"\"},"
-                             "{\"data\":[],"
-                             "\"name\":\"output0_2\","
-                             "\"shape\":[1,8,8,16],"
-                             "\"type\":\"INT8\","
-                             "\"variable_name\":\"\"}]}],"
-                             "\"name\":\"main\"}],"
-                             "\"version\":{"
-                             "\"_draft\":false,"
-                             "\"_major\":0,"
-                             "\"_minor\":80,"
-                             "\"_patch\":1}}");
+    std::string expectedJson =
+        "{\"regions\":[{\"blocks\":[{\"inputs\":[\"input1\"],\"name\":\"max_pool2d\",\"operators\":[{\"attribute\":{"
+        "\"kernel\":[2,2],\"nan_mode\":\"PROPAGATE\",\"pad\":[1,1,1,1],\"stride\":[2,2]},\"attribute_type\":"
+        "\"MaxPool2dAttribute\",\"inputs\":[\"input1\"],\"op\":\"MAX_POOL2D\",\"outputs\":[\"output1\"]}],\"outputs\":["
+        "\"output1\"],\"tensors\":[{\"data\":[],\"name\":\"input1\",\"shape\":[1,1,4,4],\"type\":\"INT8\",\"variable_"
+        "name\":\"\"},{\"data\":[],\"name\":\"output1\",\"shape\":[1,1,3,3],\"type\":\"INT8\",\"variable_name\":\"\"}]}"
+        "],\"name\":\"main\"}],\"version\":{\"_major\":1,\"_minor\":0,\"_patch\":0}}";
 
     EXPECT_EQ(companion.dump(), expectedJson);
 }
 
-static bool fileExists(const char* filename)
+static bool fileExists(const char *filename)
 {
     const std::ifstream file(filename);
     return file.good();
@@ -264,11 +373,10 @@ static bool fileExists(const char* filename)
 
 TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteVgfFile)
 {
-    // Create a simple MaxPool2d model block.
-    TosaSerializationBasicBlock block = GeneratorSimpleMaxpool2dModel();
+    auto block = GeneratorSimpleMaxpool2dModel();
 
     // Construct TosaSerializationParser object using TosaSerializationBlock or TosaSerializationHandler
-    tosa2spirv::parsers::TosaSerializationParser parser(&block);
+    tosa2spirv::parsers::TosaSerializationParser parser(block.get());
 
     std::string modelName = "quantized_max_pool_single_layer";
     std::string vgfDir = std::getenv("VGF_OUTPUT_PATH") ? std::getenv("VGF_OUTPUT_PATH") : ".";
@@ -358,7 +466,7 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteVgfFile)
             },
             "modules": [
             {
-                "code_size": 200,
+                "code_size": 201,
                         "entry_point": "main",
                         "has_spirv": true,
                         "index": 0,
@@ -416,10 +524,10 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteVgfFile)
 TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFiles)
 {
     // Create a simple MaxPool2d model block.
-    TosaSerializationBasicBlock block = GeneratorSimpleConv2dModel();
+    auto block = GeneratorSimpleConv2dModel();
 
     // Construct TosaSerializationParser object using TosaSerializationBlock or TosaSerializationHandler
-    tosa2spirv::parsers::TosaSerializationParser parser(&block);
+    tosa2spirv::parsers::TosaSerializationParser parser(block.get());
 
     std::string modelName = "quantized_conv2d_single_layer";
     std::string vgfDir = std::getenv("VGF_OUTPUT_PATH") ? std::getenv("VGF_OUTPUT_PATH") : ".";
@@ -449,8 +557,13 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFiles)
             "index": 0,
                     "mrt_index": 0,
                     "sparsity_dimension": -1
-        }]
-        ,
+        },
+        {
+            "index": 1,
+                    "mrt_index": 1,
+                    "sparsity_dimension": -1
+        }
+        ],
         "header": {
             "major": 0,
                     "minor": 3,
@@ -461,7 +574,7 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFiles)
             {
                 "binding": 0,
                         "index": 0,
-                        "mrt_index": 1,
+                        "mrt_index": 2,
                         "name": "input_0"
             }
             ],
@@ -469,24 +582,24 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFiles)
             {
                 "binding": 1,
                         "index": 0,
-                        "mrt_index": 2,
+                        "mrt_index": 3,
                         "name": "output_0"
             }
             ],
             "segments": [
             {
-                "constants": [0],
+                "constants": [0, 1],
                 "descriptor_set_infos": [
                 [
                 {
                 "binding": 0,
                 "index": 0,
-                "mrt_index": 1
+                "mrt_index": 2
                 },
                 {
                 "binding": 1,
                 "index": 1,
-                "mrt_index": 2
+                "mrt_index": 3
                 }
                 ]
                 ],
@@ -496,7 +609,7 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFiles)
                 {
                     "binding": 0,
                             "index": 0,
-                            "mrt_index": 1
+                            "mrt_index": 2
                 }
                 ],
                 "module_index": 0,
@@ -505,7 +618,7 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFiles)
                 {
                     "binding": 1,
                             "index": 0,
-                            "mrt_index": 2
+                            "mrt_index": 3
                 }
                 ],
                 "push_constant_ranges": [],
@@ -515,7 +628,7 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFiles)
         },
         "modules": [
         {
-            "code_size": 248,
+            "code_size": 265,
                     "entry_point": "main",
                     "has_spirv": true,
                     "index": 0,
@@ -527,14 +640,22 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFiles)
         {
             "category": "CONSTANT",
                     "index": 0,
-                    "shape": [1, 3, 3, 1],
+                    "shape": [1, 3, 6, 1],
             "stride": [],
                     "vk_descriptor_type": "none",
                     "vk_format": "VK_FORMAT_R8_SINT"
         },
         {
-            "category": "INPUT",
+            "category": "CONSTANT",
                     "index": 1,
+                    "shape": [1, 3, 6, 1],
+            "stride": [],
+                    "vk_descriptor_type": "none",
+                    "vk_format": "VK_FORMAT_R32_SINT"
+        },
+        {
+            "category": "INPUT",
+                    "index": 2,
                     "shape": [1, 5, 5, 1],
             "stride": [],
                     "vk_descriptor_type": "VK_DESCRIPTOR_TYPE_TENSOR_ARM",
@@ -542,7 +663,7 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFiles)
         },
         {
             "category": "OUTPUT",
-                    "index": 2,
+                    "index": 3,
                     "shape": [1, 3, 3, 1],
             "stride": [],
                     "vk_descriptor_type": "VK_DESCRIPTOR_TYPE_TENSOR_ARM",
@@ -572,14 +693,22 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFiles)
     // Check as expected
     const auto diff = testutils::CompareModules(module1, module0);
 
-    EXPECT_TRUE(diff.empty());
-
     std::vector<uint8_t> weightData;
-    mlsdk::vgf_dump::getConstant(vgfName, 0, [&weightData](const uint8_t* data, size_t size) {
+    mlsdk::vgf_dump::getConstant(vgfName, 0, [&weightData](const uint8_t *data, size_t size) {
         weightData.assign(data, data + size);
     });
-    const std::vector<int8_t> expectedWeightData{1, 2, 3, 4, 5, 6, 7, 8, 9};
+    const std::vector<int8_t> expectedWeightData{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};
     EXPECT_EQ(std::equal(weightData.begin(), weightData.begin() + weightData.size(), expectedWeightData.begin()), 1);
+
+    std::vector<uint8_t> biasDataVector;
+    mlsdk::vgf_dump::getConstant(vgfName, 1, [&biasDataVector](const uint8_t *data, size_t size) {
+        biasDataVector.assign(data, data + size);
+    });
+    uint8_t biasData = biasDataVector[0];
+    // Bias was added as int32 to cast it as such
+    auto castBiasData = static_cast<int32_t>(biasData);
+    int32_t expectedBiasData{1};
+    EXPECT_EQ(castBiasData, expectedBiasData);
 
     // Delete the .vgf
     if (std::remove(vgfName.c_str()) != 0)
@@ -591,10 +720,10 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFiles)
 TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFilesRescale)
 {
     // Create a simple MaxPool2d model block.
-    TosaSerializationBasicBlock block = GeneratorSimpleRescaleModel();
+    auto block = GeneratorSimpleRescaleModel();
 
     // Construct TosaSerializationParser object using TosaSerializationBlock or TosaSerializationHandler
-    tosa2spirv::parsers::TosaSerializationParser parser(&block);
+    tosa2spirv::parsers::TosaSerializationParser parser(block.get());
 
     std::string modelName = "quantized_rescale_single_layer";
     std::string vgfDir = std::getenv("VGF_OUTPUT_PATH") ? std::getenv("VGF_OUTPUT_PATH") : ".";
@@ -697,7 +826,7 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFilesRescale)
     },
     "modules": [
         {
-            "code_size": 194,
+            "code_size": 204,
             "entry_point": "main",
             "has_spirv": true,
             "index": 0,
@@ -709,7 +838,7 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFilesRescale)
         {
             "category": "CONSTANT",
             "index": 0,
-            "shape": [4],
+            "shape": [18],
             "stride": [],
             "vk_descriptor_type": "none",
             "vk_format": "VK_FORMAT_R32_SINT"
@@ -717,7 +846,7 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFilesRescale)
         {
             "category": "CONSTANT",
             "index": 1,
-            "shape": [4],
+            "shape": [18],
             "stride": [],
             "vk_descriptor_type": "none",
             "vk_format": "VK_FORMAT_R8_SINT"
@@ -758,9 +887,9 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFilesRescale)
     const std::string outputStr(testutils::DisassembleSPIRV(spvData, true));
 
     // Check as expected
-    testutils::CompareModules(module, spirvmodels::simpleRescale);
-    const std::vector<int32_t> expectedMultData{60, 60, 60, 60};
-    const std::vector<int8_t> expectedShiftData{30, 30, 30, 30};
+    EXPECT_EQ(spirvmodels::simpleRescale, outputStr);
+    const std::vector<int32_t> expectedMultData{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};
+    const std::vector<int8_t> expectedShiftData{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};
 
     std::vector<uint8_t> multData;
     mlsdk::vgf_dump::getConstant(vgfName, 0, [&multData](const uint8_t* data, size_t size) {
@@ -774,11 +903,9 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFilesRescale)
     std::vector<int32_t> resultMultVect;
     for (size_t i = 0; i < multData.size(); i += 4)
     {
-        int32_t value = 0;
-        value |= static_cast<int32_t>(multData[i]) << 0;
-        value |= static_cast<int32_t>(multData[i + 1]) << 8;
-        value |= static_cast<int32_t>(multData[i + 2]) << 16;
-        value |= static_cast<int32_t>(multData[i + 3]) << 24;
+        int32_t value = (static_cast<int32_t>(multData[i + 0]) << 24) | // MSB
+                        (static_cast<int32_t>(multData[i + 1]) << 16) | (static_cast<int32_t>(multData[i + 2]) << 8) |
+                        (static_cast<int32_t>(multData[i + 3]) << 0); // LSB
         resultMultVect.push_back(value);
     }
     EXPECT_EQ(

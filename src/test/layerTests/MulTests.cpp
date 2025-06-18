@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// THIS FILE IS GENERATED WITH TOSA 0.80.0.
+// THIS FILE IS GENERATED WITH TOSA 1.0.0.
 // See tosa2spirv/python/code_generator.py and README
 
 #include <AssemblyUtils.hpp>
@@ -25,7 +25,9 @@ TEST(TOSA2SPIRV_LAYERS, Mul)
 
     auto input2 = graph.AddInput(Tensor(DataType::int8_t, std::vector<unsigned int>{1, 1, 1, 1}), 0);
 
-    auto shift = Attribute({1}, DataType::int8_t);
+    auto shift_attr = Attribute({1, 1, 1, 1}, DataType::int8_t);
+    auto shift = graph.AddTensorConstant(shift_attr);
+
     auto output = Tensor(DataType::int32_t, std::vector<unsigned int>{1, 1, 1, 1});
 
     const auto res = graph.AddMulOperator(input1, input2, shift, output);
@@ -37,7 +39,9 @@ TEST(TOSA2SPIRV_LAYERS, Mul)
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MUL", outputStr);
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MUL", outputStr);
-    testutils::CheckConstant(DataType::int8_t, "MUL", outputStr, 1, 0);
+
+    testutils::CheckConstCompositeTensor({1}, "MUL", outputStr, 2, "uchar");
+
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "MUL", outputStr);
 
     // Write binary a second time to ensure IDs remain consistent.
@@ -46,6 +50,8 @@ TEST(TOSA2SPIRV_LAYERS, Mul)
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MUL", outputStr);
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MUL", outputStr);
-    testutils::CheckConstant(DataType::int8_t, "MUL", outputStr, 1, 0);
+
+    testutils::CheckConstCompositeTensor({1}, "MUL", outputStr, 2, "uchar");
+
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "MUL", outputStr);
 }

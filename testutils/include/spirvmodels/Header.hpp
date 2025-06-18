@@ -20,6 +20,6 @@ static const std::string SPIRV_HEADER = "               OpCapability Shader\n"
                                         "               OpExtension \"SPV_ARM_graph\"\n"
                                         "               OpExtension \"SPV_ARM_tensors\"\n"
                                         "               OpExtension \"SPV_EXT_replicated_composites\"\n"
-                                        "          %1 = OpExtInstImport \"TOSA.000080.2\"\n"
+                                        "          %1 = OpExtInstImport \"TOSA.001000.1\"\n"
                                         "               OpMemoryModel Logical Vulkan\n";
 }

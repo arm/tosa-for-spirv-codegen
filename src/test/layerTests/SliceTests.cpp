@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// THIS FILE IS GENERATED WITH TOSA 0.80.0.
+// THIS FILE IS GENERATED WITH TOSA 1.0.0.
 // See tosa2spirv/python/code_generator.py and README
 
 #include <AssemblyUtils.hpp>
@@ -23,8 +23,12 @@ TEST(TOSA2SPIRV_LAYERS, Slice)
 
     auto input1 = graph.AddInput(Tensor(DataType::bool_t, std::vector<unsigned int>{1, 1, 1, 1}), 0);
 
-    auto start = Attribute({1, 1, 1, 1}, DataType::int32_t);
-    auto size = Attribute({1, 1, 1, 1}, DataType::int32_t);
+    auto start_attr = Attribute({1, 1, 1, 1}, DataType::int32_t);
+    auto start = graph.AddTensorConstant(start_attr);
+
+    auto size_attr = Attribute({1, 1, 1, 1}, DataType::int32_t);
+    auto size = graph.AddTensorConstant(size_attr);
+
     auto output = Tensor(DataType::bool_t, std::vector<unsigned int>{1, 1, 1, 1});
 
     const auto res = graph.AddSliceOperator(input1, start, size, output);
@@ -35,8 +39,11 @@ TEST(TOSA2SPIRV_LAYERS, Slice)
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "SLICE", outputStr);
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "SLICE", outputStr, 0);
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "SLICE", outputStr, 0);
+
+    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "SLICE", outputStr, 1, "uint");
+
+    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "SLICE", outputStr, 2, "uint");
+
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "SLICE", outputStr);
 
     // Write binary a second time to ensure IDs remain consistent.
@@ -44,7 +51,10 @@ TEST(TOSA2SPIRV_LAYERS, Slice)
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "SLICE", outputStr);
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "SLICE", outputStr, 0);
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "SLICE", outputStr, 0);
+
+    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "SLICE", outputStr, 1, "uint");
+
+    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "SLICE", outputStr, 2, "uint");
+
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "SLICE", outputStr);
 }

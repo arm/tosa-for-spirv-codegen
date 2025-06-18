@@ -77,137 +77,144 @@ class Graph
     void FinalizeGraph();
 
     // See tosa2spirv/python/source_generator.py and README
-    // THIS SECTION IS GENERATED WITH TOSA 0.80.0. DO NOT EDIT!
+    // THIS SECTION IS GENERATED WITH TOSA 1.0. DO NOT EDIT!
     // GRAPH OPERATOR HELPER FUNCTION BEGIN
-    /// Function used to add a Argmax operator to the Graph
-    /// @param[in] input ResId representing the input to the Argmax Operator
-    /// @param[in] axis Attribute representing the axis to the Argmax Operator
-    /// @param[in] output Tensor representing the output to the Argmax Operator
-    ResId AddArgmaxOperator(const ResId& input, const Attribute& axis, const Tensor& output)
+    /// Function used to add a ArgMax operator to the Graph
+    /// @param[in] input ResId representing the input to the ArgMax Operator
+    /// @param[in] axis Attribute representing the axis to the ArgMax Operator
+    /// @param[in] nan_mode Attribute representing the nan_mode to the ArgMax Operator
+    /// @param[in] output Tensor representing the output to the ArgMax Operator
+    ResId AddArgMaxOperator(const ResId& input, const Attribute& axis, const Attribute& nan_mode, const Tensor& output)
     {
-        return AddOperator(OperatorEnum::Argmax, {input}, {output}, {axis})[0];
+        return AddOperator(OperatorEnum::ArgMax, {input}, {output}, {axis, nan_mode})[0];
     }
 
     /// Function used to add a AvgPool2d operator to the Graph
     /// @param[in] input ResId representing the input to the AvgPool2d Operator
+    /// @param[in] input_zp ResId representing the input_zp to the AvgPool2d Operator
+    /// @param[in] output_zp ResId representing the output_zp to the AvgPool2d Operator
     /// @param[in] kernel Attribute representing the kernel to the AvgPool2d Operator
     /// @param[in] stride Attribute representing the stride to the AvgPool2d Operator
     /// @param[in] pad Attribute representing the pad to the AvgPool2d Operator
-    /// @param[in] acc_size Attribute representing the acc_size to the AvgPool2d Operator
-    /// @param[in] input_zp Attribute representing the input_zp to the AvgPool2d Operator
-    /// @param[in] output_zp Attribute representing the output_zp to the AvgPool2d Operator
+    /// @param[in] acc_type Attribute representing the acc_type to the AvgPool2d Operator
     /// @param[in] output Tensor representing the output to the AvgPool2d Operator
     ResId AddAvgPool2dOperator(const ResId& input,
+                               const ResId& input_zp,
+                               const ResId& output_zp,
                                const Attribute& kernel,
                                const Attribute& stride,
                                const Attribute& pad,
-                               const Attribute& acc_size,
-                               const Attribute& input_zp,
-                               const Attribute& output_zp,
+                               const Attribute& acc_type,
                                const Tensor& output)
     {
         return AddOperator(OperatorEnum::AvgPool2d,
-                           {input},
+                           {input, input_zp, output_zp},
                            {output},
-                           {kernel, stride, pad, acc_size, input_zp, output_zp})[0];
+                           {kernel, stride, pad, acc_type})[0];
     }
 
     /// Function used to add a Conv2d operator to the Graph
     /// @param[in] input ResId representing the input to the Conv2d Operator
     /// @param[in] weight ResId representing the weight to the Conv2d Operator
     /// @param[in] bias ResId representing the bias to the Conv2d Operator
+    /// @param[in] input_zp ResId representing the input_zp to the Conv2d Operator
+    /// @param[in] weight_zp ResId representing the weight_zp to the Conv2d Operator
     /// @param[in] pad Attribute representing the pad to the Conv2d Operator
     /// @param[in] stride Attribute representing the stride to the Conv2d Operator
     /// @param[in] dilation Attribute representing the dilation to the Conv2d Operator
-    /// @param[in] input_zp Attribute representing the input_zp to the Conv2d Operator
-    /// @param[in] weight_zp Attribute representing the weight_zp to the Conv2d Operator
+    /// @param[in] acc_type Attribute representing the acc_type to the Conv2d Operator
     /// @param[in] local_bound Attribute representing the local_bound to the Conv2d Operator
     /// @param[in] output Tensor representing the output to the Conv2d Operator
     ResId AddConv2dOperator(const ResId& input,
                             const ResId& weight,
                             const ResId& bias,
+                            const ResId& input_zp,
+                            const ResId& weight_zp,
                             const Attribute& pad,
                             const Attribute& stride,
                             const Attribute& dilation,
-                            const Attribute& input_zp,
-                            const Attribute& weight_zp,
+                            const Attribute& acc_type,
                             const Attribute& local_bound,
                             const Tensor& output)
     {
         return AddOperator(OperatorEnum::Conv2d,
-                           {input, weight, bias},
+                           {input, weight, bias, input_zp, weight_zp},
                            {output},
-                           {pad, stride, dilation, input_zp, weight_zp, local_bound})[0];
+                           {pad, stride, dilation, acc_type, local_bound})[0];
     }
 
     /// Function used to add a Conv3d operator to the Graph
     /// @param[in] input ResId representing the input to the Conv3d Operator
     /// @param[in] weight ResId representing the weight to the Conv3d Operator
     /// @param[in] bias ResId representing the bias to the Conv3d Operator
+    /// @param[in] input_zp ResId representing the input_zp to the Conv3d Operator
+    /// @param[in] weight_zp ResId representing the weight_zp to the Conv3d Operator
     /// @param[in] pad Attribute representing the pad to the Conv3d Operator
     /// @param[in] stride Attribute representing the stride to the Conv3d Operator
     /// @param[in] dilation Attribute representing the dilation to the Conv3d Operator
-    /// @param[in] input_zp Attribute representing the input_zp to the Conv3d Operator
-    /// @param[in] weight_zp Attribute representing the weight_zp to the Conv3d Operator
+    /// @param[in] acc_type Attribute representing the acc_type to the Conv3d Operator
     /// @param[in] local_bound Attribute representing the local_bound to the Conv3d Operator
     /// @param[in] output Tensor representing the output to the Conv3d Operator
     ResId AddConv3dOperator(const ResId& input,
                             const ResId& weight,
                             const ResId& bias,
+                            const ResId& input_zp,
+                            const ResId& weight_zp,
                             const Attribute& pad,
                             const Attribute& stride,
                             const Attribute& dilation,
-                            const Attribute& input_zp,
-                            const Attribute& weight_zp,
+                            const Attribute& acc_type,
                             const Attribute& local_bound,
                             const Tensor& output)
     {
         return AddOperator(OperatorEnum::Conv3d,
-                           {input, weight, bias},
+                           {input, weight, bias, input_zp, weight_zp},
                            {output},
-                           {pad, stride, dilation, input_zp, weight_zp, local_bound})[0];
+                           {pad, stride, dilation, acc_type, local_bound})[0];
     }
 
     /// Function used to add a DepthwiseConv2d operator to the Graph
     /// @param[in] input ResId representing the input to the DepthwiseConv2d Operator
     /// @param[in] weight ResId representing the weight to the DepthwiseConv2d Operator
     /// @param[in] bias ResId representing the bias to the DepthwiseConv2d Operator
+    /// @param[in] input_zp ResId representing the input_zp to the DepthwiseConv2d Operator
+    /// @param[in] weight_zp ResId representing the weight_zp to the DepthwiseConv2d Operator
     /// @param[in] pad Attribute representing the pad to the DepthwiseConv2d Operator
     /// @param[in] stride Attribute representing the stride to the DepthwiseConv2d Operator
     /// @param[in] dilation Attribute representing the dilation to the DepthwiseConv2d Operator
-    /// @param[in] input_zp Attribute representing the input_zp to the DepthwiseConv2d Operator
-    /// @param[in] weight_zp Attribute representing the weight_zp to the DepthwiseConv2d Operator
+    /// @param[in] acc_type Attribute representing the acc_type to the DepthwiseConv2d Operator
     /// @param[in] local_bound Attribute representing the local_bound to the DepthwiseConv2d Operator
     /// @param[in] output Tensor representing the output to the DepthwiseConv2d Operator
     ResId AddDepthwiseConv2dOperator(const ResId& input,
                                      const ResId& weight,
                                      const ResId& bias,
+                                     const ResId& input_zp,
+                                     const ResId& weight_zp,
                                      const Attribute& pad,
                                      const Attribute& stride,
                                      const Attribute& dilation,
-                                     const Attribute& input_zp,
-                                     const Attribute& weight_zp,
+                                     const Attribute& acc_type,
                                      const Attribute& local_bound,
                                      const Tensor& output)
     {
         return AddOperator(OperatorEnum::DepthwiseConv2d,
-                           {input, weight, bias},
+                           {input, weight, bias, input_zp, weight_zp},
                            {output},
-                           {pad, stride, dilation, input_zp, weight_zp, local_bound})[0];
+                           {pad, stride, dilation, acc_type, local_bound})[0];
     }
 
     /// Function used to add a Fft2d operator to the Graph
     /// @param[in] input_real ResId representing the input_real to the Fft2d Operator
     /// @param[in] input_imag ResId representing the input_imag to the Fft2d Operator
     /// @param[in] inverse Attribute representing the inverse to the Fft2d Operator
-    /// @param[in] output_real Tensor representing the output_real to the Fft2d Operator
     /// @param[in] local_bound Attribute representing the local_bound to the Fft2d Operator
+    /// @param[in] output_real Tensor representing the output_real to the Fft2d Operator
     /// @param[in] output_imag Tensor representing the output_imag to the Fft2d Operator
     std::vector<ResId> AddFft2dOperator(const ResId& input_real,
                                         const ResId& input_imag,
                                         const Attribute& inverse,
-                                        const Tensor& output_real,
                                         const Attribute& local_bound,
+                                        const Tensor& output_real,
                                         const Tensor& output_imag)
     {
         return AddOperator(OperatorEnum::Fft2d,
@@ -216,36 +223,15 @@ class Graph
                            {inverse, local_bound});
     }
 
-    /// Function used to add a FullyConnected operator to the Graph
-    /// @param[in] input ResId representing the input to the FullyConnected Operator
-    /// @param[in] weight ResId representing the weight to the FullyConnected Operator
-    /// @param[in] bias ResId representing the bias to the FullyConnected Operator
-    /// @param[in] input_zp Attribute representing the input_zp to the FullyConnected Operator
-    /// @param[in] weight_zp Attribute representing the weight_zp to the FullyConnected Operator
-    /// @param[in] output Tensor representing the output to the FullyConnected Operator
-    ResId AddFullyConnectedOperator(const ResId& input,
-                                    const ResId& weight,
-                                    const ResId& bias,
-                                    const Attribute& input_zp,
-                                    const Attribute& weight_zp,
-                                    const Tensor& output)
-    {
-        return AddOperator(OperatorEnum::FullyConnected, {input, weight, bias}, {output}, {input_zp, weight_zp})[0];
-    }
-
     /// Function used to add a Matmul operator to the Graph
     /// @param[in] A ResId representing the A to the Matmul Operator
     /// @param[in] B ResId representing the B to the Matmul Operator
-    /// @param[in] A_zp Attribute representing the A_zp to the Matmul Operator
-    /// @param[in] B_zp Attribute representing the B_zp to the Matmul Operator
+    /// @param[in] A_zp ResId representing the A_zp to the Matmul Operator
+    /// @param[in] B_zp ResId representing the B_zp to the Matmul Operator
     /// @param[in] output Tensor representing the output to the Matmul Operator
-    ResId AddMatmulOperator(const ResId& A,
-                            const ResId& B,
-                            const Attribute& A_zp,
-                            const Attribute& B_zp,
-                            const Tensor& output)
+    ResId AddMatmulOperator(const ResId& A, const ResId& B, const ResId& A_zp, const ResId& B_zp, const Tensor& output)
     {
-        return AddOperator(OperatorEnum::Matmul, {A, B}, {output}, {A_zp, B_zp})[0];
+        return AddOperator(OperatorEnum::Matmul, {A, B, A_zp, B_zp}, {output})[0];
     }
 
     /// Function used to add a MaxPool2d operator to the Graph
@@ -253,61 +239,72 @@ class Graph
     /// @param[in] kernel Attribute representing the kernel to the MaxPool2d Operator
     /// @param[in] stride Attribute representing the stride to the MaxPool2d Operator
     /// @param[in] pad Attribute representing the pad to the MaxPool2d Operator
+    /// @param[in] nan_mode Attribute representing the nan_mode to the MaxPool2d Operator
     /// @param[in] output Tensor representing the output to the MaxPool2d Operator
     ResId AddMaxPool2dOperator(const ResId& input,
                                const Attribute& kernel,
                                const Attribute& stride,
                                const Attribute& pad,
+                               const Attribute& nan_mode,
                                const Tensor& output)
     {
-        return AddOperator(OperatorEnum::MaxPool2d, {input}, {output}, {kernel, stride, pad})[0];
+        return AddOperator(OperatorEnum::MaxPool2d, {input}, {output}, {kernel, stride, pad, nan_mode})[0];
     }
 
     /// Function used to add a Rfft2d operator to the Graph
-    /// @param[in] input ResId representing the input to the Rfft2d Operator
+    /// @param[in] input_real ResId representing the input_real to the Rfft2d Operator
+    /// @param[in] local_bound Attribute representing the local_bound to the Rfft2d Operator
     /// @param[in] output_real Tensor representing the output_real to the Rfft2d Operator
     /// @param[in] output_imag Tensor representing the output_imag to the Rfft2d Operator
-    std::vector<ResId> AddRfft2dOperator(const ResId& input, const Tensor& output_real, const Tensor& output_imag)
+    std::vector<ResId> AddRfft2dOperator(const ResId& input_real,
+                                         const Attribute& local_bound,
+                                         const Tensor& output_real,
+                                         const Tensor& output_imag)
     {
-        return AddOperator(OperatorEnum::Rfft2d, {input}, {output_real, output_imag});
+        return AddOperator(OperatorEnum::Rfft2d, {input_real}, {output_real, output_imag}, {local_bound});
     }
 
     /// Function used to add a TransposeConv2d operator to the Graph
     /// @param[in] input ResId representing the input to the TransposeConv2d Operator
     /// @param[in] weight ResId representing the weight to the TransposeConv2d Operator
     /// @param[in] bias ResId representing the bias to the TransposeConv2d Operator
+    /// @param[in] input_zp ResId representing the input_zp to the TransposeConv2d Operator
+    /// @param[in] weight_zp ResId representing the weight_zp to the TransposeConv2d Operator
     /// @param[in] out_pad Attribute representing the out_pad to the TransposeConv2d Operator
     /// @param[in] stride Attribute representing the stride to the TransposeConv2d Operator
-    /// @param[in] out_shape Attribute representing the out_shape to the TransposeConv2d Operator
-    /// @param[in] input_zp Attribute representing the input_zp to the TransposeConv2d Operator
-    /// @param[in] weight_zp Attribute representing the weight_zp to the TransposeConv2d Operator
+    /// @param[in] acc_type Attribute representing the acc_type to the TransposeConv2d Operator
     /// @param[in] local_bound Attribute representing the local_bound to the TransposeConv2d Operator
     /// @param[in] output Tensor representing the output to the TransposeConv2d Operator
     ResId AddTransposeConv2dOperator(const ResId& input,
                                      const ResId& weight,
                                      const ResId& bias,
+                                     const ResId& input_zp,
+                                     const ResId& weight_zp,
                                      const Attribute& out_pad,
                                      const Attribute& stride,
-                                     const Attribute& out_shape,
-                                     const Attribute& input_zp,
-                                     const Attribute& weight_zp,
+                                     const Attribute& acc_type,
                                      const Attribute& local_bound,
                                      const Tensor& output)
     {
         return AddOperator(OperatorEnum::TransposeConv2d,
-                           {input, weight, bias},
+                           {input, weight, bias, input_zp, weight_zp},
                            {output},
-                           {out_pad, stride, out_shape, input_zp, weight_zp, local_bound})[0];
+                           {out_pad, stride, acc_type, local_bound})[0];
     }
 
     /// Function used to add a Clamp operator to the Graph
     /// @param[in] input ResId representing the input to the Clamp Operator
     /// @param[in] min_val Attribute representing the min_val to the Clamp Operator
     /// @param[in] max_val Attribute representing the max_val to the Clamp Operator
+    /// @param[in] nan_mode Attribute representing the nan_mode to the Clamp Operator
     /// @param[in] output Tensor representing the output to the Clamp Operator
-    ResId AddClampOperator(const ResId& input, const Attribute& min_val, const Attribute& max_val, const Tensor& output)
+    ResId AddClampOperator(const ResId& input,
+                           const Attribute& min_val,
+                           const Attribute& max_val,
+                           const Attribute& nan_mode,
+                           const Tensor& output)
     {
-        return AddOperator(OperatorEnum::Clamp, {input}, {output}, {min_val, max_val})[0];
+        return AddOperator(OperatorEnum::Clamp, {input}, {output}, {min_val, max_val, nan_mode})[0];
     }
 
     /// Function used to add a Erf operator to the Graph
@@ -383,13 +380,13 @@ class Graph
         return AddOperator(OperatorEnum::BitwiseXor, {input1, input2}, {output})[0];
     }
 
-    /// Function used to add a Intdiv operator to the Graph
-    /// @param[in] input1 ResId representing the input1 to the Intdiv Operator
-    /// @param[in] input2 ResId representing the input2 to the Intdiv Operator
-    /// @param[in] output Tensor representing the output to the Intdiv Operator
-    ResId AddIntdivOperator(const ResId& input1, const ResId& input2, const Tensor& output)
+    /// Function used to add a IntDiv operator to the Graph
+    /// @param[in] input1 ResId representing the input1 to the IntDiv Operator
+    /// @param[in] input2 ResId representing the input2 to the IntDiv Operator
+    /// @param[in] output Tensor representing the output to the IntDiv Operator
+    ResId AddIntDivOperator(const ResId& input1, const ResId& input2, const Tensor& output)
     {
-        return AddOperator(OperatorEnum::Intdiv, {input1, input2}, {output})[0];
+        return AddOperator(OperatorEnum::IntDiv, {input1, input2}, {output})[0];
     }
 
     /// Function used to add a LogicalAnd operator to the Graph
@@ -440,29 +437,31 @@ class Graph
     /// Function used to add a Maximum operator to the Graph
     /// @param[in] input1 ResId representing the input1 to the Maximum Operator
     /// @param[in] input2 ResId representing the input2 to the Maximum Operator
+    /// @param[in] nan_mode Attribute representing the nan_mode to the Maximum Operator
     /// @param[in] output Tensor representing the output to the Maximum Operator
-    ResId AddMaximumOperator(const ResId& input1, const ResId& input2, const Tensor& output)
+    ResId AddMaximumOperator(const ResId& input1, const ResId& input2, const Attribute& nan_mode, const Tensor& output)
     {
-        return AddOperator(OperatorEnum::Maximum, {input1, input2}, {output})[0];
+        return AddOperator(OperatorEnum::Maximum, {input1, input2}, {output}, {nan_mode})[0];
     }
 
     /// Function used to add a Minimum operator to the Graph
     /// @param[in] input1 ResId representing the input1 to the Minimum Operator
     /// @param[in] input2 ResId representing the input2 to the Minimum Operator
+    /// @param[in] nan_mode Attribute representing the nan_mode to the Minimum Operator
     /// @param[in] output Tensor representing the output to the Minimum Operator
-    ResId AddMinimumOperator(const ResId& input1, const ResId& input2, const Tensor& output)
+    ResId AddMinimumOperator(const ResId& input1, const ResId& input2, const Attribute& nan_mode, const Tensor& output)
     {
-        return AddOperator(OperatorEnum::Minimum, {input1, input2}, {output})[0];
+        return AddOperator(OperatorEnum::Minimum, {input1, input2}, {output}, {nan_mode})[0];
     }
 
     /// Function used to add a Mul operator to the Graph
     /// @param[in] input1 ResId representing the input1 to the Mul Operator
     /// @param[in] input2 ResId representing the input2 to the Mul Operator
-    /// @param[in] shift Attribute representing the shift to the Mul Operator
+    /// @param[in] shift ResId representing the shift to the Mul Operator
     /// @param[in] output Tensor representing the output to the Mul Operator
-    ResId AddMulOperator(const ResId& input1, const ResId& input2, const Attribute& shift, const Tensor& output)
+    ResId AddMulOperator(const ResId& input1, const ResId& input2, const ResId& shift, const Tensor& output)
     {
-        return AddOperator(OperatorEnum::Mul, {input1, input2}, {output}, {shift})[0];
+        return AddOperator(OperatorEnum::Mul, {input1, input2, shift}, {output})[0];
     }
 
     /// Function used to add a Pow operator to the Graph
@@ -484,12 +483,12 @@ class Graph
     }
 
     /// Function used to add a Table operator to the Graph
-    /// @param[in] input ResId representing the input to the Table Operator
-    /// @param[in] table Attribute representing the table to the Table Operator
+    /// @param[in] input1 ResId representing the input1 to the Table Operator
+    /// @param[in] table ResId representing the table to the Table Operator
     /// @param[in] output Tensor representing the output to the Table Operator
-    ResId AddTableOperator(const ResId& input, const Attribute& table, const Tensor& output)
+    ResId AddTableOperator(const ResId& input1, const ResId& table, const Tensor& output)
     {
-        return AddOperator(OperatorEnum::Table, {input}, {output}, {table})[0];
+        return AddOperator(OperatorEnum::Table, {input1, table}, {output})[0];
     }
 
     /// Function used to add a Abs operator to the Graph
@@ -522,6 +521,14 @@ class Graph
     ResId AddClzOperator(const ResId& input1, const Tensor& output)
     {
         return AddOperator(OperatorEnum::Clz, {input1}, {output})[0];
+    }
+
+    /// Function used to add a Cos operator to the Graph
+    /// @param[in] input1 ResId representing the input1 to the Cos Operator
+    /// @param[in] output Tensor representing the output to the Cos Operator
+    ResId AddCosOperator(const ResId& input1, const Tensor& output)
+    {
+        return AddOperator(OperatorEnum::Cos, {input1}, {output})[0];
     }
 
     /// Function used to add a Exp operator to the Graph
@@ -558,13 +565,12 @@ class Graph
 
     /// Function used to add a Negate operator to the Graph
     /// @param[in] input1 ResId representing the input1 to the Negate Operator
-    /// @param[in] input1_zp Attribute representing the input1_zp to the Negate Operator
-    /// @param[in] output_zp Attribute representing the output_zp to the Negate Operator
+    /// @param[in] input1_zp ResId representing the input1_zp to the Negate Operator
+    /// @param[in] output_zp ResId representing the output_zp to the Negate Operator
     /// @param[in] output Tensor representing the output to the Negate Operator
-    ResId
-    AddNegateOperator(const ResId& input1, const Attribute& input1_zp, const Attribute& output_zp, const Tensor& output)
+    ResId AddNegateOperator(const ResId& input1, const ResId& input1_zp, const ResId& output_zp, const Tensor& output)
     {
-        return AddOperator(OperatorEnum::Negate, {input1}, {output}, {input1_zp, output_zp})[0];
+        return AddOperator(OperatorEnum::Negate, {input1, input1_zp, output_zp}, {output})[0];
     }
 
     /// Function used to add a Reciprocal operator to the Graph
@@ -581,6 +587,14 @@ class Graph
     ResId AddRsqrtOperator(const ResId& input1, const Tensor& output)
     {
         return AddOperator(OperatorEnum::Rsqrt, {input1}, {output})[0];
+    }
+
+    /// Function used to add a Sin operator to the Graph
+    /// @param[in] input1 ResId representing the input1 to the Sin Operator
+    /// @param[in] output Tensor representing the output to the Sin Operator
+    ResId AddSinOperator(const ResId& input1, const Tensor& output)
+    {
+        return AddOperator(OperatorEnum::Sin, {input1}, {output})[0];
     }
 
     /// Function used to add a Select operator to the Graph
@@ -641,19 +655,23 @@ class Graph
     /// Function used to add a ReduceMax operator to the Graph
     /// @param[in] input ResId representing the input to the ReduceMax Operator
     /// @param[in] axis Attribute representing the axis to the ReduceMax Operator
+    /// @param[in] nan_mode Attribute representing the nan_mode to the ReduceMax Operator
     /// @param[in] output Tensor representing the output to the ReduceMax Operator
-    ResId AddReduceMaxOperator(const ResId& input, const Attribute& axis, const Tensor& output)
+    ResId
+    AddReduceMaxOperator(const ResId& input, const Attribute& axis, const Attribute& nan_mode, const Tensor& output)
     {
-        return AddOperator(OperatorEnum::ReduceMax, {input}, {output}, {axis})[0];
+        return AddOperator(OperatorEnum::ReduceMax, {input}, {output}, {axis, nan_mode})[0];
     }
 
     /// Function used to add a ReduceMin operator to the Graph
     /// @param[in] input ResId representing the input to the ReduceMin Operator
     /// @param[in] axis Attribute representing the axis to the ReduceMin Operator
+    /// @param[in] nan_mode Attribute representing the nan_mode to the ReduceMin Operator
     /// @param[in] output Tensor representing the output to the ReduceMin Operator
-    ResId AddReduceMinOperator(const ResId& input, const Attribute& axis, const Tensor& output)
+    ResId
+    AddReduceMinOperator(const ResId& input, const Attribute& axis, const Attribute& nan_mode, const Tensor& output)
     {
-        return AddOperator(OperatorEnum::ReduceMin, {input}, {output}, {axis})[0];
+        return AddOperator(OperatorEnum::ReduceMin, {input}, {output}, {axis, nan_mode})[0];
     }
 
     /// Function used to add a ReduceProduct operator to the Graph
@@ -685,50 +703,49 @@ class Graph
 
     /// Function used to add a Pad operator to the Graph
     /// @param[in] input1 ResId representing the input1 to the Pad Operator
-    /// @param[in] padding Attribute representing the padding to the Pad Operator
-    /// @param[in] pad_const Attribute representing the pad_const to the Pad Operator
+    /// @param[in] padding ResId representing the padding to the Pad Operator
+    /// @param[in] pad_const ResId representing the pad_const to the Pad Operator
     /// @param[in] output Tensor representing the output to the Pad Operator
-    ResId
-    AddPadOperator(const ResId& input1, const Attribute& padding, const Attribute& pad_const, const Tensor& output)
+    ResId AddPadOperator(const ResId& input1, const ResId& padding, const ResId& pad_const, const Tensor& output)
     {
-        return AddOperator(OperatorEnum::Pad, {input1}, {output}, {padding, pad_const})[0];
+        return AddOperator(OperatorEnum::Pad, {input1, padding, pad_const}, {output})[0];
     }
 
     /// Function used to add a Reshape operator to the Graph
     /// @param[in] input1 ResId representing the input1 to the Reshape Operator
-    /// @param[in] shape Attribute representing the shape to the Reshape Operator
+    /// @param[in] shape ResId representing the shape to the Reshape Operator
     /// @param[in] output Tensor representing the output to the Reshape Operator
-    ResId AddReshapeOperator(const ResId& input1, const Attribute& shape, const Tensor& output)
+    ResId AddReshapeOperator(const ResId& input1, const ResId& shape, const Tensor& output)
     {
-        return AddOperator(OperatorEnum::Reshape, {input1}, {output}, {shape})[0];
+        return AddOperator(OperatorEnum::Reshape, {input1, shape}, {output})[0];
     }
 
     /// Function used to add a Reverse operator to the Graph
-    /// @param[in] input ResId representing the input to the Reverse Operator
+    /// @param[in] input1 ResId representing the input1 to the Reverse Operator
     /// @param[in] axis Attribute representing the axis to the Reverse Operator
     /// @param[in] output Tensor representing the output to the Reverse Operator
-    ResId AddReverseOperator(const ResId& input, const Attribute& axis, const Tensor& output)
+    ResId AddReverseOperator(const ResId& input1, const Attribute& axis, const Tensor& output)
     {
-        return AddOperator(OperatorEnum::Reverse, {input}, {output}, {axis})[0];
+        return AddOperator(OperatorEnum::Reverse, {input1}, {output}, {axis})[0];
     }
 
     /// Function used to add a Slice operator to the Graph
     /// @param[in] input1 ResId representing the input1 to the Slice Operator
-    /// @param[in] start Attribute representing the start to the Slice Operator
-    /// @param[in] size Attribute representing the size to the Slice Operator
+    /// @param[in] start ResId representing the start to the Slice Operator
+    /// @param[in] size ResId representing the size to the Slice Operator
     /// @param[in] output Tensor representing the output to the Slice Operator
-    ResId AddSliceOperator(const ResId& input1, const Attribute& start, const Attribute& size, const Tensor& output)
+    ResId AddSliceOperator(const ResId& input1, const ResId& start, const ResId& size, const Tensor& output)
     {
-        return AddOperator(OperatorEnum::Slice, {input1}, {output}, {start, size})[0];
+        return AddOperator(OperatorEnum::Slice, {input1, start, size}, {output})[0];
     }
 
     /// Function used to add a Tile operator to the Graph
     /// @param[in] input1 ResId representing the input1 to the Tile Operator
-    /// @param[in] multiples Attribute representing the multiples to the Tile Operator
+    /// @param[in] multiples ResId representing the multiples to the Tile Operator
     /// @param[in] output Tensor representing the output to the Tile Operator
-    ResId AddTileOperator(const ResId& input1, const Attribute& multiples, const Tensor& output)
+    ResId AddTileOperator(const ResId& input1, const ResId& multiples, const Tensor& output)
     {
-        return AddOperator(OperatorEnum::Tile, {input1}, {output}, {multiples})[0];
+        return AddOperator(OperatorEnum::Tile, {input1, multiples}, {output})[0];
     }
 
     /// Function used to add a Transpose operator to the Graph
@@ -761,19 +778,19 @@ class Graph
 
     /// Function used to add a Resize operator to the Graph
     /// @param[in] input ResId representing the input to the Resize Operator
-    /// @param[in] scale Attribute representing the scale to the Resize Operator
-    /// @param[in] offset Attribute representing the offset to the Resize Operator
-    /// @param[in] border Attribute representing the border to the Resize Operator
+    /// @param[in] scale ResId representing the scale to the Resize Operator
+    /// @param[in] offset ResId representing the offset to the Resize Operator
+    /// @param[in] border ResId representing the border to the Resize Operator
     /// @param[in] mode Attribute representing the mode to the Resize Operator
     /// @param[in] output Tensor representing the output to the Resize Operator
     ResId AddResizeOperator(const ResId& input,
-                            const Attribute& scale,
-                            const Attribute& offset,
-                            const Attribute& border,
+                            const ResId& scale,
+                            const ResId& offset,
+                            const ResId& border,
                             const Attribute& mode,
                             const Tensor& output)
     {
-        return AddOperator(OperatorEnum::Resize, {input}, {output}, {scale, offset, border, mode})[0];
+        return AddOperator(OperatorEnum::Resize, {input, scale, offset, border}, {output}, {mode})[0];
     }
 
     /// Function used to add a Cast operator to the Graph
@@ -786,40 +803,32 @@ class Graph
 
     /// Function used to add a Rescale operator to the Graph
     /// @param[in] input ResId representing the input to the Rescale Operator
-    /// @param[in] output Tensor representing the output to the Rescale Operator
-    /// @param[in] input_zp Attribute representing the input_zp to the Rescale Operator
-    /// @param[in] output_zp Attribute representing the output_zp to the Rescale Operator
-    /// @param[in] multiplier Attribute representing the multiplier to the Rescale Operator
-    /// @param[in] shift Attribute representing the shift to the Rescale Operator
+    /// @param[in] multiplier ResId representing the multiplier to the Rescale Operator
+    /// @param[in] shift ResId representing the shift to the Rescale Operator
+    /// @param[in] input_zp ResId representing the input_zp to the Rescale Operator
+    /// @param[in] output_zp ResId representing the output_zp to the Rescale Operator
     /// @param[in] scale32 Attribute representing the scale32 to the Rescale Operator
-    /// @param[in] double_round Attribute representing the double_round to the Rescale Operator
+    /// @param[in] rounding_mode Attribute representing the rounding_mode to the Rescale Operator
     /// @param[in] per_channel Attribute representing the per_channel to the Rescale Operator
     /// @param[in] input_unsigned Attribute representing the input_unsigned to the Rescale Operator
     /// @param[in] output_unsigned Attribute representing the output_unsigned to the Rescale Operator
+    /// @param[in] output Tensor representing the output to the Rescale Operator
     ResId AddRescaleOperator(const ResId& input,
-                             const Tensor& output,
-                             const Attribute& input_zp,
-                             const Attribute& output_zp,
-                             const Attribute& multiplier,
-                             const Attribute& shift,
+                             const ResId& multiplier,
+                             const ResId& shift,
+                             const ResId& input_zp,
+                             const ResId& output_zp,
                              const Attribute& scale32,
-                             const Attribute& double_round,
+                             const Attribute& rounding_mode,
                              const Attribute& per_channel,
                              const Attribute& input_unsigned,
-                             const Attribute& output_unsigned)
+                             const Attribute& output_unsigned,
+                             const Tensor& output)
     {
         return AddOperator(OperatorEnum::Rescale,
-                           {input},
+                           {input, multiplier, shift, input_zp, output_zp},
                            {output},
-                           {input_zp,
-                            output_zp,
-                            multiplier,
-                            shift,
-                            scale32,
-                            double_round,
-                            per_channel,
-                            input_unsigned,
-                            output_unsigned})[0];
+                           {scale32, rounding_mode, per_channel, input_unsigned, output_unsigned})[0];
     }
 
     // GRAPH OPERATOR HELPER FUNCTION END

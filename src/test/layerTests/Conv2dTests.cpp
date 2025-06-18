@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// THIS FILE IS GENERATED WITH TOSA 0.80.0.
+// THIS FILE IS GENERATED WITH TOSA 1.0.0.
 // See tosa2spirv/python/code_generator.py and README
 
 #include <AssemblyUtils.hpp>
@@ -27,16 +27,35 @@ TEST(TOSA2SPIRV_LAYERS, Conv2d)
 
     auto bias = graph.AddInput(Tensor(DataType::int32_t, std::vector<unsigned int>{1, 1, 1, 1}), 0);
 
+    auto input_zp_attr = Attribute({1, 1, 1, 1}, DataType::int8_t);
+    auto input_zp = graph.AddTensorConstant(input_zp_attr);
+
+    auto weight_zp_attr = Attribute({1, 1, 1, 1}, DataType::int8_t);
+    auto weight_zp = graph.AddTensorConstant(weight_zp_attr);
+
     auto pad = Attribute({1, 1, 1, 1}, DataType::int32_t);
+
     auto stride = Attribute({1, 1}, DataType::int32_t);
+
     auto dilation = Attribute({1, 1}, DataType::int32_t);
-    auto input_zp = Attribute({1}, DataType::int8_t);
-    auto weight_zp = Attribute({1}, DataType::int8_t);
+
+    auto acc_type = Attribute({1}, DataType::int32_t);
+
     auto local_bound = Attribute({1}, DataType::bool_t);
+
     auto output = Tensor(DataType::int32_t, std::vector<unsigned int>{1, 1, 1, 1});
 
-    const auto res =
-        graph.AddConv2dOperator(input, weight, bias, pad, stride, dilation, input_zp, weight_zp, local_bound, output);
+    const auto res = graph.AddConv2dOperator(input,
+                                             weight,
+                                             bias,
+                                             input_zp,
+                                             weight_zp,
+                                             pad,
+                                             stride,
+                                             dilation,
+                                             acc_type,
+                                             local_bound,
+                                             output);
     graph.AddOutput(res, 0);
     graph.FinalizeGraph();
 
@@ -46,12 +65,20 @@ TEST(TOSA2SPIRV_LAYERS, Conv2d)
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "CONV2D", outputStr);
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "CONV2D", outputStr);
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "CONV2D", outputStr);
+
+    testutils::CheckConstCompositeTensor({1}, "CONV2D", outputStr, 8, "uchar");
+
+    testutils::CheckConstCompositeTensor({1}, "CONV2D", outputStr, 9, "uchar");
+
     testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "CONV2D", outputStr, 0);
+
     testutils::CheckConstCompositeTensor({1, 1}, "CONV2D", outputStr, 1);
+
     testutils::CheckConstCompositeTensor({1, 1}, "CONV2D", outputStr, 2);
-    testutils::CheckConstant(DataType::int8_t, "CONV2D", outputStr, 1, 3);
-    testutils::CheckConstant(DataType::int8_t, "CONV2D", outputStr, 1, 4);
-    testutils::CheckBoolConstant(DataType::bool_t, "CONV2D", outputStr, true, 5);
+
+    testutils::CheckConstant(DataType::int32_t, "CONV2D", outputStr, 1, 3);
+
+    testutils::CheckBoolConstant(DataType::bool_t, "CONV2D", outputStr, 1, 4);
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "CONV2D", outputStr);
 
     // Write binary a second time to ensure IDs remain consistent.
@@ -61,11 +88,19 @@ TEST(TOSA2SPIRV_LAYERS, Conv2d)
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "CONV2D", outputStr);
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "CONV2D", outputStr);
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "CONV2D", outputStr);
+
+    testutils::CheckConstCompositeTensor({1}, "CONV2D", outputStr, 8, "uchar");
+
+    testutils::CheckConstCompositeTensor({1}, "CONV2D", outputStr, 9, "uchar");
+
     testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "CONV2D", outputStr, 0);
+
     testutils::CheckConstCompositeTensor({1, 1}, "CONV2D", outputStr, 1);
+
     testutils::CheckConstCompositeTensor({1, 1}, "CONV2D", outputStr, 2);
-    testutils::CheckConstant(DataType::int8_t, "CONV2D", outputStr, 1, 3);
-    testutils::CheckConstant(DataType::int8_t, "CONV2D", outputStr, 1, 4);
-    testutils::CheckBoolConstant(DataType::bool_t, "CONV2D", outputStr, true, 5);
+
+    testutils::CheckConstant(DataType::int32_t, "CONV2D", outputStr, 1, 3);
+
+    testutils::CheckBoolConstant(DataType::bool_t, "CONV2D", outputStr, 1, 4);
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "CONV2D", outputStr);
 }

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// THIS FILE IS GENERATED WITH TOSA 0.80.0. DO NOT EDIT!
+// THIS FILE IS GENERATED WITH TOSA 1.0.0. DO NOT EDIT!
 // See tosa2spirv/python/code_generator.py and README
 
 #include <AssemblyUtils.hpp>
@@ -18,105 +18,161 @@ TEST(TOSA2SPIRV_PARSER, Concat)
 {
     int32_t axis = 1;
     // Create Attribute
-    TosaAxisAttribute attribute(axis);
+    TosaConcatAttribute attribute(axis);
 
     // Create Tensors
+    std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
+    std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
     std::string input1Name = "input1";
     std::string outputName = "output";
 
     std::vector<int32_t> input1Shape = {1, 1, 1, 1};
     std::vector<int32_t> outputShape = {1, 1, 1, 1};
 
-    auto* input1Tensor = new TosaSerializationTensor(input1Name, input1Shape, DType::DType_BOOL, {});
-    auto* outputTensor = new TosaSerializationTensor(outputName, outputShape, DType::DType_BOOL, {});
+    auto input1Tensor =
+        std::make_unique<TosaSerializationTensor>(input1Name, input1Shape, DType::DType_BOOL, std::vector<uint8_t>{});
+    tensors.push_back(std::move(input1Tensor));
+    auto outputTensor =
+        std::make_unique<TosaSerializationTensor>(outputName, outputShape, DType::DType_BOOL, std::vector<uint8_t>{});
+    tensors.push_back(std::move(outputTensor));
 
     // Create Operator
-    auto op = new tosa::TosaSerializationOperator(Op::Op_CONCAT,
-                                                  Attribute::Attribute_AxisAttribute,
-                                                  &attribute,
-                                                  {input1Name},
-                                                  {outputName});
+    auto op = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONCAT,
+                                                                Attribute::Attribute_ConcatAttribute,
+                                                                &attribute,
+                                                                std::vector<std::string>{input1Name},
+                                                                std::vector<std::string>{outputName});
+    ops.push_back(std::move(op));
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("concat", "main", {op}, {input1Tensor, outputTensor}, {input1Name}, {outputName});
+    TosaSerializationBasicBlock block("concat", "main", std::move(ops), std::move(tensors), {input1Name}, {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "CONCAT", outputStr);
+
     testutils::CheckConstant(DataType::int32_t, "CONCAT", outputStr, 1, 0);
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "CONCAT", outputStr);
 }
 
 TEST(TOSA2SPIRV_PARSER, Pad)
 {
-    std::vector<int32_t> padding = {1, 1, 1, 1};
-    int32_t pad_const_int = 1;
-    float pad_const_fp = 1;
-    // Create Attribute
-    TosaPadAttribute attribute(padding, pad_const_int, pad_const_fp);
-
     // Create Tensors
+    std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
+    std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
     std::string input1Name = "input1";
+    std::string paddingName = "padding";
+    std::string pad_constName = "pad_const";
     std::string outputName = "output";
 
     std::vector<int32_t> input1Shape = {1, 1, 1, 1};
+    std::vector<int32_t> paddingShape = {1, 1, 1, 1};
+    std::vector<int32_t> pad_constShape = {1};
     std::vector<int32_t> outputShape = {1, 1, 1, 1};
 
-    auto* input1Tensor = new TosaSerializationTensor(input1Name, input1Shape, DType::DType_BOOL, {});
-    auto* outputTensor = new TosaSerializationTensor(outputName, outputShape, DType::DType_BOOL, {});
+    auto input1Tensor =
+        std::make_unique<TosaSerializationTensor>(input1Name, input1Shape, DType::DType_BOOL, std::vector<uint8_t>{});
+    tensors.push_back(std::move(input1Tensor));
+    auto paddingTensor = std::make_unique<TosaSerializationTensor>(paddingName,
+                                                                   paddingShape,
+                                                                   DType::DType_INT32,
+                                                                   std::vector<uint8_t>{1, 1, 1, 1});
+    tensors.push_back(std::move(paddingTensor));
+    auto paddingOp = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST,
+                                                                       Attribute::Attribute_NONE,
+                                                                       nullptr,
+                                                                       std::vector<std::string>{},
+                                                                       std::vector<std::string>{paddingName});
+    ops.push_back(std::move(paddingOp));
+    auto pad_constTensor = std::make_unique<TosaSerializationTensor>(pad_constName,
+                                                                     pad_constShape,
+                                                                     DType::DType_BOOL,
+                                                                     std::vector<uint8_t>{1});
+    tensors.push_back(std::move(pad_constTensor));
+    auto pad_constOp = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST,
+                                                                         Attribute::Attribute_NONE,
+                                                                         nullptr,
+                                                                         std::vector<std::string>{},
+                                                                         std::vector<std::string>{pad_constName});
+    ops.push_back(std::move(pad_constOp));
+    auto outputTensor =
+        std::make_unique<TosaSerializationTensor>(outputName, outputShape, DType::DType_BOOL, std::vector<uint8_t>{});
+    tensors.push_back(std::move(outputTensor));
 
     // Create Operator
-    auto op = new tosa::TosaSerializationOperator(Op::Op_PAD,
-                                                  Attribute::Attribute_PadAttribute,
-                                                  &attribute,
-                                                  {input1Name},
-                                                  {outputName});
+    auto op = std::make_unique<tosa::TosaSerializationOperator>(
+        Op::Op_PAD,
+        Attribute::Attribute_NONE,
+        nullptr,
+        std::vector<std::string>{input1Name, paddingName, pad_constName},
+        std::vector<std::string>{outputName});
+    ops.push_back(std::move(op));
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("pad", "main", {op}, {input1Tensor, outputTensor}, {input1Name}, {outputName});
+    TosaSerializationBasicBlock block("pad", "main", std::move(ops), std::move(tensors), {input1Name}, {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "PAD", outputStr);
-    testutils::CheckBoolConstant(DataType::bool_t, "PAD", outputStr, true, 0);
+
+    testutils::CheckGraphConstant({1, 1, 1, 1}, DataType::int32_t, "PAD", outputStr, 1, 0);
+
+    testutils::CheckConstCompositeTensor({1}, "PAD", outputStr, 2, "bool");
+
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "PAD", outputStr);
 }
 
 TEST(TOSA2SPIRV_PARSER, Reshape)
 {
-    std::vector<int32_t> shape = {1, 1, 1, 1};
-    // Create Attribute
-    TosaReshapeAttribute attribute(shape);
-
     // Create Tensors
+    std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
+    std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
     std::string input1Name = "input1";
+    std::string shapeName = "shape";
     std::string outputName = "output";
 
     std::vector<int32_t> input1Shape = {1, 1, 1, 1};
+    std::vector<int32_t> shapeShape = {1, 1, 1, 1};
     std::vector<int32_t> outputShape = {1, 1, 1, 1};
 
-    auto* input1Tensor = new TosaSerializationTensor(input1Name, input1Shape, DType::DType_BOOL, {});
-    auto* outputTensor = new TosaSerializationTensor(outputName, outputShape, DType::DType_BOOL, {});
+    auto input1Tensor =
+        std::make_unique<TosaSerializationTensor>(input1Name, input1Shape, DType::DType_BOOL, std::vector<uint8_t>{});
+    tensors.push_back(std::move(input1Tensor));
+    auto shapeTensor = std::make_unique<TosaSerializationTensor>(shapeName,
+                                                                 shapeShape,
+                                                                 DType::DType_INT32,
+                                                                 std::vector<uint8_t>{1, 1, 1, 1});
+    tensors.push_back(std::move(shapeTensor));
+    auto shapeOp = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST,
+                                                                     Attribute::Attribute_NONE,
+                                                                     nullptr,
+                                                                     std::vector<std::string>{},
+                                                                     std::vector<std::string>{shapeName});
+    ops.push_back(std::move(shapeOp));
+    auto outputTensor =
+        std::make_unique<TosaSerializationTensor>(outputName, outputShape, DType::DType_BOOL, std::vector<uint8_t>{});
+    tensors.push_back(std::move(outputTensor));
 
     // Create Operator
-    auto op = new tosa::TosaSerializationOperator(Op::Op_RESHAPE,
-                                                  Attribute::Attribute_ReshapeAttribute,
-                                                  &attribute,
-                                                  {input1Name},
-                                                  {outputName});
+    auto op = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_RESHAPE,
+                                                                Attribute::Attribute_NONE,
+                                                                nullptr,
+                                                                std::vector<std::string>{input1Name, shapeName},
+                                                                std::vector<std::string>{outputName});
+    ops.push_back(std::move(op));
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
     TosaSerializationBasicBlock block("reshape",
                                       "main",
-                                      {op},
-                                      {input1Tensor, outputTensor},
+                                      std::move(ops),
+                                      std::move(tensors),
                                       {input1Name},
                                       {outputName});
 
@@ -125,7 +181,9 @@ TEST(TOSA2SPIRV_PARSER, Reshape)
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "RESHAPE", outputStr);
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "RESHAPE", outputStr, 1);
+
+    testutils::CheckGraphConstant({1, 1, 1, 1}, DataType::int32_t, "RESHAPE", outputStr, 1, 0);
+
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "RESHAPE", outputStr);
 }
 
@@ -133,109 +191,172 @@ TEST(TOSA2SPIRV_PARSER, Reverse)
 {
     int32_t axis = 1;
     // Create Attribute
-    TosaAxisAttribute attribute(axis);
+    TosaReverseAttribute attribute(axis);
 
     // Create Tensors
-    std::string inputName = "input";
+    std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
+    std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
+    std::string input1Name = "input1";
     std::string outputName = "output";
 
-    std::vector<int32_t> inputShape = {1, 1, 1, 1};
+    std::vector<int32_t> input1Shape = {1, 1, 1, 1};
     std::vector<int32_t> outputShape = {1, 1, 1, 1};
 
-    auto* inputTensor = new TosaSerializationTensor(inputName, inputShape, DType::DType_BOOL, {});
-    auto* outputTensor = new TosaSerializationTensor(outputName, outputShape, DType::DType_BOOL, {});
+    auto input1Tensor =
+        std::make_unique<TosaSerializationTensor>(input1Name, input1Shape, DType::DType_BOOL, std::vector<uint8_t>{});
+    tensors.push_back(std::move(input1Tensor));
+    auto outputTensor =
+        std::make_unique<TosaSerializationTensor>(outputName, outputShape, DType::DType_BOOL, std::vector<uint8_t>{});
+    tensors.push_back(std::move(outputTensor));
 
     // Create Operator
-    auto op = new tosa::TosaSerializationOperator(Op::Op_REVERSE,
-                                                  Attribute::Attribute_AxisAttribute,
-                                                  &attribute,
-                                                  {inputName},
-                                                  {outputName});
+    auto op = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_REVERSE,
+                                                                Attribute::Attribute_ReverseAttribute,
+                                                                &attribute,
+                                                                std::vector<std::string>{input1Name},
+                                                                std::vector<std::string>{outputName});
+    ops.push_back(std::move(op));
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("reverse", "main", {op}, {inputTensor, outputTensor}, {inputName}, {outputName});
+    TosaSerializationBasicBlock block("reverse",
+                                      "main",
+                                      std::move(ops),
+                                      std::move(tensors),
+                                      {input1Name},
+                                      {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "REVERSE", outputStr);
+
     testutils::CheckConstant(DataType::int32_t, "REVERSE", outputStr, 1, 0);
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "REVERSE", outputStr);
 }
 
 TEST(TOSA2SPIRV_PARSER, Slice)
 {
-    std::vector<int32_t> start = {1, 1, 1, 1};
-    std::vector<int32_t> size = {1, 1, 1, 1};
-    // Create Attribute
-    TosaSliceAttribute attribute(start, size);
-
     // Create Tensors
+    std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
+    std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
     std::string input1Name = "input1";
+    std::string startName = "start";
+    std::string sizeName = "size";
     std::string outputName = "output";
 
     std::vector<int32_t> input1Shape = {1, 1, 1, 1};
+    std::vector<int32_t> startShape = {1, 1, 1, 1};
+    std::vector<int32_t> sizeShape = {1, 1, 1, 1};
     std::vector<int32_t> outputShape = {1, 1, 1, 1};
 
-    auto* input1Tensor = new TosaSerializationTensor(input1Name, input1Shape, DType::DType_BOOL, {});
-    auto* outputTensor = new TosaSerializationTensor(outputName, outputShape, DType::DType_BOOL, {});
+    auto input1Tensor =
+        std::make_unique<TosaSerializationTensor>(input1Name, input1Shape, DType::DType_BOOL, std::vector<uint8_t>{});
+    tensors.push_back(std::move(input1Tensor));
+    auto startTensor = std::make_unique<TosaSerializationTensor>(startName,
+                                                                 startShape,
+                                                                 DType::DType_INT32,
+                                                                 std::vector<uint8_t>{1, 1, 1, 1});
+    tensors.push_back(std::move(startTensor));
+    auto startOp = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST,
+                                                                     Attribute::Attribute_NONE,
+                                                                     nullptr,
+                                                                     std::vector<std::string>{},
+                                                                     std::vector<std::string>{startName});
+    ops.push_back(std::move(startOp));
+    auto sizeTensor = std::make_unique<TosaSerializationTensor>(sizeName,
+                                                                sizeShape,
+                                                                DType::DType_INT32,
+                                                                std::vector<uint8_t>{1, 1, 1, 1});
+    tensors.push_back(std::move(sizeTensor));
+    auto sizeOp = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST,
+                                                                    Attribute::Attribute_NONE,
+                                                                    nullptr,
+                                                                    std::vector<std::string>{},
+                                                                    std::vector<std::string>{sizeName});
+    ops.push_back(std::move(sizeOp));
+    auto outputTensor =
+        std::make_unique<TosaSerializationTensor>(outputName, outputShape, DType::DType_BOOL, std::vector<uint8_t>{});
+    tensors.push_back(std::move(outputTensor));
 
     // Create Operator
-    auto op = new tosa::TosaSerializationOperator(Op::Op_SLICE,
-                                                  Attribute::Attribute_SliceAttribute,
-                                                  &attribute,
-                                                  {input1Name},
-                                                  {outputName});
+    auto op =
+        std::make_unique<tosa::TosaSerializationOperator>(Op::Op_SLICE,
+                                                          Attribute::Attribute_NONE,
+                                                          nullptr,
+                                                          std::vector<std::string>{input1Name, startName, sizeName},
+                                                          std::vector<std::string>{outputName});
+    ops.push_back(std::move(op));
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("slice", "main", {op}, {input1Tensor, outputTensor}, {input1Name}, {outputName});
+    TosaSerializationBasicBlock block("slice", "main", std::move(ops), std::move(tensors), {input1Name}, {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "SLICE", outputStr);
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "SLICE", outputStr, 0);
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "SLICE", outputStr, 0);
+
+    testutils::CheckGraphConstant({1, 1, 1, 1}, DataType::int32_t, "SLICE", outputStr, 1, 0);
+
+    testutils::CheckGraphConstant({1, 1, 1, 1}, DataType::int32_t, "SLICE", outputStr, 2, 1);
+
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "SLICE", outputStr);
 }
 
 TEST(TOSA2SPIRV_PARSER, Tile)
 {
-    std::vector<int32_t> multiples = {1, 1, 1, 1};
-    // Create Attribute
-    TosaTileAttribute attribute(multiples);
-
     // Create Tensors
+    std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
+    std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
     std::string input1Name = "input1";
+    std::string multiplesName = "multiples";
     std::string outputName = "output";
 
     std::vector<int32_t> input1Shape = {1, 1, 1, 1};
+    std::vector<int32_t> multiplesShape = {1, 1, 1, 1};
     std::vector<int32_t> outputShape = {1, 1, 1, 1};
 
-    auto* input1Tensor = new TosaSerializationTensor(input1Name, input1Shape, DType::DType_BOOL, {});
-    auto* outputTensor = new TosaSerializationTensor(outputName, outputShape, DType::DType_BOOL, {});
+    auto input1Tensor =
+        std::make_unique<TosaSerializationTensor>(input1Name, input1Shape, DType::DType_BOOL, std::vector<uint8_t>{});
+    tensors.push_back(std::move(input1Tensor));
+    auto multiplesTensor = std::make_unique<TosaSerializationTensor>(multiplesName,
+                                                                     multiplesShape,
+                                                                     DType::DType_INT32,
+                                                                     std::vector<uint8_t>{1, 1, 1, 1});
+    tensors.push_back(std::move(multiplesTensor));
+    auto multiplesOp = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST,
+                                                                         Attribute::Attribute_NONE,
+                                                                         nullptr,
+                                                                         std::vector<std::string>{},
+                                                                         std::vector<std::string>{multiplesName});
+    ops.push_back(std::move(multiplesOp));
+    auto outputTensor =
+        std::make_unique<TosaSerializationTensor>(outputName, outputShape, DType::DType_BOOL, std::vector<uint8_t>{});
+    tensors.push_back(std::move(outputTensor));
 
     // Create Operator
-    auto op = new tosa::TosaSerializationOperator(Op::Op_TILE,
-                                                  Attribute::Attribute_TileAttribute,
-                                                  &attribute,
-                                                  {input1Name},
-                                                  {outputName});
+    auto op = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_TILE,
+                                                                Attribute::Attribute_NONE,
+                                                                nullptr,
+                                                                std::vector<std::string>{input1Name, multiplesName},
+                                                                std::vector<std::string>{outputName});
+    ops.push_back(std::move(op));
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("tile", "main", {op}, {input1Tensor, outputTensor}, {input1Name}, {outputName});
+    TosaSerializationBasicBlock block("tile", "main", std::move(ops), std::move(tensors), {input1Name}, {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "TILE", outputStr);
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "TILE", outputStr, 1);
+
+    testutils::CheckGraphConstant({1, 1, 1, 1}, DataType::int32_t, "TILE", outputStr, 1, 0);
+
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "TILE", outputStr);
 }
 
@@ -246,28 +367,35 @@ TEST(TOSA2SPIRV_PARSER, Transpose)
     TosaTransposeAttribute attribute(perms);
 
     // Create Tensors
+    std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
+    std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
     std::string input1Name = "input1";
     std::string outputName = "output";
 
     std::vector<int32_t> input1Shape = {1, 1, 1, 1};
     std::vector<int32_t> outputShape = {1, 1, 1, 1};
 
-    auto* input1Tensor = new TosaSerializationTensor(input1Name, input1Shape, DType::DType_BOOL, {});
-    auto* outputTensor = new TosaSerializationTensor(outputName, outputShape, DType::DType_BOOL, {});
+    auto input1Tensor =
+        std::make_unique<TosaSerializationTensor>(input1Name, input1Shape, DType::DType_BOOL, std::vector<uint8_t>{});
+    tensors.push_back(std::move(input1Tensor));
+    auto outputTensor =
+        std::make_unique<TosaSerializationTensor>(outputName, outputShape, DType::DType_BOOL, std::vector<uint8_t>{});
+    tensors.push_back(std::move(outputTensor));
 
     // Create Operator
-    auto op = new tosa::TosaSerializationOperator(Op::Op_TRANSPOSE,
-                                                  Attribute::Attribute_TransposeAttribute,
-                                                  &attribute,
-                                                  {input1Name},
-                                                  {outputName});
+    auto op = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_TRANSPOSE,
+                                                                Attribute::Attribute_TransposeAttribute,
+                                                                &attribute,
+                                                                std::vector<std::string>{input1Name},
+                                                                std::vector<std::string>{outputName});
+    ops.push_back(std::move(op));
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
     TosaSerializationBasicBlock block("transpose",
                                       "main",
-                                      {op},
-                                      {input1Tensor, outputTensor},
+                                      std::move(ops),
+                                      std::move(tensors),
                                       {input1Name},
                                       {outputName});
 
@@ -276,6 +404,7 @@ TEST(TOSA2SPIRV_PARSER, Transpose)
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
     testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "TRANSPOSE", outputStr);
+
     testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "TRANSPOSE", outputStr, 0);
     testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "TRANSPOSE", outputStr);
 }

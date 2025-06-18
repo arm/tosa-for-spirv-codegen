@@ -19,19 +19,20 @@ import tosa
 import tosa_spirv
 
 # unsupported operator group
-unsupportedgroups = ["custom", "control-flow", "variable"]
+unsupportedgroups = ['custom', 'control-flow', 'variable', 'shape']
 TOSA_TO_SPV_TYPE_DECL_NAME_MAP = {
-    "bool_t": "bool",
-    "i4_t": "int4",
-    "i8_t": "int8",
-    "i16_t": "int16",
-    "i32_t": "int32",
-    "i48_t": "int64",  # Not a typo. We map 48-bit TOSA to 64-bit SPIR-V
-    "fp16_t": "float16",
-    "fp32_t": "float32",
-    "bf16_t": "bfloat16",
-    "index_t": "int_index_t",
-    "shape_t": "int_shape_t",
+    'bool_t': 'bool',
+    'i4_t': 'int4',
+    'i8_t': 'int8',
+    'i16_t': 'int16',
+    'i32_t': 'int32',
+    'i48_t': 'int64', # Not a typo. We map 48-bit TOSA to 64-bit SPIR-V
+    'fp16_t' : 'float16',
+    'fp32_t' : 'float32',
+    'bf16_t' : 'bfloat16',
+    'index_t' : 'int_index_t',
+    'shape_t' : 'int_shape_t',
+    'acc_type_t' : 'int32',
 }
 
 
@@ -105,7 +106,7 @@ class FileWriter:
         try:
             result = subprocess.run(
                 [
-                    "clang-format",
+                    "clang-format-11",
                     "-i",
                     "--style=file",
                     self.file_dir,
@@ -145,19 +146,9 @@ class TestGenerator:
         self.tosa_serialization_parser_path = tosa_serialization_parser_path
         self.cmake_file_dir = cmake_file_path
         self.force_generate = force_generate
-        self.operator_exception = [
-            "CUSTOM",
-            "CONST",
-            "IDENTITY",
-            "DIM",
-            "VARIABLE",
-            "VARIABLE_WRITE",
-            "VARIABLE_READ",
-        ]
+        self.operator_exception = ['CUSTOM', 'CONST', "CONST_SHAPE", 'IDENTITY', 'DIM', 'VARIABLE', 'VARIABLE_WRITE', 'VARIABLE_READ']
 
         self.load_tosa_version()
-
-        self.dictOpAttributes = self.get_tosa_attribute_dict()
 
         self._operator_list = []
         self._operator_name_list = []
@@ -214,7 +205,26 @@ class TestGenerator:
 
     # convert operator name to PascalCase
     def operator_name_to_pascal_case(self, name):
-        return self.name_to_pascal_case(name, "_")
+        if name.upper() == "ARGMAX":
+            return "ArgMax"
+        if name.upper() == "INTDIV":
+            return "IntDiv"
+        if name.upper() == "FFT2D":
+            return "Fft2d"
+        if name.upper() == "RFFT2D":
+            return "Rfft2d"
+        return self.name_to_pascal_case(name, '_')
+
+    def operator_name_to_pascal_case_tosa_attributes(self, name):
+        if name.upper() == "ARGMAX":
+            return "ArgMax"
+        if name.upper() == "INTDIV":
+            return "IntDiv"
+        if name.upper() == "FFT2D":
+            return "FFT2d"
+        if name.upper() == "RFFT2D":
+            return "RFFT2d"
+        return self.name_to_pascal_case(name, '_')
 
     # convert operator name to PascalCase
     def operator_group_name_to_pascal_case(self, name):
@@ -230,110 +240,27 @@ class TestGenerator:
         camel_case = self.lowercase_first_letter(camel_case)
         return camel_case
 
-    def get_tosa_attribute_dict(self):
-        def def_value():
-            return "[UNIMPLEMENTED ATTRIBUTE: Add to dictOpAttributes dictionary in code_generator.py]"
-
-        dictOpAttributes = defaultdict(def_value)
-
-        dictOpAttributes["ARGMAX"] = "AxisAttribute"
-        dictOpAttributes["AVG_POOL2D"] = "PoolAttribute"
-        dictOpAttributes["CONV2D"] = "ConvAttribute"
-        dictOpAttributes["CONV3D"] = "ConvAttribute"
-        dictOpAttributes["DEPTHWISE_CONV2D"] = "ConvAttribute"
-        dictOpAttributes["FULLY_CONNECTED"] = "FullyConnectedAttribute"
-        dictOpAttributes["MATMUL"] = "MatMulAttribute"
-        dictOpAttributes["MAX_POOL2D"] = "PoolAttribute"
-        dictOpAttributes["TRANSPOSE_CONV2D"] = "TransposeConvAttribute"
-        dictOpAttributes["CLAMP"] = "ClampAttribute"
-        dictOpAttributes["RESERVED"] = "Attribute_NONE"
-        dictOpAttributes["SIGMOID"] = "Attribute_NONE"
-        dictOpAttributes["TANH"] = "Attribute_NONE"
-        dictOpAttributes["ADD"] = "Attribute_NONE"
-        dictOpAttributes["ARITHMETIC_RIGHT_SHIFT"] = "ArithmeticRightShiftAttribute"
-        dictOpAttributes["BITWISE_AND"] = "Attribute_NONE"
-        dictOpAttributes["BITWISE_OR"] = "Attribute_NONE"
-        dictOpAttributes["BITWISE_XOR"] = "Attribute_NONE"
-        dictOpAttributes["INTDIV"] = "Attribute_NONE"
-        dictOpAttributes["LOGICAL_AND"] = "Attribute_NONE"
-        dictOpAttributes["LOGICAL_LEFT_SHIFT"] = "Attribute_NONE"
-        dictOpAttributes["LOGICAL_RIGHT_SHIFT"] = "Attribute_NONE"
-        dictOpAttributes["LOGICAL_OR"] = "Attribute_NONE"
-        dictOpAttributes["LOGICAL_XOR"] = "Attribute_NONE"
-        dictOpAttributes["MAXIMUM"] = "Attribute_NONE"
-        dictOpAttributes["MINIMUM"] = "Attribute_NONE"
-        dictOpAttributes["MUL"] = "MulAttribute"
-        dictOpAttributes["POW"] = "PowAttribute"
-        dictOpAttributes["SUB"] = "SubAttribute"
-        dictOpAttributes["TABLE"] = "TableAttribute"
-        dictOpAttributes["ABS"] = "Attribute_NONE"
-        dictOpAttributes["BITWISE_NOT"] = "Attribute_NONE"
-        dictOpAttributes["CEIL"] = "Attribute_NONE"
-        dictOpAttributes["CLZ"] = "Attribute_NONE"
-        dictOpAttributes["EXP"] = "Attribute_NONE"
-        dictOpAttributes["FLOOR"] = "Attribute_NONE"
-        dictOpAttributes["LOG"] = "Attribute_NONE"
-        dictOpAttributes["LOGICAL_NOT"] = "Attribute_NONE"
-        dictOpAttributes["NEGATE"] = "NegateAttribute"
-        dictOpAttributes["RECIPROCAL"] = "Attribute_NONE"
-        dictOpAttributes["RSQRT"] = "Attribute_NONE"
-        dictOpAttributes["SELECT"] = "Attribute_NONE"
-        dictOpAttributes["EQUAL"] = "Attribute_NONE"
-        dictOpAttributes["GREATER"] = "Attribute_NONE"
-        dictOpAttributes["GREATER_EQUAL"] = "Attribute_NONE"
-        dictOpAttributes["REDUCE_ANY"] = "AxisAttribute"
-        dictOpAttributes["REDUCE_ALL"] = "AxisAttribute"
-        dictOpAttributes["REDUCE_MAX"] = "AxisAttribute"
-        dictOpAttributes["REDUCE_MIN"] = "AxisAttribute"
-        dictOpAttributes["REDUCE_PRODUCT"] = "AxisAttribute"
-        dictOpAttributes["REDUCE_SUM"] = "AxisAttribute"
-        dictOpAttributes["CONCAT"] = "AxisAttribute"
-        dictOpAttributes["PAD"] = "PadAttribute"
-        dictOpAttributes["RESHAPE"] = "ReshapeAttribute"
-        dictOpAttributes["REVERSE"] = "AxisAttribute"
-        dictOpAttributes["SLICE"] = "SliceAttribute"
-        dictOpAttributes["TILE"] = "TileAttribute"
-        dictOpAttributes["TRANSPOSE"] = "TransposeAttribute"
-        dictOpAttributes["GATHER"] = "Attribute_NONE"
-        dictOpAttributes["SCATTER"] = "Attribute_NONE"
-        dictOpAttributes["RESIZE"] = "ResizeAttribute"
-        dictOpAttributes["CAST"] = "Attribute_NONE"
-        dictOpAttributes["RESCALE"] = "RescaleAttribute"
-        dictOpAttributes["CONST"] = "Attribute_NONE"
-        dictOpAttributes["IDENTITY"] = "Attribute_NONE"
-        dictOpAttributes["CUSTOM"] = "CustomAttribute"
-        dictOpAttributes["COND_IF"] = "CondIfAttribute"
-        dictOpAttributes["WHILE_LOOP"] = "WhileLoopAttribute"
-        dictOpAttributes["FFT2D"] = "FFTAttribute"
-        dictOpAttributes["RFFT2D"] = "RFFTAttribute"
-        dictOpAttributes["ERF"] = "Attribute_NONE"
-        dictOpAttributes["DIM"] = "AxisAttribute"
-
-        return dictOpAttributes
-
     # convert operator name to underscore seperated e.g. MAX_POOL2D
     def operator_name_to_underscore_seperated(self, name):
         underscore_seperated = "_".join(w.capitalize() for w in name.split("_"))
         return underscore_seperated
-
-    # apply attribute exception fixes
-    def apply_attribute_exception_fixes(self, opname, attrname):
-        if opname == "CLAMP" and attrname == "max_val":
-            return "attribute.max_int()"
-        if opname == "CLAMP" and attrname == "min_val":
-            return "attribute.min_int()"
-        if opname == "TRANSPOSE_CONV2D" and attrname == "out_shape":
-            return "attribute.output_shape()"
-        if opname == "PAD" and attrname == "pad_const":
-            return "attribute.pad_const_int()"
-        if opname == "AVG_POOL2D" and attrname == "acc_size":
-            return "static_cast<int>(ConvertAvgPoolAccType(attribute))"
-        if opname == "RESIZE" and attrname == "mode":
-            return "static_cast<int>(attribute.mode())"
-        if opname == "TABLE" and attrname == "table":
-            return "attribute.table()"
+    
+    # Add casting for attributes where needed 
+    def get_attribute_casting(self, attr):
+        if attr == "nan_mode":
+            return "static_cast<NanPropagationMode>(nan_mode)"
+        elif attr == "mode":
+            return "static_cast<ResizeMode>(mode)"
+        elif attr == "min_val":
+            return "{static_cast<unsigned char>(min_val)}"
+        elif attr == "max_val":
+            return "{static_cast<unsigned char>(max_val)}"
+        elif attr == "acc_type":
+            return "DType_INT32"
+        elif attr == "rounding_mode":
+            return "static_cast<const RoundingMode>(rounding_mode)"
         else:
-            return "attribute." + attrname + "()"
+            return attr
 
     def apply_parser_datatype_fix(self, elementType):
         if elementType == "i8_t":
@@ -433,115 +360,33 @@ class TestGenerator:
             if category.name == string:
                 hasName = True
         return hasName
+    
+    def is_dynamic_input(self, argument):
+        is_input = any(cat.name == "input" for cat in argument.categories)
+        is_not_attribute = not any(cat.name == "attribute" for cat in argument.categories)
+        is_tensor = argument.type.endswith("_t")
+        compile_time_const = tosa_spirv.TOSASPIRVSpec.is_operator_argument_ctc(argument)
 
-    def is_resize_attribute(self, op, arg):
-        if op.name == "RESIZE":
-            if arg.name == "scale" or arg.name == "offset" or arg.name == "border":
-                return True
-        return False
-
-    def is_reshape_attribute(self, op, arg):
-        if op.name == "RESHAPE":
-            if arg.name == "shape":
-                return True
-        return False
-
-    def is_transpose_attribute(self, op, arg):
-        if op.name == "TRANSPOSE":
-            if arg.name == "perms":
-                return True
-        return False
-
-    def is_slice_attribute(self, op, arg):
-        if op.name == "SLICE":
-            if arg.name == "start" or arg.name == "size":
-                return True
-        return False
-
-    def is_tile_attribute(self, op, arg):
-        if op.name == "TILE":
-            if arg.name == "multiples":
-                return True
-        return False
-
-    def is_rescale_graph_constant(self, op, arg):
-        if op.name == "RESCALE":
-            if arg.name == "multiplier" or arg.name == "shift":
-                return True
-        return False
-
-    def has_multiple_inputs(self, op):
-        inputCount = 0
-        for arg in op.arguments:
-            for cat in arg.categories:
-                if cat.name == "input":
-                    inputCount += 1
-        if inputCount > 1:
-            return True
-        else:
-            return False
-
-    def has_attributes(self, op):
-        attrCount = 0
-        print(op.name)
-        for arg in op.arguments:
-            for cat in arg.categories:
-                print(cat.name)
-                if cat.name == "attribute":
-                    print(op.name + " true")
-                    attrCount += 1
-        if attrCount > 0:
-            return True
-        else:
-            return False
-
-    def has_array_attributes(self, op):
-        for arg in op.arguments:
-            if (
-                tosa_spirv.TOSAType.type_category_for_arg(arg)
-                == tosa_spirv.TOSAType.ARRAY
-            ):
-                return True
-            # account for ops with arrays that are incorrectly catagorized as not being arrays
-            elif op.name in ["TRANSPOSE"]:
-                return True
-        return False
-
-    def get_arg_type(self, op, arg):
-        datatype = TOSA_TO_SPV_TYPE_DECL_NAME_MAP.get(
-            op.typesupports[0].tymap.get(arg.tensor_element_type)
-        )
-        if datatype == None:
-            if arg.tensor_element_type == "acc_size_t":
-                datatype = "int32"
-                # index_t not mentioned in support tables instead it follows integer value of 'levels' defind in spec
-            elif arg.tensor_element_type == "index_t":
-                datatype = "int32"
-            elif arg.tensor_element_type == "shape_t":
-                datatype = "int32"
-            elif arg.tensor_element_type == "i32_t":
-                datatype = "int32"
-            elif arg.tensor_element_type == "resize_mode_t":
-                datatype = "int32"
-            elif arg.tensor_element_type == "mul_t":
-                datatype = "int32"
-            elif arg.tensor_element_type == "bool_t":
-                datatype = "bool"
-            else:
-                datatype = "int8"
-        return datatype
+        return is_input and is_not_attribute and is_tensor and not compile_time_const
+    
+    def is_constant_input(self, argument):
+        is_input = any(cat.name == "input" for cat in argument.categories)
+        is_not_attribute = not any(cat.name == "attribute" for cat in argument.categories)
+        is_tensor = argument.type.endswith("_t")
+        compile_time_const = tosa_spirv.TOSASPIRVSpec.is_operator_argument_ctc(argument)
+        return is_input and is_not_attribute and is_tensor and compile_time_const
 
     def gather_arg_types(self, op):
         list = []
         for arg in op.arguments:
-            type = self.get_arg_type(op, arg)
-            if type not in list:
+            type = self.get_arg_data_type(op, arg)
+            if type not in list :
                 list.append(type)
         return list
 
     def has_argument_of_type(self, op, string):
         for arg in op.arguments:
-            if self.get_arg_type(op, arg) == string:
+            if self.get_arg_data_type(op, arg) == string:
                 return True
         return False
 
@@ -554,25 +399,17 @@ class TestGenerator:
 
     def has_other_non_output_argument_of_type(self, op, string, arg):
         for argument in op.arguments:
-            print(
-                str(op.name)
-                + " "
-                + str(argument.name)
-                + " "
-                + string
-                + " "
-                + self.get_arg_type(op, arg)
-            )
+            print (str(op.name)  + " " + str(argument.name) + " " + string + " " + self.get_arg_type(op, arg))
             if arg.name != argument.name:
-                if not self.has_argument_category_name(argument, "output"):
+                if not self.has_argument_category_name(argument, 'output'):
                     if self.get_arg_type(op, argument) == string:
-                        print("true: " + argument.name + " = " + string)
+                        print("true: " + argument.name + " = "  + string)
                         return True
         return False
 
     def has_output_of_type(self, op, string):
         for arg in op.arguments:
-            if self.has_argument_category_name(arg, "output"):
+            if self.has_argument_category_name(arg, 'output'):
                 if self.get_arg_type(op, arg) == string:
                     return True
         return False
@@ -620,35 +457,6 @@ class TestGenerator:
             tosa_spirv.TOSAType.type_category_for_arg(arg) == tosa_spirv.TOSAType.ARRAY
         )
 
-    def fix_op(self, op):
-        op_fix_dict = {
-            "RESCALE": {
-                "multiplier": {"shape": "[1]", "tensor-element-type": "i32_t"},
-                "shift": {"shape": "[1]", "tensor-element-type": "i32_t"},
-            },
-            "RESIZE": {
-                "scale": {"tensor-element-type": "i16_t"},
-                "offset": {"tensor-element-type": "i16_t"},
-                "border": {"tensor-element-type": "i16_t"},
-            },
-            "AVG_POOL2D": {
-                "input_zp": {"tensor-element-type": "i32_t"},
-                "output_zp": {"tensor-element-type": "i32_t"},
-            },
-            "TABLE": {"table": {"tensor-element-type": "i16_t"}},
-        }
-        if op.name in op_fix_dict.keys():
-            for argument in op.arguments:
-                if argument.name in op_fix_dict[op.name].keys():
-                    for item in op_fix_dict[op.name][argument.name].keys():
-                        if item == "shape":
-                            argument.shape = op_fix_dict[op.name][argument.name][item]
-                        elif item == "tensor-element-type":
-                            argument.tensor_element_type = op_fix_dict[op.name][
-                                argument.name
-                            ][item]
-        return op
-
     def get_cpp_data_type(self, datatype):
         if datatype == "int32":
             return "int32_t"
@@ -682,6 +490,19 @@ class TestGenerator:
         # default to Int32
         else:
             return "DType::DType_INT32"
+        
+    def reorder_acc_type_local_bound(self, attr_list):
+        i = 0
+        while i < len(attr_list) - 1:
+            if attr_list[i] == 'acc_type' and attr_list[i+1] == 'local_bound':
+                attr_list[i], attr_list[i+1] = attr_list[i+1], attr_list[i]
+                i += 2
+            elif attr_list[i] == 'local_bound' and attr_list[i+1] == 'acc_type':
+                attr_list[i], attr_list[i+1] = attr_list[i+1], attr_list[i]
+                i += 2
+            else:
+                i += 1
+        return attr_list
 
     def generate_attribute_arguments(self, op, argument, file):
         numValues, values = self.get_num_values_template(argument)
@@ -690,17 +511,9 @@ class TestGenerator:
         attr_name = []
 
         is_attr = False
-        if int(numValues) > 1 or (
-            op.name == "RESCALE"
-            and (argument.name == "multiplier" or argument.name == "shift")
-        ):
+        if int(numValues) > 1:
             # Add vector to store values for attributes
-            if (
-                any(category.name == "attribute" for category in argument.categories)
-                and tosa_spirv.TOSAType.type_category_for_arg(argument)
-                != tosa_spirv.TOSAType.RANKED_TENSOR
-                or self.check_fake_input(op, argument)
-            ):
+            if any(category.name == "attribute" for category in argument.categories) and tosa_spirv.TOSAType.type_category_for_arg(argument) != tosa_spirv.TOSAType.RANKED_TENSOR:
                 is_attr = True
                 if datatype == "bool":
                     file.write(
@@ -709,74 +522,17 @@ class TestGenerator:
                         )
                     )
                 else:
-                    file.write(
-                        "std::vector<{}> {} = {{{}}};\n".format(
-                            self.get_cpp_data_type(datatype), argument.name, values
-                        )
-                    )
-            # work around attribute incorrectly marked as input
-            elif (
-                self.is_reshape_attribute(op, argument)
-                or self.is_tile_attribute(op, argument)
-                or self.is_transpose_attribute(op, argument)
-            ):
-                is_attr = True
-                file.write(
-                    "std::vector<int32_t> {} = {{{}}};\n".format(argument.name, values)
-                )
+                    file.write('std::vector<{}> {} = {{{}}};\n'.format(self.get_cpp_data_type(datatype),
+                                                                       argument.name,
+                                                                       values))
         else:
-            # single value attribute
-            # fix resize mode attribute
-            if argument.tensor_element_type == "resize_mode_t":
-                is_attr = True
-                file.write(
-                    "ResizeMode {} = ResizeMode_BILINEAR;\n".format(argument.name)
-                )
-
-            # fix PAD pad_const attribute, and CLAMP min_val/max_val attribute
-            elif (
-                op.name == "PAD" and argument.name == "pad_const"
-            ) or op.name == "CLAMP":
-                is_attr = True
-                file.write("int32_t {}_int = {};\n".format(argument.name, values))
-                file.write("float {}_fp = {};\n".format(argument.name, values))
-                attr_name = [
-                    "{}_int".format(argument.name),
-                    "{}_fp".format(argument.name),
-                ]
-
             # general attribute
-            elif (
-                any(category.name == "attribute" for category in argument.categories)
-                and tosa_spirv.TOSAType.type_category_for_arg(argument)
-                != tosa_spirv.TOSAType.RANKED_TENSOR
-                or self.check_fake_input(op, argument)
-            ):
+            if any(category.name == "attribute" for category in argument.categories) and tosa_spirv.TOSAType.type_category_for_arg(argument) != tosa_spirv.TOSAType.RANKED_TENSOR:
                 is_attr = True
-                if datatype == "bool":
-                    file.write(
-                        "bool {} = {};\n".format(
-                            argument.name, "true" if values == "1" else "false"
-                        )
-                    )
+                if datatype == 'bool':
+                    file.write('bool {} = {};\n'.format(argument.name, 'true' if values == '1' and not op.name == "RFFT2D" else 'false'))
                 else:
-                    # Fix for unused attribute in (TOSA2SPIRV_PARSER, AvgPool2d)
-                    if argument.name == "acc_size":
-                        pass
-                    else:
-                        file.write(
-                            "{} {} = {};\n".format(
-                                self.get_cpp_data_type(datatype), argument.name, values
-                            )
-                        )
-
-            # work around attribute incorrectly marked as input
-            elif self.is_reshape_attribute(op, argument) or self.is_transpose_attribute(
-                op, argument
-            ):
-                is_attr = True
-                file.write("int32_t {} = {};\n".format(argument.name, values))
-
+                        file.write('{} {} = {};\n'.format(self.get_cpp_data_type(datatype), argument.name, values))
         return is_attr, attr_name
 
     def get_arg_data_type(self, op, argument):
@@ -786,24 +542,18 @@ class TestGenerator:
         )
         # if not in typesupport table revert to the tensor_element_type
         if datatype == None:
-            # hack for inconsistency in avg_pool2d fixed in tosa 1.0
-            if argument.tensor_element_type == "acc_size_t":
-                datatype = "int32"
-                # index_t not mentioned in support tables instead it follows integer value of 'levels' defined in spec
-            elif argument.tensor_element_type == "index_t":
-                datatype = "int32"
-            elif argument.tensor_element_type == "shape_t":
-                datatype = "int32"
+            # index_t not mentioned in support tables instead it follows integer value of 'levels' defind in spec
+            if argument.tensor_element_type == 'index_t':
+                datatype = 'int32'
             # for rescale if (scale32) mul_t=i32_t else mul_t=i16_t
-            elif argument.tensor_element_type == "mul_t":
-                datatype = "int32"
-            # Enums are int32_t
-            elif argument.tensor_element_type == "resize_mode_t":
-                datatype = "int32"
+            elif argument.tensor_element_type == 'mul_t':
+                datatype = 'int32'
             else:
-                datatype = TOSA_TO_SPV_TYPE_DECL_NAME_MAP.get(
-                    argument.tensor_element_type
-                )
+                datatype = TOSA_TO_SPV_TYPE_DECL_NAME_MAP.get(argument.tensor_element_type)
+                if argument.type == 'bool_t':
+                    datatype = 'bool'
+                if datatype is None:
+                    datatype = 'int32'
         return datatype
 
     def get_num_values_template(self, argument):
@@ -836,11 +586,14 @@ class TestGenerator:
             numValues = "4"
             values = "1, 1, 1, 1"
         # TABLE attribute: table
-        elif argument.shape == "[TABLE_SIZE]":
-            numValues = "4"
-            values = "1, 1, 1, 1"
+        elif argument.shape == '[TABLE_SIZE]':
+            numValues = '1'
+            values = '1'
+        elif argument.shape == '[2*rank(shape1)]':
+            numValues = '4'
+            values = '1, 1, 1, 1'
         else:
-            numValues = "1,1,1,1"
+            numValues = '4'
             values = "1,1,1,1"
         return numValues, values
 
@@ -848,19 +601,28 @@ class TestGenerator:
         numValues, values = self.get_num_values_template(argument)
         datatype = self.get_arg_data_type(op, argument)
 
-        name_line = 'std::string {}Name = "{}";\n'.format(argument.name, argument.name)
-        shape_line = "std::vector<{}> {}Shape = {{{}}};\n".format(
-            "int32_t", argument.name, values
-        )
-        tensor_line = "auto* {}Tensor = new TosaSerializationTensor({}Name, {}Shape, {}, {{}});\n".format(
-            argument.name, argument.name, argument.name, self.get_dtype(datatype)
-        )
+        name_line = 'std::string {}Name = \"{}\";\n'.format(argument.name, argument.name)
+        shape_line = 'std::vector<{}> {}Shape = {{{}}};\n'.format('int32_t', argument.name, values)
+
+        valuesStr = ''
+
+        if self.is_constant_input(argument):
+            valuesStr = values
+        if self.is_constant_input(argument) and values == '1' and datatype == "int32":
+            valuesStr = '{0,0,0,1}'
+
+        tensor_line = 'auto {}Tensor = std::make_unique<TosaSerializationTensor>({}Name, {}Shape, {}, std::vector<uint8_t>{{{}}});\n'.format(argument.name, argument.name,
+                                                                                                          argument.name, self.get_dtype(datatype), valuesStr)
+        tensor_line += "    tensors.push_back(std::move({}Tensor));\n".format(argument.name)
+        if self.is_constant_input(argument):
+            tensor_line += '    auto {}Op = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST, Attribute::Attribute_NONE, nullptr, std::vector<std::string>{{}}, std::vector<std::string>{{ {}Name }});\n'.format(argument.name, argument.name)
+            tensor_line += '    ops.push_back(std::move({}Op));\n'.format(argument.name)
+
         return [name_line, shape_line, tensor_line]
 
     def print_tensor_arguments(self, lines, file):
         if len(lines) == 0:
-            print("ParserTests Tensor Arguments Generation Failed!")
-            return
+            raise ValueError("ParserTests Tensor Arguments Generation Failed!")
         for col_idx in range(3):
             for line_idx in range(len(lines)):
                 file.write(lines[line_idx][col_idx])
@@ -906,6 +668,7 @@ class TestGenerator:
             )
         )
 
+
     def generate_test_arguments(self, op, name, file):
 
         for argument in op.arguments:
@@ -937,117 +700,40 @@ class TestGenerator:
                 numValues = "1,1,1,1"
                 values = "1,1,1,1"
 
-            # find a data type valid in type support for the operator tensor element type
-            datatype = TOSA_TO_SPV_TYPE_DECL_NAME_MAP.get(
-                op.typesupports[0].tymap.get(argument.tensor_element_type)
-            )
-            # if not it typesupport table revert to the tensor_element_type
-            if datatype == None:
-                # hack for inconsistency in avg_pool2d fixed in tosa 1.0
-                if argument.tensor_element_type == "acc_size_t":
-                    datatype = "int32"
-                    # index_t not mentioned in support tables instead it
-                    # follows integer value of 'levels' defind in spec
-                elif argument.tensor_element_type == "index_t":
-                    datatype = "int32"
-                elif argument.tensor_element_type == "shape_t":
-                    datatype = "int32"
-                # for rescale if (scale32) mul_t=i32_t else mul_t=i16_t
-                elif argument.tensor_element_type == "mul_t":
-                    datatype = "int32"
-                # Enums are int32_t
-                elif argument.tensor_element_type == "resize_mode_t":
-                    datatype = "int32"
-                else:
-                    datatype = TOSA_TO_SPV_TYPE_DECL_NAME_MAP.get(
-                        argument.tensor_element_type
-                    )
+            datatype = self.get_arg_data_type(op, argument)
 
-            inputArg = False
-            first_line = ""
-            if (
-                any(category.name == "input" for category in argument.categories)
-                and not any(
-                    category.name == "attribute" for category in argument.categories
-                )
-                and argument.shape != "[rank(shape)]"
-                and argument.shape != "-"
-                and argument.shape != "[2]"
-                and argument.shape != "[4]"
-                and argument.shape != "[NC]"
-                and argument.shape != "[TABLE_SIZE]"
-                and argument.shape != "[rank(shape1)]"
-            ):
-                first_line = "auto {} = graph.AddInput(Tensor(".format(argument.name)
-                inputArg = True
-            elif any(category.name == "output" for category in argument.categories):
-                first_line = "auto {} = Tensor(".format(argument.name)
-
-            attributeArg = False
-            if any(
-                category.name == "attribute" for category in argument.categories
-            ) and tosa_spirv.TOSAType.type_category_for_arg(argument):
-                attributeArg = True
-            if argument.name == "padding":
-                attributeArg = True
-
-            # work around resize incorrectly marking scale offset and border as inputs instead of attributes
-            elif self.is_resize_attribute(op, argument):
-                attributeArg = True
-            # work around resize incorrectly marked as input
-            elif (
-                self.is_reshape_attribute(op, argument)
-                or self.is_tile_attribute(op, argument)
-                or self.is_transpose_attribute(op, argument)
-            ):
-                attributeArg = True
-
-            if attributeArg:
-                if (
-                    tosa_spirv.TOSAType.type_category_for_arg(argument)
-                    != tosa_spirv.TOSAType.RANKED_TENSOR
-                    and argument.name != "padding"
-                ):
-                    first_line = "auto {} = Attribute(".format(argument.name)
-                    first_line += "{" + values + "}, "
-                    first_line += "DataType::{}_t);".format(datatype)
-                    file.write(first_line)
-                else:
-                    file.write(
-                        "auto {}Tensor = Tensor(DataType::{}_t, ".format(
-                            argument.name, datatype
-                        )
-                    )
-                    file.append("{" + values + "});\n")
-                    file.write(
-                        "const auto {}Constant = graph.AddGraphConstant({}Tensor);\n".format(
-                            argument.name, argument.name, argument.name
-                        )
-                    )
-                    file.write(
-                        "auto {} = Attribute({}Constant);\n".format(
-                            argument.name, argument.name
-                        )
-                    )
-
-            else:
-                file.write(first_line + "DataType::{}_t, ".format(datatype))
-                file.append("std::vector<unsigned int>{ ")
+            first_line = ''
+            if self.is_dynamic_input(argument):
+                first_line = 'auto {} = graph.AddInput(Tensor('.format(argument.name)
+                file.write(first_line + 'DataType::{}_t, '.format(datatype))
+                file.append('std::vector<unsigned int>{ ')
                 file.append(str(numValues))
-                file.append(" })")
-                if inputArg:
-                    file.append(", 0)")
-                file.append(";\n")
+                file.append(' })')
+                file.append(', 0)')
+                file.append(';\n')
+            
+            elif any(category.name == "output" for category in argument.categories):
+                first_line = 'auto {} = Tensor('.format(argument.name)
+                file.write(first_line + 'DataType::{}_t, '.format(datatype))
+                file.append('std::vector<unsigned int>{ ')
+                file.append(str(numValues))
+                file.append(' })')
+                file.append(';\n')
 
-            if any(category.name == "input" for category in argument.categories) or any(
-                category.name == "output" for category in argument.categories
-            ):
-                if (
-                    self.is_reshape_attribute(op, argument)
-                    or self.is_tile_attribute(op, argument)
-                    or self.is_transpose_attribute(op, argument)
-                ):
-                    continue
+            elif tosa_spirv.TOSASPIRVSpec.is_operator_argument_ctc(argument):
+                    first_line = 'auto {}_attr = Attribute('.format(argument.name)
+                    first_line += '{' + values + '}, '
+                    first_line += 'DataType::{}_t);\n'.format(datatype)
+                    file.write(first_line)
+                    file.write("auto {} = graph.AddTensorConstant({}_attr);\n".format(argument.name, argument.name))
+
+            elif tosa_spirv.TOSAType.type_category_for_arg(argument):
+                    file.write("auto {} = Attribute(".format(argument.name))
+                    file.append('{' +  str(values))
+                    file.append('}, ')
+                    if op.name == "CLAMP" and argument.name == "min_val" or argument.name == "max_val":
+                        datatype = "int8"
+                    file.append('DataType::{}_t);\n'.format(datatype))
 
             file.append("\n")
 
@@ -1059,24 +745,16 @@ class TestGenerator:
     def get_layer_variable_name(self, name):
         return name[0].lower() + name[1:] + "Layer"
 
-    def get_effcee_string(self, op, is_graph=False):
+    def get_effcee_string(self, op, is_graph=False, layerTests=False):
 
         categoryEffceeCheckDict = {
-            tosa_spirv.TOSAType.RANKED_TENSOR: "testutils::Check{INPUTOUTPUT}Tensor({{{VALUES}}}, "
-            'DataType::{DATATYPE}, "{OP_NAME}", outputStr);',
-            tosa_spirv.TOSAType.SHAPED_TENSOR: "testutils::Check{INPUTOUTPUT}Tensor({{{VALUES}}}, "
-            'DataType::{DATATYPE}, "{OP_NAME}", outputStr);',
-            tosa_spirv.TOSAType.SCALAR: "testutils::Check{BOOL}Constant("
-            'DataType::{DATATYPE}, "{OP_NAME}", outputStr, '
-            "{VALUE}, {ARG_INDEX});",
-            tosa_spirv.TOSAType.ARRAY: "testutils::CheckConstCompositeTensor({{{VALUES}}}, "
-            '"{OP_NAME}", outputStr, {ARG_INDEX});',
+            tosa_spirv.TOSAType.RANKED_TENSOR: 'testutils::Check{INPUTOUTPUT}Tensor({{{VALUES}}}, DataType::{DATATYPE}, "{OP_NAME}", outputStr);',
+            tosa_spirv.TOSAType.SHAPED_TENSOR: 'testutils::CheckOutputTensor({{{VALUES}}}, DataType::{DATATYPE}, "{OP_NAME}", outputStr);',  # constant input and outputs
+            tosa_spirv.TOSAType.SCALAR: 'testutils::Check{BOOL}Constant(DataType::{DATATYPE}, "{OP_NAME}", outputStr, {VALUE}, {ARG_INDEX});',
+            tosa_spirv.TOSAType.SHAPE: 'testutils::CheckConstCompositeTensor({{{VALUES}}}, "{OP_NAME}", outputStr, {ARG_INDEX});',
             tosa_spirv.TOSAType.TENSOR_LIST: "UNKNOWNTENSOR_LIST",
-            tosa_spirv.TOSAType.TENSOR_LIST_UNIFORM_ETYPE: "testutils::Check{INPUTOUTPUT}Tensor({{{VALUES}}}, "
-            'DataType::{DATATYPE}, "{OP_NAME}", outputStr);',
-            tosa_spirv.TOSAType.ENUM: "testutils::Check{BOOL}Constant("
-            'DataType::{DATATYPE}, "{OP_NAME}", outputStr, '
-            "{VALUE}, {ARG_INDEX});",
+            tosa_spirv.TOSAType.TENSOR_LIST_UNIFORM_ETYPE: 'testutils::Check{INPUTOUTPUT}Tensor({{{VALUES}}}, DataType::{DATATYPE}, "{OP_NAME}", outputStr);',  # concat
+            tosa_spirv.TOSAType.ENUM: 'testutils::Check{BOOL}Constant(DataType::{DATATYPE}, "{OP_NAME}", outputStr, {VALUE}, {ARG_INDEX});',
             tosa_spirv.TOSAType.GRAPH: "UNKNOWNGRAPH",
             tosa_spirv.TOSAType.UNKNOWN: "UNKNOWN",
         }
@@ -1085,160 +763,81 @@ class TestGenerator:
         inputIdx = 0
         effceestring = ""
 
-        if op.name == "RESIZE":
-            inputIdx += 1
-
+        graphConstantIdentifier = 0
         for argument in op.arguments:
             # Decide on number of values to give for shape
-            if argument.shape == "[4]":
-                values = "1, 1, 1, 1"
-            elif argument.shape == "[3]":
-                values = "1,1,1"
-            elif argument.shape == "[6]":
-                values = "1,1,1,1,1,1"
-            elif argument.shape == "[2]":
-                values = "1, 1"
-            elif argument.shape == "-":
-                values = "1"
-            elif argument.shape == "[rank(shape)]":
-                values = "1, 1, 1, 1"
-            # PAD attribute: padding
-            elif argument.shape == "[rank(shape1),2]" and not is_graph:
-                values = "4"
-            # TABLE attribute: table
-            elif argument.shape == "[TABLE_SIZE]":
-                values = "4"
-            else:
-                values = "1, 1, 1, 1"
+            values = self.get_num_values_template(argument)[1]
 
-            effcee_check_str = categoryEffceeCheckDict[
-                tosa_spirv.TOSAType.type_category_for_arg(argument)
-            ]
-            isInput = self.has_argument_category_name(argument, "input")
+            effcee_check_str = categoryEffceeCheckDict[tosa_spirv.TOSAType.type_category_for_arg(argument)]
+            datatype = self.get_arg_data_type(op, argument)
+            isInput = self.has_argument_category_name(argument, 'input')
+            isOutput = self.has_argument_category_name(argument, 'output')
+            isAttr = self.has_argument_category_name(argument, 'attribute')
 
-            datatype = self.get_arg_type(op, argument)
+            if isAttr:
+                if tosa_spirv.TOSAType.type_category_for_arg(argument) == tosa_spirv.TOSAType.SCALAR or tosa_spirv.TOSAType.type_category_for_arg(argument) == tosa_spirv.TOSAType.ENUM:
+                    datatype_str = str(datatype) + '_t'
 
-            if is_graph:
-                if op.name == "AVG_POOL2D" and (
-                    argument.name == "input_zp" or argument.name == "output_zp"
-                ):
-                    datatype = "int8"
-                elif op.name == "PAD" and argument.name == "padding":
-                    datatype = "bool"
-
-            # hack to account rescale having graph constants
-            if self.is_rescale_graph_constant(op, argument):
-
-                effcee_check_str = "\n"
-                effceestring += effcee_check_str
+                    boolStr = ''
+                    if self.has_argument_type_name(argument, 'bool_t'):
+                        boolStr = "Bool"
+                        datatype_str = "bool_t"
+                    if op.name == "RFFT2D" and argument.name == "local_bound":
+                        # RFFT2D alway returns false for attribute.local_bound() in Parser
+                        if layerTests:
+                            constantValue = "1"
+                        else:
+                            constantValue = "0"
+                    elif op.name == "CLAMP" and argument.type == "in_out_t":
+                        datatype_str = "int8_t"
+                        constantValue = "1"
+                    else:
+                        constantValue = "1"
+                    effceestring += "\n    " + effcee_check_str.format(BOOL=boolStr, OP_NAME=op.name, VALUE=constantValue, ARG_INDEX=idx, DATATYPE=datatype_str) + "\n"
+                    idx += 1
+                    continue
+                effcee_check_str = '\n    testutils::CheckConstCompositeTensor({{{VALUES}}}, "{OP_NAME}", outputStr, {ARG_INDEX});\n'
+                effceestring += effcee_check_str.format(VALUES=values, OP_NAME=op.name, ARG_INDEX=idx)
                 idx += 1
-            # hack to account reshape having Arrays
-            elif (
-                self.is_reshape_attribute(op, argument)
-                or self.is_tile_attribute(op, argument)
-                or self.is_transpose_attribute(op, argument)
-                or self.is_slice_attribute(op, argument)
-            ):
-                if self.has_argument_category_name(argument, "input"):
-                    index = 1
-                else:
-                    index = 0
-                effcee_check_str = (
-                    '    testutils::CheckConstCompositeTensor({{{VALUES}}}, "{OP_NAME}", outputStr, {ARG_INDEX});\n')
 
-                effceestring += effcee_check_str.format(
-                    VALUES=values, OP_NAME=op.name, ARG_INDEX=index
-                )
-                idx += 1
-            # Handle scalars and enums
-            elif (
-                tosa_spirv.TOSAType.type_category_for_arg(argument)
-                == tosa_spirv.TOSAType.SCALAR
-                or tosa_spirv.TOSAType.type_category_for_arg(argument)
-                == tosa_spirv.TOSAType.ENUM
-            ):
-                if (
-                    self.has_argument_tensor_element_type_name(argument, "bool_t")
-                    or datatype == "bool"
-                ):
-                    datatype = "bool"
-                    effceestring += (
-                        "    "
-                        + effcee_check_str.format(
-                            BOOL="Bool",
-                            OP_NAME=op.name,
-                            VALUE="true",
-                            ARG_INDEX=idx,
-                            DATATYPE="bool_t",
-                        )
-                        + "\n"
-                    )
-                else:
-                    datatype_str = str(datatype) + "_t"
-                    effceestring += (
-                        "    "
-                        + effcee_check_str.format(
-                            BOOL="",
-                            OP_NAME=op.name,
-                            VALUE="1",
-                            ARG_INDEX=idx,
-                            DATATYPE=datatype_str,
-                        )
-                        + "\n"
-                    )
-                idx += 1
             # Handle Inputs
-            # hack to account for mode attribute before inputs for resize
-            elif isInput or self.is_resize_attribute(op, argument):
-                # resize marked as multiple inputs but actually they are attributes
+            elif isInput:
+                if not self.is_dynamic_input(argument):
+                    if datatype == "int32":
+                        dataTypeStr = "uint"
+                    elif datatype == "int8":
+                        dataTypeStr = "uchar"
+                    elif datatype == "bool":
+                        dataTypeStr = "bool"
+                    else:
+                        raise ValueError("Unhandled datatype: " + datatype)
+                    
+                    # LayerTests always pass constants in as ConstCompositeTensor
+                    if values == '1' or layerTests:
+                        effcee_check_str = '\n    testutils::CheckConstCompositeTensor({{{VALUES}}}, "{OP_NAME}", outputStr, {ARG_INDEX}, "' + dataTypeStr + '");\n'
+                    else:
+                        effcee_check_str = '\n    testutils::CheckGraphConstant({{{VALUES}}}, DataType::{DATATYPE}, "{OP_NAME}", outputStr, {ARG_INDEX}, ' + str(graphConstantIdentifier) + ');\n'
+                        graphConstantIdentifier += 1
+
+                    
                 functionName = "Input"
                 if inputIdx > 0:
                     effceestring += "    "
+                
+                opIndex = tosa_spirv.TOSASPIRVSpec.operand_index_for_argument(op, argument) - tosa_spirv.TOSASPIRVSpec.FIRST_IN_ARGUMENT_OPERAND_OFFSET
 
-                datatype_str = str(datatype) + "_t"
-                if (op.name == "TABLE" and inputIdx == 1) or (
-                    op.name == "PAD" and inputIdx > 0
-                ):
-                    continue
-                effceestring += (
-                    effcee_check_str.format(
-                        OP_NAME=op.name,
-                        INPUTOUTPUT=functionName,
-                        VALUES=values,
-                        ARG_INDEX=inputIdx,
-                        DATATYPE=datatype_str,
-                    )
-                    + "\n"
-                )
+                datatype_str = str(datatype) + '_t'
+                effceestring += effcee_check_str.format(OP_NAME=op.name, INPUTOUTPUT=functionName, VALUES=values, ARG_INDEX=opIndex, DATATYPE=datatype_str) + "\n"
                 inputIdx += 1
-            # Handle outputs and non scalar/bool
-            else:
+            # Handle Outputs
+            elif isOutput:
                 functionName = "Output"
-                datatype_str = str(datatype) + "_t"
-                effceestring += (
-                    "    "
-                    + effcee_check_str.format(
-                        OP_NAME=op.name,
-                        INPUTOUTPUT=functionName,
-                        VALUES=values,
-                        ARG_INDEX=idx,
-                        DATATYPE=datatype_str,
-                    )
-                    + "\n"
-                )
-                # hack for rescale unusually having output come first in arguments
-                if (
-                    "output" in argument.name
-                    and op.name == "RESCALE"
-                    or op.name == "FFT2D"
-                    or op.name == "RFFT2D"
-                ):
-                    continue
-                else:
-                    idx += 1
+                datatype_str = str(datatype) + '_t'
+                effceestring += "    " + effcee_check_str.format(OP_NAME=op.name, INPUTOUTPUT=functionName, VALUES=values, ARG_INDEX=idx, DATATYPE=datatype_str) + "\n"
+                idx += 1
 
         return effceestring
-
+    
     def generate_layer_test(self, op, name):
 
         print(
@@ -1310,7 +909,7 @@ class TestGenerator:
             "std::string outputStr(testutils::DisassembleSPIRV(binary, true));\n\n"
         )
 
-        effceestring = self.get_effcee_string(op)
+        effceestring = self.get_effcee_string(op, False, True)
 
         file.write(effceestring + "\n")
         file.write("// Write binary a second time to ensure IDs remain consistent.\n")
@@ -1364,30 +963,6 @@ class TestGenerator:
                 self.generate_parser_test_case(op, file)
             file.close()
 
-    def check_fake_input(self, op, argument):
-        fake_input_dict = {
-            "RESCALE": {"multiplier", "shift"},
-            "RESIZE": {"scale", "offset", "border"},
-            "PAD": {"padding"},
-            "TABLE": {"table"},
-        }
-        if (
-            op.name in fake_input_dict.keys()
-            and argument.name in fake_input_dict[op.name]
-        ):
-            return True
-        return False
-
-    # Check input which is incorrectly marked as attribute
-    def check_fake_attribute(self, op, argument):
-        fake_attr_dict = {}
-        if (
-            op.name in fake_attr_dict.keys()
-            and argument.name in fake_attr_dict[op.name]
-        ):
-            return True
-        return False
-
     def generate_parser_test_case(self, op, file):
         op_pascal_case_name = self.operator_name_to_pascal_case(op.name)
 
@@ -1395,28 +970,12 @@ class TestGenerator:
         file.write("{\n")
         file.start_block()
 
-        op = self.fix_op(op)
-
         input_args = []
         output_args = []
         attribute_args = []
 
         for argument in op.arguments:
-            # check the fake input which should be attributes
-            if self.check_fake_input(op, argument):
-                attribute_args.append(argument)
-            elif self.check_fake_attribute(op, argument):
-                input_args.append(argument)
-            elif (
-                any(category.name == "input" for category in argument.categories)
-                and argument.shape != "[rank(shape)]"
-                and argument.shape != "-"
-                and argument.shape != "[2]"
-                and argument.shape != "[4]"
-                and argument.shape != "[NC]"
-                and argument.shape != "[TABLE_SIZE]"
-                and argument.shape != "[rank(shape1)]"
-            ):
+            if any(category.name == "input" for category in argument.categories):
                 input_args.append(argument)
             elif any(category.name == "output" for category in argument.categories):
                 output_args.append(argument)
@@ -1433,47 +992,34 @@ class TestGenerator:
         # Attribute values
         attr_list = []
         for argument in attribute_args:
-            # attr_name will return attribute name for special cases, such as pad_const_int and pad_const_fp for PAD
             is_attr, attr_name = self.generate_attribute_arguments(op, argument, file)
+
+
             if is_attr:
                 if len(attr_name) > 0:
                     attr_list.extend(attr_name)
                 else:
                     attr_list.append(argument.name)
 
+        attr_list = self.reorder_acc_type_local_bound(attr_list)
+
         if len(attr_list) > 0:
             file.write("// Create Attribute\n")
-            file.write("Tosa{} attribute(".format(self.dictOpAttributes[op.name]))
-            # fix Clamp min_val, max_val
-            if op.name == "CLAMP":
-                attr_list[1], attr_list[2] = attr_list[2], attr_list[1]
-            # fix POOL attribute sequence
-            elif op.name == "AVG_POOL2D":
-                attr_list[0], attr_list[1], attr_list[2] = (
-                    attr_list[2],
-                    attr_list[0],
-                    attr_list[1],
-                )
-                attr_list[3], attr_list[4] = attr_list[4], attr_list[5]
-                attr_list[5] = "DType::DType_FP16"
-            elif op.name == "MAX_POOL2D":
-                attr_list[0], attr_list[1], attr_list[2] = (
-                    attr_list[2],
-                    attr_list[0],
-                    attr_list[1],
-                )
-                attr_list.extend(["0", "0", "DType::DType_INT32"])
+            file.write("Tosa{}Attribute attribute(".format(self.operator_name_to_pascal_case_tosa_attributes(op.name)))
+
             # print attribute names
             for attr in attr_list:
                 if attr == attr_list[-1]:
-                    file.append("{});\n".format(attr))
+                    file.append("{});\n".format(self.get_attribute_casting(attr)))
                 else:
-                    file.append("{}, ".format(attr))
+                    file.append("{}, ".format(self.get_attribute_casting(attr)))
 
             file.append("\n")
 
         # Create tensors
         file.write("// Create Tensors\n")
+        file.write("std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;\n")
+        file.write("std::vector<std::unique_ptr<TosaSerializationOperator>> ops;\n")
         tensor_lines = []
         # Input tensors
         for argument in input_args:
@@ -1488,37 +1034,43 @@ class TestGenerator:
 
         # Get input tensors and input/output names
         input_output_args = input_args + output_args
+        dynamic_input_args = []
+        # Only dynamic inputs that are not coming from constant operators are added as inputs to block
+        for arg in input_output_args:
+            if self.is_dynamic_input(arg):
+                dynamic_input_args.append(arg)
+            
         tensors = ["{}Tensor".format(arg.name) for arg in input_output_args]
         input_names = ["{}Name".format(arg.name) for arg in input_args]
+        dynamic_input_names = ["{}Name".format(arg.name) for arg in dynamic_input_args]
         output_names = ["{}Name".format(arg.name) for arg in output_args]
 
         # Create Operator
         file.write("// Create Operator\n")
-        first_line = "auto op = new tosa::TosaSerializationOperator("
+        first_line = "auto op = std::make_unique<tosa::TosaSerializationOperator>("
         file.write(first_line + "Op::Op_{},\n".format(op.name))
         if len(attr_list) == 0:
             file.write(" " * len(first_line) + "Attribute::Attribute_NONE,\n")
             file.write(" " * len(first_line) + "nullptr,\n")
         else:
-            file.write(
-                " " * len(first_line)
-                + "Attribute::Attribute_{},\n".format(self.dictOpAttributes[op.name])
-            )
-            file.write(" " * len(first_line) + "&attribute,\n")
-        file.write(" " * len(first_line) + "{ ")
+            file.write(' ' * len(first_line) + "Attribute::Attribute_{}Attribute,\n".format(self.operator_name_to_pascal_case_tosa_attributes(op.name)))
+            file.write(' ' * len(first_line) + "&attribute,\n")
+        file.write(' ' * len(first_line) + "std::vector<std::string>{ ")
         for input_name in input_names:
             if input_name == input_names[-1]:
                 file.append("{} }},\n".format(input_name))
             else:
                 file.append("{}, ".format(input_name))
 
-        file.write(" " * len(first_line) + "{ ")
+        file.write(' ' * len(first_line) + "std::vector<std::string>{ ")
         for output_name in output_names:
             if output_name == output_names[-1]:
                 file.append("{} }}".format(output_name))
             else:
                 file.append("{}, ".format(output_name))
         file.append(");\n")
+
+        file.write("ops.push_back(std::move(op));\n")
 
         file.append("\n")
 
@@ -1529,18 +1081,13 @@ class TestGenerator:
         )
 
         first_line = "TosaSerializationBasicBlock block("
-        file.write(first_line + '"{}",\n'.format(op.name.lower()))
-        file.write(" " * len(first_line) + '"main",\n')
-        file.write(" " * len(first_line) + "{ op },\n")
-        file.write(" " * len(first_line) + "{ ")
-        for tensor in tensors:
-            if tensor == tensors[-1]:
-                file.append("{} }},\n".format(tensor))
-            else:
-                file.append("{}, ".format(tensor))
-        file.write(" " * len(first_line) + "{ ")
-        for input_name in input_names:
-            if input_name == input_names[-1]:
+        file.write(first_line + "\"{}\",\n".format(op.name.lower()))
+        file.write(' ' * len(first_line) + "\"main\",\n")
+        file.write(' ' * len(first_line) + "std::move(ops),\n")
+        file.write(' ' * len(first_line) + "std::move(tensors),\n")
+        file.write(' ' * len(first_line) + "{ ")
+        for input_name in dynamic_input_names:
+            if input_name == dynamic_input_names[-1]:
                 file.append("{} }},\n".format(input_name))
             else:
                 file.append("{}, ".format(input_name))
