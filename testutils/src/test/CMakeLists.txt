@@ -8,7 +8,8 @@ enable_testing()
 add_executable(testutils_unittests
                ModuleComparisonTest.cpp
                EnumMapTest.cpp
-               AssemblyUtilsTest.cpp)
+               AssemblyUtilsTest.cpp
+               OpGeneratorTest.cpp)
 
 target_include_directories(testutils_unittests PRIVATE
         $<BUILD_INTERFACE${GOOGLETEST_PATH}/include)

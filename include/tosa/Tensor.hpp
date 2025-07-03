@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <cstring>
 #include <numeric>
+#include <string>
 #include <vector>
 
 namespace tosa2spirv::spirv
@@ -39,6 +40,27 @@ enum class DataType
     bool_t = 12,
     null_t = 13,
 };
+
+inline std::string GetDataTypeName(DataType type)
+{
+    const char* names[] = {
+        "int4_t",
+        "int8_t",
+        "int16_t",
+        "int32_t",
+        "int48_t",
+        "int64_t",
+        "uint8_t",
+        "uint16_t",
+        "uint32_t",
+        "float16_t",
+        "float32_t",
+        "bfloat16_t",
+        "bool_t",
+        "null_t",
+    };
+    return names[static_cast<size_t>(type)];
+}
 
 /// tosa2spirv's implementation of TOSA tensor.
 class Tensor
@@ -77,6 +99,22 @@ class Tensor
     {
         return std::accumulate(std::begin(m_Shape), std::end(m_Shape), 1, std::multiplies<>());
     }
+
+    bool operator==(const Tensor& other) const
+    {
+        if (this->m_DataType != other.m_DataType)
+            return false;
+        if (this->m_Shape.size() != other.m_Shape.size())
+            return false;
+        for (size_t dimIdx = 0; dimIdx < this->m_Shape.size(); ++dimIdx)
+        {
+            if (this->m_Shape[dimIdx] != other.m_Shape[dimIdx])
+                return false;
+        }
+        return true;
+    }
+
+    bool operator!=(const Tensor& other) const { return !(*this == other); }
 
     private:
     TensorShape m_Shape;
@@ -151,11 +189,27 @@ class Attribute
         {}
 
     explicit Attribute(const ResId resId)
-        : m_ResId(resId){};
+        : m_ResId(resId) {};
 
     const std::vector<uint32_t>& GetData() const { return m_AttributeData; }
     Tensor GetTensor() const { return m_Tensor; }
     ResId GetResId() const { return m_ResId; }
+
+    bool operator==(const Attribute& other) const
+    {
+        if (this->m_Tensor != other.m_Tensor)
+            return false;
+        if (this->m_AttributeData.size() != other.m_AttributeData.size())
+            return false;
+        for (size_t dataIdx = 0; dataIdx < this->m_AttributeData.size(); ++dataIdx)
+        {
+            if (this->m_AttributeData[dataIdx] != other.m_AttributeData[dataIdx])
+                return false;
+        }
+        return true;
+    }
+
+    bool operator!=(const Attribute& other) const { return !(*this == other); }
 
     private:
     Tensor m_Tensor;

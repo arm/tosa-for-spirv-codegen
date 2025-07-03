@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <string>
+
 namespace tosa2spirv::tosa
 {
 // See tosa2spirv/python/source_generator.py and README
@@ -79,4 +81,78 @@ enum class OperatorEnum
     Cast,
     Rescale,
 }; // OPERATOR ENUM SECTION END
+
+inline std::string GetEnumName(OperatorEnum op)
+{
+    const char *names[] = {
+        "ArgMax",
+        "AvgPool2d",
+        "Conv2d",
+        "Conv3d",
+        "DepthwiseConv2d",
+        "Fft2d",
+        "Matmul",
+        "MaxPool2d",
+        "Rfft2d",
+        "TransposeConv2d",
+        "Clamp",
+        "Erf",
+        "Sigmoid",
+        "Tanh",
+        "Add",
+        "ArithmeticRightShift",
+        "BitwiseAnd",
+        "BitwiseOr",
+        "BitwiseXor",
+        "IntDiv",
+        "LogicalAnd",
+        "LogicalLeftShift",
+        "LogicalRightShift",
+        "LogicalOr",
+        "LogicalXor",
+        "Maximum",
+        "Minimum",
+        "Mul",
+        "Pow",
+        "Sub",
+        "Table",
+        "Abs",
+        "BitwiseNot",
+        "Ceil",
+        "Clz",
+        "Cos",
+        "Exp",
+        "Floor",
+        "Log",
+        "LogicalNot",
+        "Negate",
+        "Reciprocal",
+        "Rsqrt",
+        "Sin",
+        "Select",
+        "Equal",
+        "Greater",
+        "GreaterEqual",
+        "ReduceAll",
+        "ReduceAny",
+        "ReduceMax",
+        "ReduceMin",
+        "ReduceProduct",
+        "ReduceSum",
+        "Concat",
+        "Pad",
+        "Reshape",
+        "Reverse",
+        "Slice",
+        "Tile",
+        "Transpose",
+        "Gather",
+        "Scatter",
+        "Resize",
+        "Cast",
+        "Rescale",
+    };
+    return names[static_cast<size_t>(op)];
+}
+
 } // namespace tosa2spirv::tosa

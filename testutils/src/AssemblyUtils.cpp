@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -97,8 +98,12 @@ Operand ParseOperand(const std::string& token, ResIdMap& resIdMap)
     }
     try
     {
-        const int value = std::stoi(intToken);
+        const uint32_t value = std::stoul(intToken);
         return Operand(value);
+    }
+    catch (const std::out_of_range&)
+    {
+        throw std::invalid_argument("Invalid terminal operand (out of range): " + token);
     }
     catch (const std::exception&)
     {

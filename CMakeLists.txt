@@ -13,6 +13,7 @@ option(BUILD_TOSA_SERIALIZATION_PARSER "Build the TOSA Serialization Parser.
                                         This library can parse a TOSA Serialization structure and generate SPIRV." ON)
 option(BUILD_TOSA_2_SPIRV_GENERATOR "Build the tosa2spirv generator.
                                      This command line tool generates SPIRV binary from a TOSA Flatbuffers file." ON)
+option(BUILD_SPIRV_2_TOSA_TOOL "Build the spirv2tosa utility tool." ON)
 option(BUILD_VGF_WRITER "Build the VGF Writer library.
                          A wrapper of the VGF Encoder allowing users to create .vgf files with tosa2spirv output." ON)
 # Option for Unittest Coverage testing
@@ -79,6 +80,9 @@ if(BUILD_VGF_WRITER)
 endif()
 if(BUILD_TOSA_2_SPIRV_GENERATOR)
     add_subdirectory(generator)
+endif()
+if(BUILD_SPIRV_2_TOSA_TOOL)
+    add_subdirectory(spirv2tosatool)
 endif()
 
 if(BUILD_UNITTESTS)

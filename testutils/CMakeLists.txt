@@ -12,7 +12,8 @@ set(TEST_UTILS_SOURCE src/ModuleComparator.cpp
                       src/OpTestUtils.cpp
                       src/AssemblyUtils.cpp
                       src/ValidationUtils.cpp
-                      src/EnumMaps.cpp)
+                      src/EnumMaps.cpp
+                      src/OpGenerator.cpp)
 
 add_library(test_utils ${TEST_UTILS_SOURCE})
 

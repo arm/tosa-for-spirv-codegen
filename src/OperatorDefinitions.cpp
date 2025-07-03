@@ -530,4 +530,5 @@ TOSAInstructions GetTOSAInstructions(const OperatorEnum operatorType)
         default: throw std::invalid_argument("Invalid OperatorEnum");
     }
 }
+
 } // namespace tosa2spirv::tosa
