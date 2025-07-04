@@ -47,7 +47,8 @@ TEST(TOSA2SPIRV_PARSER, Resize)
                                                                      Attribute::Attribute_NONE,
                                                                      nullptr,
                                                                      std::vector<std::string>{},
-                                                                     std::vector<std::string>{scaleName});
+                                                                     std::vector<std::string>{scaleName},
+                                                                     TosaOpLocation{});
     ops.push_back(std::move(scaleOp));
     auto offsetTensor = std::make_unique<TosaSerializationTensor>(offsetName,
                                                                   offsetShape,
@@ -58,7 +59,8 @@ TEST(TOSA2SPIRV_PARSER, Resize)
                                                                       Attribute::Attribute_NONE,
                                                                       nullptr,
                                                                       std::vector<std::string>{},
-                                                                      std::vector<std::string>{offsetName});
+                                                                      std::vector<std::string>{offsetName},
+                                                                      TosaOpLocation{});
     ops.push_back(std::move(offsetOp));
     auto borderTensor = std::make_unique<TosaSerializationTensor>(borderName,
                                                                   borderShape,
@@ -69,7 +71,8 @@ TEST(TOSA2SPIRV_PARSER, Resize)
                                                                       Attribute::Attribute_NONE,
                                                                       nullptr,
                                                                       std::vector<std::string>{},
-                                                                      std::vector<std::string>{borderName});
+                                                                      std::vector<std::string>{borderName},
+                                                                      TosaOpLocation{});
     ops.push_back(std::move(borderOp));
     auto outputTensor =
         std::make_unique<TosaSerializationTensor>(outputName, outputShape, DType::DType_INT32, std::vector<uint8_t>{});
@@ -81,12 +84,14 @@ TEST(TOSA2SPIRV_PARSER, Resize)
         Attribute::Attribute_ResizeAttribute,
         &attribute,
         std::vector<std::string>{inputName, scaleName, offsetName, borderName},
-        std::vector<std::string>{outputName});
+        std::vector<std::string>{outputName},
+        TosaOpLocation{});
     ops.push_back(std::move(op));
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("resize", "main", std::move(ops), std::move(tensors), {inputName}, {outputName});
+    TosaSerializationBasicBlock block("resize", "main", std::move(ops), std::move(tensors),
+        std::vector<std::unique_ptr<TosaSerializationShape>>{}, {inputName}, {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");

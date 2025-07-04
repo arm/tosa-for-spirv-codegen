@@ -84,7 +84,8 @@ TEST(TOSA2SPIRV_PARSER, ConstInputOpTest)
                                                                       Attribute::Attribute_NONE,
                                                                       nullptr,
                                                                       std::vector<std::string>{},
-                                                                      std::vector<std::string>{weightName});
+                                                                      std::vector<std::string>{weightName},
+                                                                      TosaOpLocation{});
     ops.push_back(std::move(weightOp));
 
     auto biasTensor =
@@ -97,7 +98,8 @@ TEST(TOSA2SPIRV_PARSER, ConstInputOpTest)
                                                                     Attribute::Attribute_NONE,
                                                                     nullptr,
                                                                     std::vector<std::string>{},
-                                                                    std::vector<std::string>{biasName});
+                                                                    std::vector<std::string>{biasName},
+                                                                    TosaOpLocation{});
     ops.push_back(std::move(biasOp));
     auto input_zpTensor = std::make_unique<TosaSerializationTensor>(input_zpName,
                                                                     input_zpShape,
@@ -108,7 +110,8 @@ TEST(TOSA2SPIRV_PARSER, ConstInputOpTest)
                                                                         Attribute::Attribute_NONE,
                                                                         nullptr,
                                                                         std::vector<std::string>{},
-                                                                        std::vector<std::string>{input_zpName});
+                                                                        std::vector<std::string>{input_zpName},
+                                                                        TosaOpLocation{});
     ops.push_back(std::move(input_zpOp));
 
     auto weight_zpTensor = std::make_unique<TosaSerializationTensor>(weight_zpName,
@@ -120,7 +123,8 @@ TEST(TOSA2SPIRV_PARSER, ConstInputOpTest)
                                                                          Attribute::Attribute_NONE,
                                                                          nullptr,
                                                                          std::vector<std::string>{},
-                                                                         std::vector<std::string>{weight_zpName});
+                                                                         std::vector<std::string>{weight_zpName},
+                                                                         TosaOpLocation{});
     ops.push_back(std::move(weight_zpOp));
 
     auto rescaleTensor = std::make_unique<TosaSerializationTensor>(rescaleIntermediateName,
@@ -139,7 +143,8 @@ TEST(TOSA2SPIRV_PARSER, ConstInputOpTest)
                                                                           Attribute::Attribute_NONE,
                                                                           nullptr,
                                                                           std::vector<std::string>{},
-                                                                          std::vector<std::string>{multiplierName});
+                                                                          std::vector<std::string>{multiplierName},
+                                                                          TosaOpLocation{});
     ops.push_back(std::move(multiplierOp));
 
     auto shiftTensor =
@@ -150,7 +155,8 @@ TEST(TOSA2SPIRV_PARSER, ConstInputOpTest)
                                                                      Attribute::Attribute_NONE,
                                                                      nullptr,
                                                                      std::vector<std::string>{},
-                                                                     std::vector<std::string>{shiftName});
+                                                                     std::vector<std::string>{shiftName},
+                                                                     TosaOpLocation{});
     ops.push_back(std::move(shiftOp));
 
     auto input_zpRescaleTensor = std::make_unique<TosaSerializationTensor>(input_zpRescaleName,
@@ -164,7 +170,8 @@ TEST(TOSA2SPIRV_PARSER, ConstInputOpTest)
                                                           Attribute::Attribute_NONE,
                                                           nullptr,
                                                           std::vector<std::string>{},
-                                                          std::vector<std::string>{input_zpRescaleName});
+                                                          std::vector<std::string>{input_zpRescaleName},
+                                                          TosaOpLocation{});
     ops.push_back(std::move(input_zpRescaleOp));
 
     auto output_zpTensor = std::make_unique<TosaSerializationTensor>(output_zpName,
@@ -176,7 +183,8 @@ TEST(TOSA2SPIRV_PARSER, ConstInputOpTest)
                                                                          Attribute::Attribute_NONE,
                                                                          nullptr,
                                                                          std::vector<std::string>{},
-                                                                         std::vector<std::string>{output_zpName});
+                                                                         std::vector<std::string>{output_zpName},
+                                                                         TosaOpLocation{});
     ops.push_back(std::move(output_zpOp));
 
     auto outputTensor =
@@ -188,7 +196,8 @@ TEST(TOSA2SPIRV_PARSER, ConstInputOpTest)
         Attribute::Attribute_Conv2dAttribute,
         &conv2dAttribute,
         std::vector<std::string>{inputName, weightName, biasName, input_zpName, weight_zpName},
-        std::vector<std::string>{rescaleIntermediateName});
+        std::vector<std::string>{rescaleIntermediateName},
+        TosaOpLocation{});
     ops.push_back(std::move(conv2d));
 
     // Create Rescale Operator
@@ -200,11 +209,13 @@ TEST(TOSA2SPIRV_PARSER, ConstInputOpTest)
                                                                                                 shiftName,
                                                                                                 input_zpRescaleName,
                                                                                                 output_zpName},
-                                                                       std::vector<std::string>{outputName});
+                                                                       std::vector<std::string>{outputName},
+                                                                       TosaOpLocation{});
     ops.push_back(std::move(rescaleOp));
 
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("main", "main", std::move(ops), std::move(tensors), {inputName}, {outputName});
+    TosaSerializationBasicBlock block("main", "main", std::move(ops), std::move(tensors),
+        std::vector<std::unique_ptr<TosaSerializationShape>>{}, {inputName}, {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
@@ -228,14 +239,16 @@ TEST(TOSA2SPIRV_PARSER, UnsupportedOperator)
                                                                 Attribute::Attribute_NONE,
                                                                 nullptr,
                                                                 std::vector<std::string>{},
-                                                                std::vector<std::string>{});
+                                                                std::vector<std::string>{},
+                                                                TosaOpLocation{});
 
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
     ops.push_back(std::move(op));
 
     // Create a tosa single-op basic block
     // The raw pointers of operators will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("unknown", "main", std::move(ops), {}, {}, {});
+    TosaSerializationBasicBlock block("unknown", "main", std::move(ops), {},
+        std::vector<std::unique_ptr<TosaSerializationShape>>{}, {}, {});
 
     TosaSerializationParser parser(&block);
 
@@ -272,13 +285,15 @@ TEST(TOSA2SPIRV_PARSER, InvalidDtype)
                                                                 Attribute::Attribute_MaxPool2dAttribute,
                                                                 &attribute,
                                                                 std::vector<std::string>{inputName},
-                                                                std::vector<std::string>{outputName});
+                                                                std::vector<std::string>{outputName},
+                                                                TosaOpLocation{});
 
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
     ops.push_back(std::move(op));
 
     // Create a tosa single-op basic block
-    TosaSerializationBasicBlock block("unknown", "main", std::move(ops), std::move(tensors), {inputName}, {outputName});
+    TosaSerializationBasicBlock block("unknown", "main", std::move(ops), std::move(tensors),
+        std::vector<std::unique_ptr<TosaSerializationShape>>{}, {inputName}, {outputName});
 
     TosaSerializationParser parser(&block);
 
@@ -316,7 +331,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorSimpleMaxpool2dModel()
                                                                 Attribute::Attribute_MaxPool2dAttribute,
                                                                 &attribute,
                                                                 std::vector<std::string>{inputName},
-                                                                std::vector<std::string>{outputName});
+                                                                std::vector<std::string>{outputName},
+                                                                TosaOpLocation{});
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
     ops.push_back(std::move(op));
 
@@ -325,6 +341,7 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorSimpleMaxpool2dModel()
                                                                "main",
                                                                std::move(ops),
                                                                std::move(tensors),
+                                                               std::vector<std::unique_ptr<TosaSerializationShape>>{},
                                                                std::vector<std::string>{inputName},
                                                                std::vector<std::string>{outputName});
 
@@ -415,7 +432,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DRescaleConv2DModel()
                                                                       Attribute::Attribute_NONE,
                                                                       nullptr,
                                                                       std::vector<std::string>{},
-                                                                      std::vector<std::string>{weightName});
+                                                                      std::vector<std::string>{weightName},
+                                                                      TosaOpLocation{});
     ops.push_back(std::move(weightOp));
 
     auto biasTensor =
@@ -428,7 +446,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DRescaleConv2DModel()
                                                                     Attribute::Attribute_NONE,
                                                                     nullptr,
                                                                     std::vector<std::string>{},
-                                                                    std::vector<std::string>{biasName});
+                                                                    std::vector<std::string>{biasName},
+                                                                    TosaOpLocation{});
     ops.push_back(std::move(biasOp));
 
     auto input_zpTensor = std::make_unique<TosaSerializationTensor>(input_zpName,
@@ -440,7 +459,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DRescaleConv2DModel()
                                                                         Attribute::Attribute_NONE,
                                                                         nullptr,
                                                                         std::vector<std::string>{},
-                                                                        std::vector<std::string>{input_zpName});
+                                                                        std::vector<std::string>{input_zpName},
+                                                                        TosaOpLocation{});
     ops.push_back(std::move(input_zpOp));
 
     auto weight_zpTensor = std::make_unique<TosaSerializationTensor>(weight_zpName,
@@ -452,7 +472,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DRescaleConv2DModel()
                                                                          Attribute::Attribute_NONE,
                                                                          nullptr,
                                                                          std::vector<std::string>{},
-                                                                         std::vector<std::string>{weight_zpName});
+                                                                         std::vector<std::string>{weight_zpName},
+                                                                         TosaOpLocation{});
     ops.push_back(std::move(weight_zpOp));
 
     auto rescaleTensor = std::make_unique<TosaSerializationTensor>(rescaleIntermediateName,
@@ -471,7 +492,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DRescaleConv2DModel()
                                                                           Attribute::Attribute_NONE,
                                                                           nullptr,
                                                                           std::vector<std::string>{},
-                                                                          std::vector<std::string>{multiplierName});
+                                                                          std::vector<std::string>{multiplierName},
+                                                                          TosaOpLocation{});
     ops.push_back(std::move(multiplierOp));
 
     auto shiftTensor =
@@ -482,7 +504,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DRescaleConv2DModel()
                                                                      Attribute::Attribute_NONE,
                                                                      nullptr,
                                                                      std::vector<std::string>{},
-                                                                     std::vector<std::string>{shiftName});
+                                                                     std::vector<std::string>{shiftName},
+                                                                     TosaOpLocation{});
     ops.push_back(std::move(shiftOp));
 
     auto input_zpRescaleTensor = std::make_unique<TosaSerializationTensor>(input_zpRescaleName,
@@ -496,7 +519,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DRescaleConv2DModel()
                                                           Attribute::Attribute_NONE,
                                                           nullptr,
                                                           std::vector<std::string>{},
-                                                          std::vector<std::string>{input_zpRescaleName});
+                                                          std::vector<std::string>{input_zpRescaleName},
+                                                          TosaOpLocation{});
     ops.push_back(std::move(input_zpRescaleOp));
 
     auto output_zpTensor = std::make_unique<TosaSerializationTensor>(output_zpName,
@@ -508,7 +532,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DRescaleConv2DModel()
                                                                          Attribute::Attribute_NONE,
                                                                          nullptr,
                                                                          std::vector<std::string>{},
-                                                                         std::vector<std::string>{output_zpName});
+                                                                         std::vector<std::string>{output_zpName},
+                                                                         TosaOpLocation{});
     ops.push_back(std::move(output_zpOp));
 
     auto rescaleOutTensor = std::make_unique<TosaSerializationTensor>(rescaleOutName,
@@ -526,7 +551,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DRescaleConv2DModel()
         Attribute::Attribute_Conv2dAttribute,
         &conv2dAttribute,
         std::vector<std::string>{inputName, weightName, biasName, input_zpName, weight_zpName},
-        std::vector<std::string>{rescaleIntermediateName});
+        std::vector<std::string>{rescaleIntermediateName},
+        TosaOpLocation{});
     ops.push_back(std::move(conv2d));
 
     // Create Rescale Operator
@@ -538,7 +564,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DRescaleConv2DModel()
                                                                                                 shiftName,
                                                                                                 input_zpRescaleName,
                                                                                                 output_zpName},
-                                                                       std::vector<std::string>{rescaleOutName});
+                                                                       std::vector<std::string>{rescaleOutName},
+                                                                       TosaOpLocation{});
     ops.push_back(std::move(rescaleOp));
 
     auto conv2d2 = std::make_unique<tosa::TosaSerializationOperator>(
@@ -546,7 +573,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DRescaleConv2DModel()
         Attribute::Attribute_Conv2dAttribute,
         &conv2dAttribute,
         std::vector<std::string>{rescaleOutName, weightName, biasName, input_zpName, weight_zpName},
-        std::vector<std::string>{output2Name});
+        std::vector<std::string>{output2Name},
+        TosaOpLocation{});
     ops.push_back(std::move(conv2d2));
 
     // Create a tosa single-op basic block
@@ -554,6 +582,7 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DRescaleConv2DModel()
                                                                "main",
                                                                std::move(ops),
                                                                std::move(tensors),
+                                                               std::vector<std::unique_ptr<TosaSerializationShape>>{},
                                                                std::vector<std::string>{inputName},
                                                                std::vector<std::string>{output2Name});
 
@@ -615,7 +644,8 @@ TEST(TOSA2SPIRV_PARSER, InvalidBlockInputOutputConnectWithIdentity)
                                                                       Attribute::Attribute_NONE,
                                                                       nullptr,
                                                                       std::vector<std::string>{},
-                                                                      std::vector<std::string>{weightName});
+                                                                      std::vector<std::string>{weightName},
+                                                                      TosaOpLocation{});
     ops.push_back(std::move(weightOp));
 
     auto biasTensor =
@@ -628,7 +658,8 @@ TEST(TOSA2SPIRV_PARSER, InvalidBlockInputOutputConnectWithIdentity)
                                                                     Attribute::Attribute_NONE,
                                                                     nullptr,
                                                                     std::vector<std::string>{},
-                                                                    std::vector<std::string>{biasName});
+                                                                    std::vector<std::string>{biasName},
+                                                                    TosaOpLocation{});
     ops.push_back(std::move(biasOp));
     auto input_zpTensor = std::make_unique<TosaSerializationTensor>(input_zpName,
                                                                     input_zpShape,
@@ -639,7 +670,8 @@ TEST(TOSA2SPIRV_PARSER, InvalidBlockInputOutputConnectWithIdentity)
                                                                         Attribute::Attribute_NONE,
                                                                         nullptr,
                                                                         std::vector<std::string>{},
-                                                                        std::vector<std::string>{input_zpName});
+                                                                        std::vector<std::string>{input_zpName},
+                                                                        TosaOpLocation{});
     ops.push_back(std::move(input_zpOp));
 
     auto weight_zpTensor = std::make_unique<TosaSerializationTensor>(weight_zpName,
@@ -651,7 +683,8 @@ TEST(TOSA2SPIRV_PARSER, InvalidBlockInputOutputConnectWithIdentity)
                                                                          Attribute::Attribute_NONE,
                                                                          nullptr,
                                                                          std::vector<std::string>{},
-                                                                         std::vector<std::string>{weight_zpName});
+                                                                         std::vector<std::string>{weight_zpName},
+                                                                         TosaOpLocation{});
     ops.push_back(std::move(weight_zpOp));
     auto outputTensor =
         std::make_unique<TosaSerializationTensor>(output1Name, output1Shape, DType::DType_INT8, std::vector<uint8_t>{});
@@ -668,14 +701,16 @@ TEST(TOSA2SPIRV_PARSER, InvalidBlockInputOutputConnectWithIdentity)
                                                           Attribute::Attribute_NONE,
                                                           nullptr,
                                                           std::vector<std::string>{inputName},
-                                                          std::vector<std::string>{identityInterTensorName});
+                                                          std::vector<std::string>{identityInterTensorName},
+                                                          TosaOpLocation{});
     ops.push_back(std::move(identity1));
     auto identity2 =
         std::make_unique<tosa::TosaSerializationOperator>(Op::Op_IDENTITY,
                                                           Attribute::Attribute_NONE,
                                                           nullptr,
                                                           std::vector<std::string>{inputName},
-                                                          std::vector<std::string>{identityInterTensorName});
+                                                          std::vector<std::string>{identityInterTensorName},
+                                                          TosaOpLocation{});
     ops.push_back(std::move(identity2));
 
     // Create Operators Conv2D
@@ -684,7 +719,8 @@ TEST(TOSA2SPIRV_PARSER, InvalidBlockInputOutputConnectWithIdentity)
         Attribute::Attribute_Conv2dAttribute,
         &conv2dAttribute,
         std::vector<std::string>{output1Name, weightName, biasName, input_zpName, weight_zpName},
-        std::vector<std::string>{output2Name});
+        std::vector<std::string>{output2Name},
+        TosaOpLocation{});
     ops.push_back(std::move(conv2d));
 
     // Create a tosa single-op basic block
@@ -692,6 +728,7 @@ TEST(TOSA2SPIRV_PARSER, InvalidBlockInputOutputConnectWithIdentity)
                                       "main",
                                       std::move(ops),
                                       std::move(tensors),
+                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
                                       {inputName},
                                       {output1Name, output2Name});
 
@@ -753,7 +790,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorIdentityConv2DIdentityMode
                                                                       Attribute::Attribute_NONE,
                                                                       nullptr,
                                                                       std::vector<std::string>{},
-                                                                      std::vector<std::string>{conv2DWeightsName});
+                                                                      std::vector<std::string>{conv2DWeightsName},
+                                                                      TosaOpLocation{});
     ops.push_back(std::move(weightOp));
     auto biasTensor =
         std::make_unique<TosaSerializationTensor>(conv2DBiasName,
@@ -765,7 +803,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorIdentityConv2DIdentityMode
                                                                     Attribute::Attribute_NONE,
                                                                     nullptr,
                                                                     std::vector<std::string>{},
-                                                                    std::vector<std::string>{conv2DBiasName});
+                                                                    std::vector<std::string>{conv2DBiasName},
+                                                                    TosaOpLocation{});
     ops.push_back(std::move(biasOp));
     auto input_zpTensor = std::make_unique<TosaSerializationTensor>(input_zpName,
                                                                     input_zpShape,
@@ -776,7 +815,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorIdentityConv2DIdentityMode
                                                                         Attribute::Attribute_NONE,
                                                                         nullptr,
                                                                         std::vector<std::string>{},
-                                                                        std::vector<std::string>{input_zpName});
+                                                                        std::vector<std::string>{input_zpName},
+                                                                        TosaOpLocation{});
     ops.push_back(std::move(input_zpOp));
     auto weight_zpTensor = std::make_unique<TosaSerializationTensor>(weight_zpName,
                                                                      weight_zpShape,
@@ -787,7 +827,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorIdentityConv2DIdentityMode
                                                                          Attribute::Attribute_NONE,
                                                                          nullptr,
                                                                          std::vector<std::string>{},
-                                                                         std::vector<std::string>{weight_zpName});
+                                                                         std::vector<std::string>{weight_zpName},
+                                                                         TosaOpLocation{});
     ops.push_back(std::move(weight_zpOp));
 
     auto identity2InputTensor = std::make_unique<TosaSerializationTensor>(identity2InputName,
@@ -806,7 +847,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorIdentityConv2DIdentityMode
                                                                        Attribute::Attribute_NONE,
                                                                        nullptr,
                                                                        std::vector<std::string>{identity1InputName},
-                                                                       std::vector<std::string>{identity1OutputName});
+                                                                       std::vector<std::string>{identity1OutputName},
+                                                                       TosaOpLocation{});
     ops.push_back(std::move(identity1));
 
     // Create Operators Conv2D
@@ -815,14 +857,16 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorIdentityConv2DIdentityMode
         Attribute::Attribute_Conv2dAttribute,
         &conv2dAttribute,
         std::vector<std::string>{identity1OutputName, conv2DWeightsName, conv2DBiasName, input_zpName, weight_zpName},
-        std::vector<std::string>{identity2InputName});
+        std::vector<std::string>{identity2InputName},
+        TosaOpLocation{});
     ops.push_back(std::move(conv2d));
 
     auto identity2 = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_IDENTITY,
                                                                        Attribute::Attribute_NONE,
                                                                        nullptr,
                                                                        std::vector<std::string>{identity2InputName},
-                                                                       std::vector<std::string>{identity2OutputName});
+                                                                       std::vector<std::string>{identity2OutputName},
+                                                                       TosaOpLocation{});
     ops.push_back(std::move(identity2));
 
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
@@ -830,6 +874,7 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorIdentityConv2DIdentityMode
                                                                "main",
                                                                std::move(ops),
                                                                std::move(tensors),
+                                                               std::vector<std::unique_ptr<TosaSerializationShape>>{},
                                                                std::vector<std::string>{identity1InputName},
                                                                std::vector<std::string>{identity2OutputName});
 
@@ -921,7 +966,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DIdentityConv2DModel(
                                                                       Attribute::Attribute_NONE,
                                                                       nullptr,
                                                                       std::vector<std::string>{},
-                                                                      std::vector<std::string>{weightName});
+                                                                      std::vector<std::string>{weightName},
+                                                                      TosaOpLocation{});
     ops.push_back(std::move(weightOp));
 
     auto biasTensor =
@@ -935,7 +981,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DIdentityConv2DModel(
                                                                     Attribute::Attribute_NONE,
                                                                     nullptr,
                                                                     std::vector<std::string>{},
-                                                                    std::vector<std::string>{biasName});
+                                                                    std::vector<std::string>{biasName},
+                                                                    TosaOpLocation{});
     ops.push_back(std::move(biasOp));
 
     auto input_zpTensor = std::make_unique<TosaSerializationTensor>(input_zpName,
@@ -947,7 +994,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DIdentityConv2DModel(
                                                                         Attribute::Attribute_NONE,
                                                                         nullptr,
                                                                         std::vector<std::string>{},
-                                                                        std::vector<std::string>{input_zpName});
+                                                                        std::vector<std::string>{input_zpName},
+                                                                        TosaOpLocation{});
     ops.push_back(std::move(input_zpOp));
 
     auto weight_zpTensor = std::make_unique<TosaSerializationTensor>(weight_zpName,
@@ -959,7 +1007,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DIdentityConv2DModel(
                                                                          Attribute::Attribute_NONE,
                                                                          nullptr,
                                                                          std::vector<std::string>{},
-                                                                         std::vector<std::string>{weight_zpName});
+                                                                         std::vector<std::string>{weight_zpName},
+                                                                         TosaOpLocation{});
     ops.push_back(std::move(weight_zpOp));
 
     auto identityInTensor = std::make_unique<TosaSerializationTensor>(identityInName,
@@ -994,7 +1043,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DIdentityConv2DModel(
                                                                           Attribute::Attribute_NONE,
                                                                           nullptr,
                                                                           std::vector<std::string>{},
-                                                                          std::vector<std::string>{multiplierName});
+                                                                          std::vector<std::string>{multiplierName},
+                                                                          TosaOpLocation{});
     ops.push_back(std::move(multiplierOp));
 
     auto shiftTensor =
@@ -1005,7 +1055,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DIdentityConv2DModel(
                                                                      Attribute::Attribute_NONE,
                                                                      nullptr,
                                                                      std::vector<std::string>{},
-                                                                     std::vector<std::string>{shiftName});
+                                                                     std::vector<std::string>{shiftName},
+                                                                     TosaOpLocation{});
     ops.push_back(std::move(shiftOp));
 
     auto output_zpTensor = std::make_unique<TosaSerializationTensor>(output_zpName,
@@ -1017,7 +1068,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DIdentityConv2DModel(
                                                                          Attribute::Attribute_NONE,
                                                                          nullptr,
                                                                          std::vector<std::string>{},
-                                                                         std::vector<std::string>{output_zpName});
+                                                                         std::vector<std::string>{output_zpName},
+                                                                         TosaOpLocation{});
     ops.push_back(std::move(output_zpOp));
 
     auto input_zpRescaleTensor = std::make_unique<TosaSerializationTensor>(input_zpRescaleName,
@@ -1031,7 +1083,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DIdentityConv2DModel(
                                                           Attribute::Attribute_NONE,
                                                           nullptr,
                                                           std::vector<std::string>{},
-                                                          std::vector<std::string>{input_zpRescaleName});
+                                                          std::vector<std::string>{input_zpRescaleName},
+                                                          TosaOpLocation{});
     ops.push_back(std::move(input_zpRescaleOp));
 
     // Create Operators Conv2D, Rescale, Conv2D
@@ -1040,27 +1093,31 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DIdentityConv2DModel(
         Attribute::Attribute_Conv2dAttribute,
         &conv2dAttribute,
         std::vector<std::string>{inputName, weightName, biasName, input_zpName, weight_zpName},
-        std::vector<std::string>{identityInName});
+        std::vector<std::string>{identityInName},
+        TosaOpLocation{});
     ops.push_back(std::move(conv2d));
     auto identity1 = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_IDENTITY,
                                                                        Attribute::Attribute_NONE,
                                                                        nullptr,
                                                                        std::vector<std::string>{identityInName},
-                                                                       std::vector<std::string>{identityOutName});
+                                                                       std::vector<std::string>{identityOutName},
+                                                                       TosaOpLocation{});
     ops.push_back(std::move(identity1));
     auto rescaleOp = std::make_unique<tosa::TosaSerializationOperator>(
         Op::Op_RESCALE,
         Attribute::Attribute_RescaleAttribute,
         &rescaleAttribute,
         std::vector<std::string>{identityOutName, multiplierName, shiftName, input_zpRescaleName, output_zpName},
-        std::vector<std::string>{rescaleOutName});
+        std::vector<std::string>{rescaleOutName},
+        TosaOpLocation{});
     ops.push_back(std::move(rescaleOp));
     auto conv2d2 = std::make_unique<tosa::TosaSerializationOperator>(
         Op::Op_CONV2D,
         Attribute::Attribute_Conv2dAttribute,
         &conv2dAttribute,
         std::vector<std::string>{rescaleOutName, weightName, biasName, input_zpName, weight_zpName},
-        std::vector<std::string>{outputName});
+        std::vector<std::string>{outputName},
+        TosaOpLocation{});
     ops.push_back(std::move(conv2d2));
 
     // Create a tosa single-op basic block
@@ -1068,6 +1125,7 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DIdentityConv2DModel(
                                                                "main",
                                                                std::move(ops),
                                                                std::move(tensors),
+                                                               std::vector<std::unique_ptr<TosaSerializationShape>>{},
                                                                std::vector<std::string>{inputName},
                                                                std::vector<std::string>{outputName});
 
@@ -1166,7 +1224,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DIdentityOutputConv2D
                                                                       Attribute::Attribute_NONE,
                                                                       nullptr,
                                                                       std::vector<std::string>{},
-                                                                      std::vector<std::string>{weightName});
+                                                                      std::vector<std::string>{weightName},
+                                                                      TosaOpLocation{});
     ops.push_back(std::move(weightOp));
 
     auto biasTensor =
@@ -1179,7 +1238,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DIdentityOutputConv2D
                                                                     Attribute::Attribute_NONE,
                                                                     nullptr,
                                                                     std::vector<std::string>{},
-                                                                    std::vector<std::string>{biasName});
+                                                                    std::vector<std::string>{biasName},
+                                                                    TosaOpLocation{});
     ops.push_back(std::move(biasOp));
 
     auto input_zpTensor = std::make_unique<TosaSerializationTensor>(input_zpName,
@@ -1191,7 +1251,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DIdentityOutputConv2D
                                                                         Attribute::Attribute_NONE,
                                                                         nullptr,
                                                                         std::vector<std::string>{},
-                                                                        std::vector<std::string>{input_zpName});
+                                                                        std::vector<std::string>{input_zpName},
+                                                                        TosaOpLocation{});
     ops.push_back(std::move(input_zpOp));
 
     auto weight_zpTensor = std::make_unique<TosaSerializationTensor>(weight_zpName,
@@ -1203,7 +1264,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DIdentityOutputConv2D
                                                                          Attribute::Attribute_NONE,
                                                                          nullptr,
                                                                          std::vector<std::string>{},
-                                                                         std::vector<std::string>{weight_zpName});
+                                                                         std::vector<std::string>{weight_zpName},
+                                                                         TosaOpLocation{});
     ops.push_back(std::move(weight_zpOp));
 
     auto identityInTensor = std::make_unique<TosaSerializationTensor>(identity1InName,
@@ -1243,7 +1305,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DIdentityOutputConv2D
                                                                           Attribute::Attribute_NONE,
                                                                           nullptr,
                                                                           std::vector<std::string>{},
-                                                                          std::vector<std::string>{multiplierName});
+                                                                          std::vector<std::string>{multiplierName},
+                                                                          TosaOpLocation{});
     ops.push_back(std::move(multiplierOp));
 
     auto shiftTensor =
@@ -1254,7 +1317,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DIdentityOutputConv2D
                                                                      Attribute::Attribute_NONE,
                                                                      nullptr,
                                                                      std::vector<std::string>{},
-                                                                     std::vector<std::string>{shiftName});
+                                                                     std::vector<std::string>{shiftName},
+                                                                     TosaOpLocation{});
     ops.push_back(std::move(shiftOp));
 
     auto output_zpTensor = std::make_unique<TosaSerializationTensor>(output_zpName,
@@ -1266,7 +1330,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DIdentityOutputConv2D
                                                                          Attribute::Attribute_NONE,
                                                                          nullptr,
                                                                          std::vector<std::string>{},
-                                                                         std::vector<std::string>{output_zpName});
+                                                                         std::vector<std::string>{output_zpName},
+                                                                         TosaOpLocation{});
     ops.push_back(std::move(output_zpOp));
 
     auto input_zpRescaleTensor = std::make_unique<TosaSerializationTensor>(input_zpRescaleName,
@@ -1280,7 +1345,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DIdentityOutputConv2D
                                                           Attribute::Attribute_NONE,
                                                           nullptr,
                                                           std::vector<std::string>{},
-                                                          std::vector<std::string>{input_zpRescaleName});
+                                                          std::vector<std::string>{input_zpRescaleName},
+                                                          TosaOpLocation{});
     ops.push_back(std::move(input_zpRescaleOp));
 
     // Create Operators Conv2D, Rescale, Conv2D
@@ -1289,26 +1355,30 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DIdentityOutputConv2D
         Attribute::Attribute_Conv2dAttribute,
         &conv2dAttribute,
         std::vector<std::string>{inputName, weightName, biasName, input_zpName, weight_zpName},
-        std::vector<std::string>{identity1InName});
+        std::vector<std::string>{identity1InName},
+        TosaOpLocation{});
     ops.push_back(std::move(conv2d));
     auto identity1 = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_IDENTITY,
                                                                        Attribute::Attribute_NONE,
                                                                        nullptr,
                                                                        std::vector<std::string>{identity1InName},
-                                                                       std::vector<std::string>{identity1OutName});
+                                                                       std::vector<std::string>{identity1OutName},
+                                                                       TosaOpLocation{});
     ops.push_back(std::move(identity1));
     auto identity2 = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_IDENTITY,
                                                                        Attribute::Attribute_NONE,
                                                                        nullptr,
                                                                        std::vector<std::string>{identity1OutName},
-                                                                       std::vector<std::string>{identity2OutName});
+                                                                       std::vector<std::string>{identity2OutName},
+                                                                       TosaOpLocation{});
     ops.push_back(std::move(identity2));
     auto rescaleOp = std::make_unique<tosa::TosaSerializationOperator>(
         Op::Op_RESCALE,
         Attribute::Attribute_RescaleAttribute,
         &rescaleAttribute,
         std::vector<std::string>{identity2OutName, multiplierName, shiftName, input_zpRescaleName, output_zpName},
-        std::vector<std::string>{rescaleOutName});
+        std::vector<std::string>{rescaleOutName},
+        TosaOpLocation{});
     ops.push_back(std::move(rescaleOp));
 
     auto conv2d2 = std::make_unique<tosa::TosaSerializationOperator>(
@@ -1316,7 +1386,8 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DIdentityOutputConv2D
         Attribute::Attribute_Conv2dAttribute,
         &conv2dAttribute,
         std::vector<std::string>{rescaleOutName, weightName, biasName, input_zpName, weight_zpName},
-        std::vector<std::string>{outputName});
+        std::vector<std::string>{outputName},
+        TosaOpLocation{});
     ops.push_back(std::move(conv2d2));
 
     // Create a tosa single-op basic block
@@ -1324,6 +1395,7 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DIdentityOutputConv2D
                                                                "main",
                                                                std::move(ops),
                                                                std::move(tensors),
+                                                               std::vector<std::unique_ptr<TosaSerializationShape>>{},
                                                                std::vector<std::string>{inputName},
                                                                std::vector<std::string>{outputName, identity1OutName});
 
@@ -1373,7 +1445,8 @@ TEST(TOSA2SPIRV_PARSER, EmptyTensor)
                                                                    Attribute::Attribute_AddAttribute,
                                                                    nullptr,
                                                                    std::vector<std::string>{input1Name, input2Name},
-                                                                   std::vector<std::string>{outputName});
+                                                                   std::vector<std::string>{outputName},
+                                                                   TosaOpLocation{});
     ops.push_back(std::move(addOp));
 
     // Create a tosa single-op basic block
@@ -1382,6 +1455,7 @@ TEST(TOSA2SPIRV_PARSER, EmptyTensor)
                                       "main",
                                       std::move(ops),
                                       std::move(tensors),
+                                      {},
                                       {input1Name, input2Name},
                                       {outputName});
 

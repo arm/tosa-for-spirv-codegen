@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# Copyright © 2023-2024 Arm Ltd and Contributors. All rights reserved.
+# Copyright © 2023-2025 Arm Ltd and Contributors. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -11,7 +11,7 @@ TOSA_SERIALIZATION_LIB_DIR=$EXTERNAL_DIR/serialization_lib
 
 rm -rf $TOSA_SERIALIZATION_LIB_DIR
 
-TOSA_SERIALIZATION_LIB_REVISION="d14952584ffb83372343edbada07c5ba35a4aaf6" # v1.0 Remove incompatible hardened flags
+TOSA_SERIALIZATION_LIB_REVISION="3a7d3b81c5111355722d3fe56e2248eceab10288" # To align with Systest
 
 echo "+++ Cloning TOSA Serialization Library"
 git clone "https://review.mlplatform.org/tosa/serialization_lib" $TOSA_SERIALIZATION_LIB_DIR

@@ -42,7 +42,8 @@ TEST(TOSA2SPIRV_PARSER, Equal)
                                                                 Attribute::Attribute_NONE,
                                                                 nullptr,
                                                                 std::vector<std::string>{input1Name, input2Name},
-                                                                std::vector<std::string>{outputName});
+                                                                std::vector<std::string>{outputName},
+                                                                TosaOpLocation{});
     ops.push_back(std::move(op));
 
     // Create a tosa single-op basic block
@@ -51,6 +52,7 @@ TEST(TOSA2SPIRV_PARSER, Equal)
                                       "main",
                                       std::move(ops),
                                       std::move(tensors),
+                                      std::vector<std::unique_ptr<TosaSerializationShape>>{}, // empty shapes vector
                                       {input1Name, input2Name},
                                       {outputName});
 
@@ -91,7 +93,8 @@ TEST(TOSA2SPIRV_PARSER, Greater)
                                                                 Attribute::Attribute_NONE,
                                                                 nullptr,
                                                                 std::vector<std::string>{input1Name, input2Name},
-                                                                std::vector<std::string>{outputName});
+                                                                std::vector<std::string>{outputName},
+                                                                TosaOpLocation{});
     ops.push_back(std::move(op));
 
     // Create a tosa single-op basic block
@@ -100,6 +103,7 @@ TEST(TOSA2SPIRV_PARSER, Greater)
                                       "main",
                                       std::move(ops),
                                       std::move(tensors),
+                                      std::vector<std::unique_ptr<TosaSerializationShape>>{}, // empty shapes vector
                                       {input1Name, input2Name},
                                       {outputName});
 
@@ -140,7 +144,8 @@ TEST(TOSA2SPIRV_PARSER, GreaterEqual)
                                                                 Attribute::Attribute_NONE,
                                                                 nullptr,
                                                                 std::vector<std::string>{input1Name, input2Name},
-                                                                std::vector<std::string>{outputName});
+                                                                std::vector<std::string>{outputName},
+                                                                TosaOpLocation{});
     ops.push_back(std::move(op));
 
     // Create a tosa single-op basic block
@@ -149,6 +154,7 @@ TEST(TOSA2SPIRV_PARSER, GreaterEqual)
                                       "main",
                                       std::move(ops),
                                       std::move(tensors),
+                                      std::vector<std::unique_ptr<TosaSerializationShape>>{}, // empty shapes vector
                                       {input1Name, input2Name},
                                       {outputName});
 
