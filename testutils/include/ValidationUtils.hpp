@@ -10,21 +10,21 @@
 
 using namespace tosa2spirv;
 
-void CheckDataType(const spirv::Instruction* instr, tosa::DataType expectedDataType);
+void CheckDataType(const spirv::Instruction *instr, tosa::DataType expectedDataType);
 
-void CheckResID(const spirv::Operand& operand);
+void CheckResID(const spirv::Operand &operand);
 
-void CheckConstant(const spirv::Instruction* instruction,
-                   const tosa::DataType& expectedDataType,
+void CheckConstant(const spirv::Instruction *instruction,
+                   const tosa::DataType &expectedDataType,
                    std::optional<uint32_t> expectedValue0 = {},
                    std::optional<uint32_t> expectedValue1 = {});
 
-void CheckConstantComposite(const spirv::Instruction* instruction,
-                            const std::vector<uint32_t>& expectedValues,
+void CheckConstantComposite(const spirv::Instruction *instruction,
+                            const std::vector<uint32_t> &expectedValues,
                             tosa::DataType expectedConstantType,
                             tosa::DataType expectedCompositeType);
 
-void CheckTensorType(const spirv::Instruction* instruction,
+void CheckTensorType(const spirv::Instruction *instruction,
                      tosa::DataType expectedDataType,
                      uint32_t expectedRank,
-                     const std::vector<uint32_t>& expectedShape);
+                     const std::vector<uint32_t> &expectedShape);

@@ -34,15 +34,15 @@ TEST(TOSA2SPIRV_LAYERS, BitwiseXor)
     auto binary = tosa2spirv::WriteToBinary(module);
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_XOR", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_XOR", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_XOR", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_XOR", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_XOR", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_XOR", outputStr));
 
     // Write binary a second time to ensure IDs remain consistent.
     binary = tosa2spirv::WriteToBinary(module);
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_XOR", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_XOR", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_XOR", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_XOR", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_XOR", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_XOR", outputStr));
 }

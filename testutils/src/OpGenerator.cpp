@@ -154,7 +154,7 @@ tosa::Attribute GetAttributeFromInstruction(const spirv::Instruction& attributeI
     else
     {
         std::string errText =
-            "GetAttributeFromInstruction: unsupported opcode: " + GetOpString(attributeInstruction.GetOpCode());
+            "GetAttributeFromInstruction: unsupported opcode: " + OpToString(attributeInstruction.GetOpCode());
         throw std::invalid_argument{errText};
     }
 }

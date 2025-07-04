@@ -56,14 +56,14 @@ TEST(TOSA2SPIRV_PARSER, Clamp)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "CLAMP", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "CLAMP", outputStr));
 
-    testutils::CheckConstant(DataType::int8_t, "CLAMP", outputStr, 1, 0);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int8_t, "CLAMP", outputStr, 1, 0));
 
-    testutils::CheckConstant(DataType::int8_t, "CLAMP", outputStr, 1, 1);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int8_t, "CLAMP", outputStr, 1, 1));
 
-    testutils::CheckConstant(DataType::int32_t, "CLAMP", outputStr, 1, 2);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "CLAMP", outputStr);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "CLAMP", outputStr, 1, 2));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "CLAMP", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, Erf)
@@ -100,8 +100,8 @@ TEST(TOSA2SPIRV_PARSER, Erf)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "ERF", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "ERF", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "ERF", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "ERF", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, Sigmoid)
@@ -138,8 +138,8 @@ TEST(TOSA2SPIRV_PARSER, Sigmoid)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "SIGMOID", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "SIGMOID", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "SIGMOID", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "SIGMOID", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, Tanh)
@@ -176,6 +176,6 @@ TEST(TOSA2SPIRV_PARSER, Tanh)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "TANH", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "TANH", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "TANH", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "TANH", outputStr));
 }

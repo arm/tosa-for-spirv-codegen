@@ -36,19 +36,19 @@ TEST(TOSA2SPIRV_LAYERS, ArithmeticRightShift)
     auto binary = tosa2spirv::WriteToBinary(module);
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr));
 
-    testutils::CheckBoolConstant(DataType::bool_t, "ARITHMETIC_RIGHT_SHIFT", outputStr, 1, 0);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr);
+    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "ARITHMETIC_RIGHT_SHIFT", outputStr, 1, 0));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr));
 
     // Write binary a second time to ensure IDs remain consistent.
     binary = tosa2spirv::WriteToBinary(module);
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr));
 
-    testutils::CheckBoolConstant(DataType::bool_t, "ARITHMETIC_RIGHT_SHIFT", outputStr, 1, 0);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr);
+    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "ARITHMETIC_RIGHT_SHIFT", outputStr, 1, 0));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr));
 }

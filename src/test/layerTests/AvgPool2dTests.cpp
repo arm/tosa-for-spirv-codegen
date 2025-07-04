@@ -46,37 +46,37 @@ TEST(TOSA2SPIRV_LAYERS, AvgPool2d)
     auto binary = tosa2spirv::WriteToBinary(module);
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "AVG_POOL2D", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "AVG_POOL2D", outputStr));
 
-    testutils::CheckConstCompositeTensor({1}, "AVG_POOL2D", outputStr, 5, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "AVG_POOL2D", outputStr, 5, "uchar"));
 
-    testutils::CheckConstCompositeTensor({1}, "AVG_POOL2D", outputStr, 6, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "AVG_POOL2D", outputStr, 6, "uchar"));
 
-    testutils::CheckConstCompositeTensor({1, 1}, "AVG_POOL2D", outputStr, 0);
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1}, "AVG_POOL2D", outputStr, 0));
 
-    testutils::CheckConstCompositeTensor({1, 1}, "AVG_POOL2D", outputStr, 1);
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1}, "AVG_POOL2D", outputStr, 1));
 
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "AVG_POOL2D", outputStr, 2);
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "AVG_POOL2D", outputStr, 2));
 
-    testutils::CheckConstant(DataType::int32_t, "AVG_POOL2D", outputStr, 1, 3);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "AVG_POOL2D", outputStr);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "AVG_POOL2D", outputStr, 1, 3));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "AVG_POOL2D", outputStr));
 
     // Write binary a second time to ensure IDs remain consistent.
     binary = tosa2spirv::WriteToBinary(module);
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "AVG_POOL2D", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "AVG_POOL2D", outputStr));
 
-    testutils::CheckConstCompositeTensor({1}, "AVG_POOL2D", outputStr, 5, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "AVG_POOL2D", outputStr, 5, "uchar"));
 
-    testutils::CheckConstCompositeTensor({1}, "AVG_POOL2D", outputStr, 6, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "AVG_POOL2D", outputStr, 6, "uchar"));
 
-    testutils::CheckConstCompositeTensor({1, 1}, "AVG_POOL2D", outputStr, 0);
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1}, "AVG_POOL2D", outputStr, 0));
 
-    testutils::CheckConstCompositeTensor({1, 1}, "AVG_POOL2D", outputStr, 1);
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1}, "AVG_POOL2D", outputStr, 1));
 
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "AVG_POOL2D", outputStr, 2);
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "AVG_POOL2D", outputStr, 2));
 
-    testutils::CheckConstant(DataType::int32_t, "AVG_POOL2D", outputStr, 1, 3);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "AVG_POOL2D", outputStr);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "AVG_POOL2D", outputStr, 1, 3));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "AVG_POOL2D", outputStr));
 }

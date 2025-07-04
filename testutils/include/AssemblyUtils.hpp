@@ -11,17 +11,18 @@
 #include <cstdint>
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 namespace testutils
 {
 
-std::string DisassembleSPIRV(const std::vector<uint32_t>& binary, bool runValidation = true);
+std::string
+DiffSPIRV(const std::vector<uint32_t> &rhsBinary, const std::vector<uint32_t> &lhsBinary, bool runValidation = true);
+std::string DisassembleSPIRV(const std::vector<uint32_t> &binary, bool runValidation = true);
 
-std::shared_ptr<tosa2spirv::spirv::Module> LoadSPIRVDisassembly(const std::string& text);
+std::shared_ptr<tosa2spirv::spirv::Module> LoadSPIRVDisassembly(const std::string &text);
 
-inline unsigned int GetInstructionCount(const std::string& spirvString)
+inline unsigned int GetInstructionCount(const std::string &spirvString)
 {
     return std::count(spirvString.begin(), spirvString.end(), '\n');
 }

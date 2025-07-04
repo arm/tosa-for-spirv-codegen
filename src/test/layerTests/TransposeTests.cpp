@@ -34,17 +34,17 @@ TEST(TOSA2SPIRV_LAYERS, Transpose)
     auto binary = tosa2spirv::WriteToBinary(module);
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "TRANSPOSE", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "TRANSPOSE", outputStr));
 
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "TRANSPOSE", outputStr, 0);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "TRANSPOSE", outputStr);
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "TRANSPOSE", outputStr, 0));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "TRANSPOSE", outputStr));
 
     // Write binary a second time to ensure IDs remain consistent.
     binary = tosa2spirv::WriteToBinary(module);
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "TRANSPOSE", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "TRANSPOSE", outputStr));
 
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "TRANSPOSE", outputStr, 0);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "TRANSPOSE", outputStr);
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "TRANSPOSE", outputStr, 0));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "TRANSPOSE", outputStr));
 }

@@ -37,17 +37,17 @@ TEST(TOSA2SPIRV_LAYERS, Concat)
     auto binary = tosa2spirv::WriteToBinary(module);
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "CONCAT", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "CONCAT", outputStr));
 
-    testutils::CheckConstant(DataType::int32_t, "CONCAT", outputStr, 1, 0);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "CONCAT", outputStr);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "CONCAT", outputStr, 1, 0));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "CONCAT", outputStr));
 
     // Write binary a second time to ensure IDs remain consistent.
     binary = tosa2spirv::WriteToBinary(module);
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "CONCAT", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "CONCAT", outputStr));
 
-    testutils::CheckConstant(DataType::int32_t, "CONCAT", outputStr, 1, 0);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "CONCAT", outputStr);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "CONCAT", outputStr, 1, 0));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "CONCAT", outputStr));
 }

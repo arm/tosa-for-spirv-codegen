@@ -38,23 +38,23 @@ TEST(TOSA2SPIRV_LAYERS, Slice)
     auto binary = tosa2spirv::WriteToBinary(module);
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "SLICE", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "SLICE", outputStr));
 
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "SLICE", outputStr, 1, "uint");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "SLICE", outputStr, 1, "uint"));
 
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "SLICE", outputStr, 2, "uint");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "SLICE", outputStr, 2, "uint"));
 
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "SLICE", outputStr);
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "SLICE", outputStr));
 
     // Write binary a second time to ensure IDs remain consistent.
     binary = tosa2spirv::WriteToBinary(module);
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "SLICE", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "SLICE", outputStr));
 
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "SLICE", outputStr, 1, "uint");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "SLICE", outputStr, 1, "uint"));
 
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "SLICE", outputStr, 2, "uint");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "SLICE", outputStr, 2, "uint"));
 
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "SLICE", outputStr);
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "SLICE", outputStr));
 }

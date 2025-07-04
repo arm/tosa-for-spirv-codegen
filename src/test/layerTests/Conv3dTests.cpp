@@ -62,45 +62,45 @@ TEST(TOSA2SPIRV_LAYERS, Conv3d)
     auto binary = tosa2spirv::WriteToBinary(module);
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "CONV3D", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "CONV3D", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "CONV3D", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "CONV3D", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "CONV3D", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "CONV3D", outputStr));
 
-    testutils::CheckConstCompositeTensor({1}, "CONV3D", outputStr, 8, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "CONV3D", outputStr, 8, "uchar"));
 
-    testutils::CheckConstCompositeTensor({1}, "CONV3D", outputStr, 9, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "CONV3D", outputStr, 9, "uchar"));
 
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1, 1, 1}, "CONV3D", outputStr, 0);
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1, 1, 1, 1}, "CONV3D", outputStr, 0));
 
-    testutils::CheckConstCompositeTensor({1, 1, 1}, "CONV3D", outputStr, 1);
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1}, "CONV3D", outputStr, 1));
 
-    testutils::CheckConstCompositeTensor({1, 1, 1}, "CONV3D", outputStr, 2);
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1}, "CONV3D", outputStr, 2));
 
-    testutils::CheckConstant(DataType::int32_t, "CONV3D", outputStr, 1, 3);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "CONV3D", outputStr, 1, 3));
 
-    testutils::CheckBoolConstant(DataType::bool_t, "CONV3D", outputStr, 1, 4);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "CONV3D", outputStr);
+    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "CONV3D", outputStr, 1, 4));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "CONV3D", outputStr));
 
     // Write binary a second time to ensure IDs remain consistent.
     binary = tosa2spirv::WriteToBinary(module);
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "CONV3D", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "CONV3D", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "CONV3D", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "CONV3D", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "CONV3D", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "CONV3D", outputStr));
 
-    testutils::CheckConstCompositeTensor({1}, "CONV3D", outputStr, 8, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "CONV3D", outputStr, 8, "uchar"));
 
-    testutils::CheckConstCompositeTensor({1}, "CONV3D", outputStr, 9, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "CONV3D", outputStr, 9, "uchar"));
 
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1, 1, 1}, "CONV3D", outputStr, 0);
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1, 1, 1, 1}, "CONV3D", outputStr, 0));
 
-    testutils::CheckConstCompositeTensor({1, 1, 1}, "CONV3D", outputStr, 1);
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1}, "CONV3D", outputStr, 1));
 
-    testutils::CheckConstCompositeTensor({1, 1, 1}, "CONV3D", outputStr, 2);
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1}, "CONV3D", outputStr, 2));
 
-    testutils::CheckConstant(DataType::int32_t, "CONV3D", outputStr, 1, 3);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "CONV3D", outputStr, 1, 3));
 
-    testutils::CheckBoolConstant(DataType::bool_t, "CONV3D", outputStr, 1, 4);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "CONV3D", outputStr);
+    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "CONV3D", outputStr, 1, 4));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "CONV3D", outputStr));
 }

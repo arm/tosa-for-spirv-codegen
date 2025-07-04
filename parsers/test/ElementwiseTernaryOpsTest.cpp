@@ -64,8 +64,8 @@ TEST(TOSA2SPIRV_PARSER, Select)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "SELECT", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "SELECT", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "SELECT", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "SELECT", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "SELECT", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "SELECT", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "SELECT", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "SELECT", outputStr));
 }

@@ -64,49 +64,49 @@ TEST(TOSA2SPIRV_LAYERS, Rescale)
     auto binary = tosa2spirv::WriteToBinary(module);
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "RESCALE", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "RESCALE", outputStr));
 
-    testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 6, "uint");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 6, "uint"));
 
-    testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 7, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 7, "uchar"));
 
-    testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 8, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 8, "uchar"));
 
-    testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 9, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 9, "uchar"));
 
-    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 0);
+    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 0));
 
-    testutils::CheckConstant(DataType::int32_t, "RESCALE", outputStr, 1, 1);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "RESCALE", outputStr, 1, 1));
 
-    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 2);
+    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 2));
 
-    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 3);
+    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 3));
 
-    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 4);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "RESCALE", outputStr);
+    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 4));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "RESCALE", outputStr));
 
     // Write binary a second time to ensure IDs remain consistent.
     binary = tosa2spirv::WriteToBinary(module);
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "RESCALE", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "RESCALE", outputStr));
 
-    testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 6, "uint");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 6, "uint"));
 
-    testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 7, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 7, "uchar"));
 
-    testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 8, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 8, "uchar"));
 
-    testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 9, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 9, "uchar"));
 
-    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 0);
+    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 0));
 
-    testutils::CheckConstant(DataType::int32_t, "RESCALE", outputStr, 1, 1);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "RESCALE", outputStr, 1, 1));
 
-    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 2);
+    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 2));
 
-    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 3);
+    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 3));
 
-    testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 4);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "RESCALE", outputStr);
+    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 4));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "RESCALE", outputStr));
 }

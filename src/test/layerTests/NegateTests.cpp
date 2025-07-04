@@ -38,23 +38,23 @@ TEST(TOSA2SPIRV_LAYERS, Negate)
     auto binary = tosa2spirv::WriteToBinary(module);
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "NEGATE", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "NEGATE", outputStr));
 
-    testutils::CheckConstCompositeTensor({1}, "NEGATE", outputStr, 1, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "NEGATE", outputStr, 1, "uchar"));
 
-    testutils::CheckConstCompositeTensor({1}, "NEGATE", outputStr, 2, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "NEGATE", outputStr, 2, "uchar"));
 
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "NEGATE", outputStr);
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "NEGATE", outputStr));
 
     // Write binary a second time to ensure IDs remain consistent.
     binary = tosa2spirv::WriteToBinary(module);
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "NEGATE", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "NEGATE", outputStr));
 
-    testutils::CheckConstCompositeTensor({1}, "NEGATE", outputStr, 1, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "NEGATE", outputStr, 1, "uchar"));
 
-    testutils::CheckConstCompositeTensor({1}, "NEGATE", outputStr, 2, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "NEGATE", outputStr, 2, "uchar"));
 
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "NEGATE", outputStr);
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "NEGATE", outputStr));
 }

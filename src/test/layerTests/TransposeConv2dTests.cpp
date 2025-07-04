@@ -59,41 +59,41 @@ TEST(TOSA2SPIRV_LAYERS, TransposeConv2d)
     auto binary = tosa2spirv::WriteToBinary(module);
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "TRANSPOSE_CONV2D", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "TRANSPOSE_CONV2D", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "TRANSPOSE_CONV2D", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "TRANSPOSE_CONV2D", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "TRANSPOSE_CONV2D", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "TRANSPOSE_CONV2D", outputStr));
 
-    testutils::CheckConstCompositeTensor({1}, "TRANSPOSE_CONV2D", outputStr, 7, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "TRANSPOSE_CONV2D", outputStr, 7, "uchar"));
 
-    testutils::CheckConstCompositeTensor({1}, "TRANSPOSE_CONV2D", outputStr, 8, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "TRANSPOSE_CONV2D", outputStr, 8, "uchar"));
 
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "TRANSPOSE_CONV2D", outputStr, 0);
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "TRANSPOSE_CONV2D", outputStr, 0));
 
-    testutils::CheckConstCompositeTensor({1, 1}, "TRANSPOSE_CONV2D", outputStr, 1);
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1}, "TRANSPOSE_CONV2D", outputStr, 1));
 
-    testutils::CheckConstant(DataType::int32_t, "TRANSPOSE_CONV2D", outputStr, 1, 2);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "TRANSPOSE_CONV2D", outputStr, 1, 2));
 
-    testutils::CheckBoolConstant(DataType::bool_t, "TRANSPOSE_CONV2D", outputStr, 1, 3);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "TRANSPOSE_CONV2D", outputStr);
+    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "TRANSPOSE_CONV2D", outputStr, 1, 3));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "TRANSPOSE_CONV2D", outputStr));
 
     // Write binary a second time to ensure IDs remain consistent.
     binary = tosa2spirv::WriteToBinary(module);
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "TRANSPOSE_CONV2D", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "TRANSPOSE_CONV2D", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "TRANSPOSE_CONV2D", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "TRANSPOSE_CONV2D", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "TRANSPOSE_CONV2D", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "TRANSPOSE_CONV2D", outputStr));
 
-    testutils::CheckConstCompositeTensor({1}, "TRANSPOSE_CONV2D", outputStr, 7, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "TRANSPOSE_CONV2D", outputStr, 7, "uchar"));
 
-    testutils::CheckConstCompositeTensor({1}, "TRANSPOSE_CONV2D", outputStr, 8, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "TRANSPOSE_CONV2D", outputStr, 8, "uchar"));
 
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "TRANSPOSE_CONV2D", outputStr, 0);
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "TRANSPOSE_CONV2D", outputStr, 0));
 
-    testutils::CheckConstCompositeTensor({1, 1}, "TRANSPOSE_CONV2D", outputStr, 1);
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1}, "TRANSPOSE_CONV2D", outputStr, 1));
 
-    testutils::CheckConstant(DataType::int32_t, "TRANSPOSE_CONV2D", outputStr, 1, 2);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "TRANSPOSE_CONV2D", outputStr, 1, 2));
 
-    testutils::CheckBoolConstant(DataType::bool_t, "TRANSPOSE_CONV2D", outputStr, 1, 3);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "TRANSPOSE_CONV2D", outputStr);
+    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "TRANSPOSE_CONV2D", outputStr, 1, 3));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "TRANSPOSE_CONV2D", outputStr));
 }

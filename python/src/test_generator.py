@@ -244,8 +244,8 @@ class TestGenerator:
     def operator_name_to_underscore_seperated(self, name):
         underscore_seperated = "_".join(w.capitalize() for w in name.split("_"))
         return underscore_seperated
-    
-    # Add casting for attributes where needed 
+
+    # Add casting for attributes where needed
     def get_attribute_casting(self, attr):
         if attr == "nan_mode":
             return "static_cast<NanPropagationMode>(nan_mode)"
@@ -360,7 +360,7 @@ class TestGenerator:
             if category.name == string:
                 hasName = True
         return hasName
-    
+
     def is_dynamic_input(self, argument):
         is_input = any(cat.name == "input" for cat in argument.categories)
         is_not_attribute = not any(cat.name == "attribute" for cat in argument.categories)
@@ -368,7 +368,7 @@ class TestGenerator:
         compile_time_const = tosa_spirv.TOSASPIRVSpec.is_operator_argument_ctc(argument)
 
         return is_input and is_not_attribute and is_tensor and not compile_time_const
-    
+
     def is_constant_input(self, argument):
         is_input = any(cat.name == "input" for cat in argument.categories)
         is_not_attribute = not any(cat.name == "attribute" for cat in argument.categories)
@@ -490,7 +490,7 @@ class TestGenerator:
         # default to Int32
         else:
             return "DType::DType_INT32"
-        
+
     def reorder_acc_type_local_bound(self, attr_list):
         i = 0
         while i < len(attr_list) - 1:
@@ -711,7 +711,7 @@ class TestGenerator:
                 file.append(' })')
                 file.append(', 0)')
                 file.append(';\n')
-            
+
             elif any(category.name == "output" for category in argument.categories):
                 first_line = 'auto {} = Tensor('.format(argument.name)
                 file.write(first_line + 'DataType::{}_t, '.format(datatype))
@@ -748,13 +748,13 @@ class TestGenerator:
     def get_effcee_string(self, op, is_graph=False, layerTests=False):
 
         categoryEffceeCheckDict = {
-            tosa_spirv.TOSAType.RANKED_TENSOR: 'testutils::Check{INPUTOUTPUT}Tensor({{{VALUES}}}, DataType::{DATATYPE}, "{OP_NAME}", outputStr);',
-            tosa_spirv.TOSAType.SHAPED_TENSOR: 'testutils::CheckOutputTensor({{{VALUES}}}, DataType::{DATATYPE}, "{OP_NAME}", outputStr);',  # constant input and outputs
-            tosa_spirv.TOSAType.SCALAR: 'testutils::Check{BOOL}Constant(DataType::{DATATYPE}, "{OP_NAME}", outputStr, {VALUE}, {ARG_INDEX});',
-            tosa_spirv.TOSAType.SHAPE: 'testutils::CheckConstCompositeTensor({{{VALUES}}}, "{OP_NAME}", outputStr, {ARG_INDEX});',
+            tosa_spirv.TOSAType.RANKED_TENSOR: 'EXPECT_TRUE(testutils::Check{INPUTOUTPUT}Tensor({{{VALUES}}}, DataType::{DATATYPE}, "{OP_NAME}", outputStr));',
+            tosa_spirv.TOSAType.SHAPED_TENSOR: 'EXPECT_TRUE(testutils::CheckOutputTensor({{{VALUES}}}, DataType::{DATATYPE}, "{OP_NAME}", outputStr));',  # constant input and outputs
+            tosa_spirv.TOSAType.SCALAR: 'EXPECT_TRUE(testutils::Check{BOOL}Constant(DataType::{DATATYPE}, "{OP_NAME}", outputStr, {VALUE}, {ARG_INDEX}));',
+            tosa_spirv.TOSAType.SHAPE: 'EXPECT_TRUE(testutils::CheckConstCompositeTensor({{{VALUES}}}, "{OP_NAME}", outputStr, {ARG_INDEX}));',
             tosa_spirv.TOSAType.TENSOR_LIST: "UNKNOWNTENSOR_LIST",
-            tosa_spirv.TOSAType.TENSOR_LIST_UNIFORM_ETYPE: 'testutils::Check{INPUTOUTPUT}Tensor({{{VALUES}}}, DataType::{DATATYPE}, "{OP_NAME}", outputStr);',  # concat
-            tosa_spirv.TOSAType.ENUM: 'testutils::Check{BOOL}Constant(DataType::{DATATYPE}, "{OP_NAME}", outputStr, {VALUE}, {ARG_INDEX});',
+            tosa_spirv.TOSAType.TENSOR_LIST_UNIFORM_ETYPE: 'EXPECT_TRUE(testutils::Check{INPUTOUTPUT}Tensor({{{VALUES}}}, DataType::{DATATYPE}, "{OP_NAME}", outputStr));',  # concat
+            tosa_spirv.TOSAType.ENUM: 'EXPECT_TRUE(testutils::Check{BOOL}Constant(DataType::{DATATYPE}, "{OP_NAME}", outputStr, {VALUE}, {ARG_INDEX}));',
             tosa_spirv.TOSAType.GRAPH: "UNKNOWNGRAPH",
             tosa_spirv.TOSAType.UNKNOWN: "UNKNOWN",
         }
@@ -796,7 +796,7 @@ class TestGenerator:
                     effceestring += "\n    " + effcee_check_str.format(BOOL=boolStr, OP_NAME=op.name, VALUE=constantValue, ARG_INDEX=idx, DATATYPE=datatype_str) + "\n"
                     idx += 1
                     continue
-                effcee_check_str = '\n    testutils::CheckConstCompositeTensor({{{VALUES}}}, "{OP_NAME}", outputStr, {ARG_INDEX});\n'
+                effcee_check_str = '\n    EXPECT_TRUE(testutils::CheckConstCompositeTensor({{{VALUES}}}, "{OP_NAME}", outputStr, {ARG_INDEX}));\n'
                 effceestring += effcee_check_str.format(VALUES=values, OP_NAME=op.name, ARG_INDEX=idx)
                 idx += 1
 
@@ -811,19 +811,19 @@ class TestGenerator:
                         dataTypeStr = "bool"
                     else:
                         raise ValueError("Unhandled datatype: " + datatype)
-                    
+
                     # LayerTests always pass constants in as ConstCompositeTensor
                     if values == '1' or layerTests:
-                        effcee_check_str = '\n    testutils::CheckConstCompositeTensor({{{VALUES}}}, "{OP_NAME}", outputStr, {ARG_INDEX}, "' + dataTypeStr + '");\n'
+                        effcee_check_str = '\n    EXPECT_TRUE(testutils::CheckConstCompositeTensor({{{VALUES}}}, "{OP_NAME}", outputStr, {ARG_INDEX}, "' + dataTypeStr + '"));\n'
                     else:
-                        effcee_check_str = '\n    testutils::CheckGraphConstant({{{VALUES}}}, DataType::{DATATYPE}, "{OP_NAME}", outputStr, {ARG_INDEX}, ' + str(graphConstantIdentifier) + ');\n'
+                        effcee_check_str = '\n    EXPECT_TRUE(testutils::CheckGraphConstant({{{VALUES}}}, DataType::{DATATYPE}, "{OP_NAME}", outputStr, {ARG_INDEX}, ' + str(graphConstantIdentifier) + '));\n'
                         graphConstantIdentifier += 1
 
-                    
+
                 functionName = "Input"
                 if inputIdx > 0:
                     effceestring += "    "
-                
+
                 opIndex = tosa_spirv.TOSASPIRVSpec.operand_index_for_argument(op, argument) - tosa_spirv.TOSASPIRVSpec.FIRST_IN_ARGUMENT_OPERAND_OFFSET
 
                 datatype_str = str(datatype) + '_t'
@@ -837,7 +837,7 @@ class TestGenerator:
                 idx += 1
 
         return effceestring
-    
+
     def generate_layer_test(self, op, name):
 
         print(
@@ -1039,7 +1039,7 @@ class TestGenerator:
         for arg in input_output_args:
             if self.is_dynamic_input(arg):
                 dynamic_input_args.append(arg)
-            
+
         tensors = ["{}Tensor".format(arg.name) for arg in input_output_args]
         input_names = ["{}Name".format(arg.name) for arg in input_args]
         dynamic_input_names = ["{}Name".format(arg.name) for arg in dynamic_input_args]

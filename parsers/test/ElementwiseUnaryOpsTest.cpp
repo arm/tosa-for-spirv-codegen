@@ -48,8 +48,8 @@ TEST(TOSA2SPIRV_PARSER, Abs)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "ABS", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "ABS", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "ABS", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "ABS", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, BitwiseNot)
@@ -91,8 +91,8 @@ TEST(TOSA2SPIRV_PARSER, BitwiseNot)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_NOT", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_NOT", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_NOT", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_NOT", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, Ceil)
@@ -129,8 +129,8 @@ TEST(TOSA2SPIRV_PARSER, Ceil)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "CEIL", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "CEIL", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "CEIL", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "CEIL", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, Clz)
@@ -167,8 +167,8 @@ TEST(TOSA2SPIRV_PARSER, Clz)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "CLZ", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "CLZ", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "CLZ", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "CLZ", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, Cos)
@@ -205,8 +205,8 @@ TEST(TOSA2SPIRV_PARSER, Cos)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "COS", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "COS", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "COS", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "COS", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, Exp)
@@ -243,8 +243,8 @@ TEST(TOSA2SPIRV_PARSER, Exp)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "EXP", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "EXP", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "EXP", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "EXP", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, Floor)
@@ -281,8 +281,8 @@ TEST(TOSA2SPIRV_PARSER, Floor)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "FLOOR", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "FLOOR", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "FLOOR", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "FLOOR", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, Log)
@@ -319,8 +319,8 @@ TEST(TOSA2SPIRV_PARSER, Log)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "LOG", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "LOG", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "LOG", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "LOG", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, LogicalNot)
@@ -362,8 +362,8 @@ TEST(TOSA2SPIRV_PARSER, LogicalNot)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_NOT", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_NOT", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_NOT", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_NOT", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, Negate)
@@ -427,13 +427,13 @@ TEST(TOSA2SPIRV_PARSER, Negate)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "NEGATE", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "NEGATE", outputStr));
 
-    testutils::CheckConstCompositeTensor({1}, "NEGATE", outputStr, 1, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "NEGATE", outputStr, 1, "uchar"));
 
-    testutils::CheckConstCompositeTensor({1}, "NEGATE", outputStr, 2, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "NEGATE", outputStr, 2, "uchar"));
 
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "NEGATE", outputStr);
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "NEGATE", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, Reciprocal)
@@ -475,8 +475,8 @@ TEST(TOSA2SPIRV_PARSER, Reciprocal)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "RECIPROCAL", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "RECIPROCAL", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "RECIPROCAL", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "RECIPROCAL", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, Rsqrt)
@@ -513,8 +513,8 @@ TEST(TOSA2SPIRV_PARSER, Rsqrt)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "RSQRT", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "RSQRT", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "RSQRT", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "RSQRT", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, Sin)
@@ -551,6 +551,6 @@ TEST(TOSA2SPIRV_PARSER, Sin)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "SIN", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "SIN", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "SIN", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "SIN", outputStr));
 }

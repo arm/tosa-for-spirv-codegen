@@ -58,9 +58,9 @@ TEST(TOSA2SPIRV_PARSER, Add)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "ADD", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "ADD", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "ADD", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "ADD", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "ADD", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "ADD", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, ArithmeticRightShift)
@@ -111,11 +111,11 @@ TEST(TOSA2SPIRV_PARSER, ArithmeticRightShift)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr));
 
-    testutils::CheckBoolConstant(DataType::bool_t, "ARITHMETIC_RIGHT_SHIFT", outputStr, 1, 0);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr);
+    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "ARITHMETIC_RIGHT_SHIFT", outputStr, 1, 0));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "ARITHMETIC_RIGHT_SHIFT", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, BitwiseAnd)
@@ -162,9 +162,9 @@ TEST(TOSA2SPIRV_PARSER, BitwiseAnd)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_AND", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_AND", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_AND", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_AND", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_AND", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_AND", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, BitwiseOr)
@@ -211,9 +211,9 @@ TEST(TOSA2SPIRV_PARSER, BitwiseOr)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_OR", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_OR", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_OR", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_OR", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_OR", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_OR", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, BitwiseXor)
@@ -260,9 +260,9 @@ TEST(TOSA2SPIRV_PARSER, BitwiseXor)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_XOR", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_XOR", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_XOR", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_XOR", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_XOR", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "BITWISE_XOR", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, IntDiv)
@@ -309,9 +309,9 @@ TEST(TOSA2SPIRV_PARSER, IntDiv)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "INTDIV", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "INTDIV", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "INTDIV", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "INTDIV", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "INTDIV", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "INTDIV", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, LogicalAnd)
@@ -358,9 +358,9 @@ TEST(TOSA2SPIRV_PARSER, LogicalAnd)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_AND", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_AND", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_AND", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_AND", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_AND", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_AND", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, LogicalLeftShift)
@@ -407,9 +407,9 @@ TEST(TOSA2SPIRV_PARSER, LogicalLeftShift)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "LOGICAL_LEFT_SHIFT", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "LOGICAL_LEFT_SHIFT", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "LOGICAL_LEFT_SHIFT", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "LOGICAL_LEFT_SHIFT", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "LOGICAL_LEFT_SHIFT", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "LOGICAL_LEFT_SHIFT", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, LogicalRightShift)
@@ -456,9 +456,9 @@ TEST(TOSA2SPIRV_PARSER, LogicalRightShift)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "LOGICAL_RIGHT_SHIFT", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "LOGICAL_RIGHT_SHIFT", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "LOGICAL_RIGHT_SHIFT", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "LOGICAL_RIGHT_SHIFT", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "LOGICAL_RIGHT_SHIFT", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "LOGICAL_RIGHT_SHIFT", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, LogicalOr)
@@ -505,9 +505,9 @@ TEST(TOSA2SPIRV_PARSER, LogicalOr)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_OR", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_OR", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_OR", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_OR", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_OR", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_OR", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, LogicalXor)
@@ -554,9 +554,9 @@ TEST(TOSA2SPIRV_PARSER, LogicalXor)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_XOR", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_XOR", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_XOR", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_XOR", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_XOR", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "LOGICAL_XOR", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, Maximum)
@@ -607,11 +607,11 @@ TEST(TOSA2SPIRV_PARSER, Maximum)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "MAXIMUM", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "MAXIMUM", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "MAXIMUM", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "MAXIMUM", outputStr));
 
-    testutils::CheckConstant(DataType::int32_t, "MAXIMUM", outputStr, 1, 0);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "MAXIMUM", outputStr);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "MAXIMUM", outputStr, 1, 0));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "MAXIMUM", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, Minimum)
@@ -662,11 +662,11 @@ TEST(TOSA2SPIRV_PARSER, Minimum)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "MINIMUM", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "MINIMUM", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "MINIMUM", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "MINIMUM", outputStr));
 
-    testutils::CheckConstant(DataType::int32_t, "MINIMUM", outputStr, 1, 0);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "MINIMUM", outputStr);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "MINIMUM", outputStr, 1, 0));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "MINIMUM", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, Mul)
@@ -725,12 +725,12 @@ TEST(TOSA2SPIRV_PARSER, Mul)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MUL", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MUL", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MUL", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MUL", outputStr));
 
-    testutils::CheckConstCompositeTensor({1}, "MUL", outputStr, 2, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "MUL", outputStr, 2, "uchar"));
 
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "MUL", outputStr);
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "MUL", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, Pow)
@@ -777,9 +777,9 @@ TEST(TOSA2SPIRV_PARSER, Pow)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "POW", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "POW", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "POW", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "POW", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "POW", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "POW", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, Sub)
@@ -826,9 +826,9 @@ TEST(TOSA2SPIRV_PARSER, Sub)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "SUB", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "SUB", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "SUB", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "SUB", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "SUB", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "SUB", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, Table)
@@ -876,9 +876,9 @@ TEST(TOSA2SPIRV_PARSER, Table)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "TABLE", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "TABLE", outputStr));
 
-    testutils::CheckConstCompositeTensor({1}, "TABLE", outputStr, 1, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "TABLE", outputStr, 1, "uchar"));
 
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "TABLE", outputStr);
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "TABLE", outputStr));
 }

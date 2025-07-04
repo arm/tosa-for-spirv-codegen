@@ -3,14 +3,15 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include "../EnumMaps.hpp"
-
+#include <EnumMaps.hpp>
 #include <Graph.hpp>
 #include <Instruction.hpp>
 #include <OperatorEnum.hpp>
-#include <gtest/gtest.h>
+#include <StringUtils.hpp>
+
 #include <tosa2spirv.hpp>
 
+#include <gtest/gtest.h>
 TEST(SpvUtilsTest, OpEnumAndStringRoundTrip)
 {
     std::vector<std::pair<std::string, spv::Op>> opMap = {
@@ -48,11 +49,11 @@ TEST(SpvUtilsTest, OpEnumAndStringRoundTrip)
     for (const auto &[name, op] : opMap)
     {
         EXPECT_EQ(GetOpEnum(name), op);
-        EXPECT_EQ(GetOpString(op), name);
+        EXPECT_EQ(OpToString(op), name);
     }
 
     EXPECT_THROW(GetOpEnum("InvalidOp"), std::invalid_argument);
-    EXPECT_THROW(GetOpString(static_cast<spv::Op>(9999)), std::invalid_argument);
+    EXPECT_THROW(OpToString(static_cast<spv::Op>(9999)), std::invalid_argument);
 }
 
 TEST(SpvUtilsTest, CapabilityEnumValidation)
@@ -175,7 +176,7 @@ TEST(SpvUtilsTest, InstructionToStringBasic)
     instr.m_Operands.emplace_back("some_str");
     instr.m_Operands.emplace_back(123);
 
-    std::string str = InstructionToString(instr);
+    std::string str = testutils::InstructionToString(instr);
     EXPECT_NE(str.find("OpConstant"), std::string::npos);
     EXPECT_NE(str.find("42"), std::string::npos);
     EXPECT_NE(str.find("some_str"), std::string::npos);

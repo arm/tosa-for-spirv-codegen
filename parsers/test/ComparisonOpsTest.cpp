@@ -58,9 +58,9 @@ TEST(TOSA2SPIRV_PARSER, Equal)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "EQUAL", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "EQUAL", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "EQUAL", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "EQUAL", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "EQUAL", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "EQUAL", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, Greater)
@@ -107,9 +107,9 @@ TEST(TOSA2SPIRV_PARSER, Greater)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "GREATER", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "GREATER", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "GREATER", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "GREATER", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "GREATER", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "GREATER", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, GreaterEqual)
@@ -156,7 +156,7 @@ TEST(TOSA2SPIRV_PARSER, GreaterEqual)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "GREATER_EQUAL", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "GREATER_EQUAL", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "GREATER_EQUAL", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "GREATER_EQUAL", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "GREATER_EQUAL", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "GREATER_EQUAL", outputStr));
 }

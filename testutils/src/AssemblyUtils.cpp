@@ -52,7 +52,8 @@ std::string DisassembleSPIRV(const std::vector<uint32_t>& binary, bool runValida
         return {};
     }
 
-    // Return SPIR-V in human-readable form with indentation and friendly names for types.
+    // Return SPIR-V in human-readable form with indentation and friendly names
+    // for types.
     if (!tools.Disassemble(binary,
                            &humanReadableSpirV,
                            SPV_BINARY_TO_TEXT_OPTION_INDENT | SPV_BINARY_TO_TEXT_OPTION_NO_HEADER |
@@ -70,7 +71,7 @@ using tosa2spirv::spirv::Module;
 using tosa2spirv::spirv::Operand;
 using ResIdMap = std::unordered_map<std::string, Operand>;
 
-Operand ParseOperand(const std::string& token, ResIdMap& resIdMap)
+std::vector<Operand> ParseOperand(const std::string& token, ResIdMap& resIdMap)
 {
     if (const auto it = resIdMap.find(token); it != resIdMap.end())
     {
@@ -86,7 +87,7 @@ Operand ParseOperand(const std::string& token, ResIdMap& resIdMap)
         }
         // Remove the quotes.
         const std::string inner = token.substr(1, token.size() - 2);
-        return Operand(inner);
+        return {Operand(inner)};
     }
 
     // Otherwise, try to parse as an integer.
@@ -98,8 +99,17 @@ Operand ParseOperand(const std::string& token, ResIdMap& resIdMap)
     }
     try
     {
-        const uint32_t value = std::stoul(intToken);
-        return Operand(value);
+        const uint64_t value = std::stoull(intToken);
+        const auto low = static_cast<uint32_t>(value);
+        const auto high = static_cast<uint32_t>(value >> 32);
+        if (high == 0)
+        {
+            return {Operand(low)};
+        }
+        else
+        {
+            return {Operand{high}, Operand{low}};
+        }
     }
     catch (const std::out_of_range&)
     {
@@ -127,7 +137,8 @@ std::vector<Operand> ParseTosaInstruction(std::istringstream& line, ResIdMap& re
 
     while (line >> token)
     {
-        operands.push_back(ParseOperand(token, resIdMap));
+        const auto vals = ParseOperand(token, resIdMap);
+        operands.insert(operands.end(), vals.begin(), vals.end());
     }
 
     return operands;
@@ -148,7 +159,8 @@ std::vector<Operand> ParseOp(spv::Op op, std::istringstream& line, ResIdMap& res
         case spv::Op::OpDecorate:
         {
             line >> token;
-            operands.push_back(ParseOperand(token, resIdMap));
+            auto vals = ParseOperand(token, resIdMap);
+            operands.insert(operands.end(), vals.begin(), vals.end());
             line >> token;
             if (token == "DescriptorSet")
             {
@@ -159,7 +171,8 @@ std::vector<Operand> ParseOp(spv::Op op, std::istringstream& line, ResIdMap& res
                 operands.emplace_back(spv::DecorationBinding);
             }
             line >> token;
-            operands.push_back(ParseOperand(token, resIdMap));
+            vals = ParseOperand(token, resIdMap);
+            operands.insert(operands.end(), vals.begin(), vals.end());
             return operands;
         }
         case spv::Op::OpMemoryModel:
@@ -178,13 +191,15 @@ std::vector<Operand> ParseOp(spv::Op op, std::istringstream& line, ResIdMap& res
             operands.emplace_back(spv::StorageClassUniformConstant);
             line >> token;
             line >> token;
-            operands.push_back(ParseOperand(token, resIdMap));
+            const auto vals = ParseOperand(token, resIdMap);
+            operands.insert(operands.end(), vals.begin(), vals.end());
             return operands;
         }
         case spv::Op::OpVariable:
         {
             line >> token;
-            operands.push_back(ParseOperand(token, resIdMap));
+            const auto vals = ParseOperand(token, resIdMap);
+            operands.insert(operands.end(), vals.begin(), vals.end());
             operands.emplace_back(spv::StorageClassUniformConstant);
             return operands;
         }
@@ -195,7 +210,8 @@ std::vector<Operand> ParseOp(spv::Op op, std::istringstream& line, ResIdMap& res
 
     while (line >> token)
     {
-        operands.push_back(ParseOperand(token, resIdMap));
+        const auto vals = ParseOperand(token, resIdMap);
+        operands.insert(operands.end(), vals.begin(), vals.end());
     }
 
     return operands;
@@ -230,9 +246,15 @@ void ParseSpirvTextImpl(const std::string& text, Module& module, ResIdMap& resId
                 try
                 {
                     opcode = GetOpEnum(token);
-                    if (firstPass && (opcode == spv::Op::OpDecorate || opcode == spv::Op::OpGraphEntryPointARM))
+                    if (opcode == 44)
                     {
-                        // These ops may not have their ResIds resolved at this point, so we wait for the second pass
+                        std::cout << "";
+                    }
+                    if (firstPass && (opcode == spv::Op::OpDecorate || opcode == spv::Op::OpGraphEntryPointARM ||
+                                      opcode == spv::Op::OpName))
+                    {
+                        // These ops may not have their ResIds resolved at this point, so we
+                        // wait for the second pass
                         break;
                     }
                     operands = ParseOp(opcode, iss, resIdMap);
@@ -266,9 +288,7 @@ void ParseSpirvTextImpl(const std::string& text, Module& module, ResIdMap& resId
         }
 
         if (!resId.empty())
-        {
             resIdMap.insert({resId, op});
-        }
     }
 }
 

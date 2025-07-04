@@ -43,29 +43,29 @@ TEST(TOSA2SPIRV_LAYERS, Resize)
     auto binary = tosa2spirv::WriteToBinary(module);
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "RESIZE", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "RESIZE", outputStr));
 
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "RESIZE", outputStr, 2, "uint");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "RESIZE", outputStr, 2, "uint"));
 
-    testutils::CheckConstCompositeTensor({1, 1}, "RESIZE", outputStr, 3, "uint");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1}, "RESIZE", outputStr, 3, "uint"));
 
-    testutils::CheckConstCompositeTensor({1, 1}, "RESIZE", outputStr, 4, "uint");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1}, "RESIZE", outputStr, 4, "uint"));
 
-    testutils::CheckConstant(DataType::int32_t, "RESIZE", outputStr, 1, 0);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "RESIZE", outputStr);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "RESIZE", outputStr, 1, 0));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "RESIZE", outputStr));
 
     // Write binary a second time to ensure IDs remain consistent.
     binary = tosa2spirv::WriteToBinary(module);
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "RESIZE", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "RESIZE", outputStr));
 
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "RESIZE", outputStr, 2, "uint");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "RESIZE", outputStr, 2, "uint"));
 
-    testutils::CheckConstCompositeTensor({1, 1}, "RESIZE", outputStr, 3, "uint");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1}, "RESIZE", outputStr, 3, "uint"));
 
-    testutils::CheckConstCompositeTensor({1, 1}, "RESIZE", outputStr, 4, "uint");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1}, "RESIZE", outputStr, 4, "uint"));
 
-    testutils::CheckConstant(DataType::int32_t, "RESIZE", outputStr, 1, 0);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "RESIZE", outputStr);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "RESIZE", outputStr, 1, 0));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "RESIZE", outputStr));
 }

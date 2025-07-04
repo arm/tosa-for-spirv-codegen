@@ -7,11 +7,12 @@
 #include <ModuleComparator.hpp>
 #include <spirvmodels/Add.hpp>
 
-#include <Graph.hpp>
-#include <gtest/gtest.h>
 #include <spirvmodels/Conv2d.hpp>
 #include <spirvmodels/MaxPool.hpp>
 #include <spirvmodels/Rescale.hpp>
+
+#include <Graph.hpp>
+#include <gtest/gtest.h>
 #include <tosa2spirv.hpp>
 
 namespace testutils

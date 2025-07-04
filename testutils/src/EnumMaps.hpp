@@ -12,13 +12,10 @@
 #include <spirv/unified1/spirv.hpp>
 #include <string>
 
-std::string GetOpString(const spv::Op op);
-std::string InstructionToString(const tosa2spirv::spirv::Instruction &instruction);
-
+std::string OpToString(const spv::Op op);
 TOSAInstructions GetTosaOpEnum(const std::string &instruction);
 tosa2spirv::tosa::OperatorEnum GetOperatorEnum(TOSAInstructions instructionType);
 spv::Capability GetCapabilityEnum(const std::string &instruction);
 spv::Op GetOpEnum(const std::string &instruction);
-
 unsigned int GetResultIdPosition(spv::Op op);
 unsigned int GetResId(const tosa2spirv::spirv::Instruction &instruction);

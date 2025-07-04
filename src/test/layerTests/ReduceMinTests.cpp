@@ -36,21 +36,21 @@ TEST(TOSA2SPIRV_LAYERS, ReduceMin)
     auto binary = tosa2spirv::WriteToBinary(module);
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "REDUCE_MIN", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "REDUCE_MIN", outputStr));
 
-    testutils::CheckConstant(DataType::int32_t, "REDUCE_MIN", outputStr, 1, 0);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "REDUCE_MIN", outputStr, 1, 0));
 
-    testutils::CheckConstant(DataType::int32_t, "REDUCE_MIN", outputStr, 1, 1);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "REDUCE_MIN", outputStr);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "REDUCE_MIN", outputStr, 1, 1));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "REDUCE_MIN", outputStr));
 
     // Write binary a second time to ensure IDs remain consistent.
     binary = tosa2spirv::WriteToBinary(module);
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "REDUCE_MIN", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "REDUCE_MIN", outputStr));
 
-    testutils::CheckConstant(DataType::int32_t, "REDUCE_MIN", outputStr, 1, 0);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "REDUCE_MIN", outputStr, 1, 0));
 
-    testutils::CheckConstant(DataType::int32_t, "REDUCE_MIN", outputStr, 1, 1);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "REDUCE_MIN", outputStr);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "REDUCE_MIN", outputStr, 1, 1));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "REDUCE_MIN", outputStr));
 }

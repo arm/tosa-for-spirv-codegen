@@ -11,11 +11,10 @@
 #include <stdexcept>
 #include <unordered_map>
 
-// Maps seperated into their own functions to enable test coverage
+// Maps separated into their own functions to enable test coverage
 static const std::unordered_map<std::string, spv::Op>& getInstructionMap()
 {
-    static const auto mapInstance = []()
-    {
+    static const auto mapInstance = []() {
         std::unordered_map<std::string, spv::Op> tmp;
         tmp.reserve(29);
         tmp.emplace("OpCapability", spv::Op::OpCapability);
@@ -54,18 +53,49 @@ static const std::unordered_map<std::string, spv::Op>& getInstructionMap()
 
 spv::Op GetOpEnum(const std::string& instruction)
 {
-    const auto& instructionMap = getInstructionMap();
+    const std::unordered_map<std::string, spv::Op> instructionMap = {
+        {"OpCapability", spv::Op::OpCapability},
+        {"OpExtension", spv::Op::OpExtension},
+        {"OpMemoryModel", spv::Op::OpMemoryModel},
+        {"OpTypeInt", spv::Op::OpTypeInt},
+        {"OpTypeFloat", spv::Op::OpTypeFloat},
+        {"OpTypeBool", spv::Op::OpTypeBool},
+        {"OpConstantTrue", spv::Op::OpConstantTrue},
+        {"OpConstantFalse", spv::Op::OpConstantFalse},
+        {"OpConstant", spv::Op::OpConstant},
+        {"OpConstantComposite", spv::Op::OpConstantComposite},
+        {"OpConstantNull", spv::Op::OpConstantNull},
+        {"OpConstantCompositeReplicateEXT", spv::Op::OpConstantCompositeReplicateEXT},
+        {"OpTypeArray", spv::Op::OpTypeArray},
+        {"OpTypeTensorARM", spv::Op::OpTypeTensorARM},
+        {"OpTypeStruct", spv::Op::OpTypeStruct},
+        {"OpExtInst", spv::Op::OpExtInst},
+        {"OpCompositeExtract", spv::Op::OpCompositeExtract},
+        {"OpTypeGraphARM", spv::Op::OpTypeGraphARM},
+        {"OpExtInstImport", spv::Op::OpExtInstImport},
+        {"OpGraphInputARM", spv::Op::OpGraphInputARM},
+        {"OpGraphSetOutputARM", spv::Op::OpGraphSetOutputARM},
+        {"OpGraphARM", spv::Op::OpGraphARM},
+        {"OpTypePointer", spv::Op::OpTypePointer},
+        {"OpVariable", spv::Op::OpVariable},
+        {"OpDecorate", spv::Op::OpDecorate},
+        {"OpGraphEntryPointARM", spv::Op::OpGraphEntryPointARM},
+        {"OpGraphEndARM", spv::Op::OpGraphEndARM},
+        {"OpGraphConstantARM", spv::Op::OpGraphConstantARM},
+        {"OpName", spv::Op::OpName}};
+
+    // Look up the instruction in the map.
     if (const auto it = instructionMap.find(instruction); it != instructionMap.end())
     {
         return it->second;
     }
+    // If not found, throw an exception.
     throw std::invalid_argument("Unsupported instruction: " + instruction);
 }
 
 static const std::unordered_map<spv::Op, std::string>& getOpToStringMap()
 {
-    static const auto mapInstance = []()
-    {
+    static const auto mapInstance = []() {
         std::unordered_map<spv::Op, std::string> tmp;
         tmp.reserve(29);
         tmp.emplace(spv::Op::OpCapability, "OpCapability");
@@ -104,7 +134,36 @@ static const std::unordered_map<spv::Op, std::string>& getOpToStringMap()
 
 std::string GetOpString(const spv::Op op)
 {
-    const auto& opToString = getOpToStringMap();
+    const std::unordered_map<spv::Op, std::string> opToString = {
+        {spv::Op::OpCapability, "OpCapability"},
+        {spv::Op::OpExtension, "OpExtension"},
+        {spv::Op::OpMemoryModel, "OpMemoryModel"},
+        {spv::Op::OpTypeInt, "OpTypeInt"},
+        {spv::Op::OpTypeFloat, "OpTypeFloat"},
+        {spv::Op::OpTypeBool, "OpTypeBool"},
+        {spv::Op::OpConstantTrue, "OpConstantTrue"},
+        {spv::Op::OpConstantFalse, "OpConstantFalse"},
+        {spv::Op::OpConstant, "OpConstant"},
+        {spv::Op::OpConstantComposite, "OpConstantComposite"},
+        {spv::Op::OpConstantNull, "OpConstantNull"},
+        {spv::Op::OpConstantCompositeReplicateEXT, "OpConstantCompositeReplicateEXT"},
+        {spv::Op::OpTypeArray, "OpTypeArray"},
+        {spv::Op::OpTypeTensorARM, "OpTypeTensorARM"},
+        {spv::Op::OpTypeStruct, "OpTypeStruct"},
+        {spv::Op::OpExtInst, "OpExtInst"},
+        {spv::Op::OpCompositeExtract, "OpCompositeExtract"},
+        {spv::Op::OpTypeGraphARM, "OpTypeGraphARM"},
+        {spv::Op::OpExtInstImport, "OpExtInstImport"},
+        {spv::Op::OpGraphInputARM, "OpGraphInputARM"},
+        {spv::Op::OpGraphSetOutputARM, "OpGraphSetOutputARM"},
+        {spv::Op::OpGraphARM, "OpGraphARM"},
+        {spv::Op::OpTypePointer, "OpTypePointer"},
+        {spv::Op::OpVariable, "OpVariable"},
+        {spv::Op::OpDecorate, "OpDecorate"},
+        {spv::Op::OpGraphEntryPointARM, "OpGraphEntryPointARM"},
+        {spv::Op::OpGraphEndARM, "OpGraphEndARM"},
+        {spv::Op::OpGraphConstantARM, "OpGraphConstantARM"}};
+
     if (const auto it = opToString.find(op); it != opToString.end())
     {
         return it->second;
@@ -114,8 +173,7 @@ std::string GetOpString(const spv::Op op)
 
 static const std::unordered_map<std::string, TOSAInstructions>& getTosaInstructionsMap()
 {
-    static const auto mapInstance = []()
-    {
+    static const auto mapInstance = []() {
         std::unordered_map<std::string, TOSAInstructions> tmp;
         tmp.reserve(66);
         tmp.emplace("ARGMAX", TOSAARGMAX);
@@ -191,8 +249,72 @@ static const std::unordered_map<std::string, TOSAInstructions>& getTosaInstructi
 
 TOSAInstructions GetTosaOpEnum(const std::string& instruction)
 {
-    const auto& tosaMap = getTosaInstructionsMap();
-    if (const auto it = tosaMap.find(instruction); it != tosaMap.end())
+    const std::unordered_map<std::string, TOSAInstructions> tosaInstructionsMap = {
+        {"ARGMAX", TOSAARGMAX},
+        {"AVG_POOL2D", TOSAAVG_POOL2D},
+        {"CONV2D", TOSACONV2D},
+        {"CONV3D", TOSACONV3D},
+        {"DEPTHWISE_CONV2D", TOSADEPTHWISE_CONV2D},
+        {"FFT2D", TOSAFFT2D},
+        {"MATMUL", TOSAMATMUL},
+        {"MAX_POOL2D", TOSAMAX_POOL2D},
+        {"RFFT2D", TOSARFFT2D},
+        {"TRANSPOSE_CONV2D", TOSATRANSPOSE_CONV2D},
+        {"CLAMP", TOSACLAMP},
+        {"ERF", TOSAERF},
+        {"SIGMOID", TOSASIGMOID},
+        {"TANH", TOSATANH},
+        {"ADD", TOSAADD},
+        {"ARITHMETIC_RIGHT_SHIFT", TOSAARITHMETIC_RIGHT_SHIFT},
+        {"BITWISE_AND", TOSABITWISE_AND},
+        {"BITWISE_OR", TOSABITWISE_OR},
+        {"BITWISE_XOR", TOSABITWISE_XOR},
+        {"INTDIV", TOSAINTDIV},
+        {"LOGICAL_AND", TOSALOGICAL_AND},
+        {"LOGICAL_LEFT_SHIFT", TOSALOGICAL_LEFT_SHIFT},
+        {"LOGICAL_RIGHT_SHIFT", TOSALOGICAL_RIGHT_SHIFT},
+        {"LOGICAL_OR", TOSALOGICAL_OR},
+        {"LOGICAL_XOR", TOSALOGICAL_XOR},
+        {"MAXIMUM", TOSAMAXIMUM},
+        {"MINIMUM", TOSAMINIMUM},
+        {"MUL", TOSAMUL},
+        {"POW", TOSAPOW},
+        {"SUB", TOSASUB},
+        {"TABLE", TOSATABLE},
+        {"ABS", TOSAABS},
+        {"BITWISE_NOT", TOSABITWISE_NOT},
+        {"CEIL", TOSACEIL},
+        {"CLZ", TOSACLZ},
+        {"EXP", TOSAEXP},
+        {"FLOOR", TOSAFLOOR},
+        {"LOG", TOSALOG},
+        {"LOGICAL_NOT", TOSALOGICAL_NOT},
+        {"NEGATE", TOSANEGATE},
+        {"RECIPROCAL", TOSARECIPROCAL},
+        {"RSQRT", TOSARSQRT},
+        {"SELECT", TOSASELECT},
+        {"EQUAL", TOSAEQUAL},
+        {"GREATER", TOSAGREATER},
+        {"GREATER_EQUAL", TOSAGREATER_EQUAL},
+        {"REDUCE_ALL", TOSAREDUCE_ALL},
+        {"REDUCE_ANY", TOSAREDUCE_ANY},
+        {"REDUCE_MAX", TOSAREDUCE_MAX},
+        {"REDUCE_MIN", TOSAREDUCE_MIN},
+        {"REDUCE_PRODUCT", TOSAREDUCE_PRODUCT},
+        {"REDUCE_SUM", TOSAREDUCE_SUM},
+        {"CONCAT", TOSACONCAT},
+        {"PAD", TOSAPAD},
+        {"RESHAPE", TOSARESHAPE},
+        {"REVERSE", TOSAREVERSE},
+        {"SLICE", TOSASLICE},
+        {"TILE", TOSATILE},
+        {"TRANSPOSE", TOSATRANSPOSE},
+        {"GATHER", TOSAGATHER},
+        {"SCATTER", TOSASCATTER},
+        {"RESIZE", TOSARESIZE},
+        {"CAST", TOSACAST},
+        {"RESCALE", TOSARESCALE}};
+    if (const auto it = tosaInstructionsMap.find(instruction); it != tosaInstructionsMap.end())
     {
         return it->second;
     }
@@ -277,8 +399,7 @@ tosa2spirv::tosa::OperatorEnum GetOperatorEnum(TOSAInstructions instructionType)
 
 static const std::unordered_map<std::string, spv::Capability>& getCapabilityMap()
 {
-    static const auto mapInstance = []()
-    {
+    static const auto mapInstance = []() {
         std::unordered_map<std::string, spv::Capability> tmp;
         tmp.reserve(10);
         tmp.emplace("VulkanMemoryModel", spv::Capability::CapabilityVulkanMemoryModel);
@@ -298,7 +419,18 @@ static const std::unordered_map<std::string, spv::Capability>& getCapabilityMap(
 
 spv::Capability GetCapabilityEnum(const std::string& instruction)
 {
-    const auto& capabilityMap = getCapabilityMap();
+    const std::unordered_map<std::string, spv::Capability> capabilityMap = {
+        {"VulkanMemoryModel", spv::Capability::CapabilityVulkanMemoryModel},
+        {"Shader", spv::Capability::CapabilityShader},
+        {"Int8", spv::Capability::CapabilityInt8},
+        {"Int16", spv::Capability::CapabilityInt16},
+        {"Float16", spv::Capability::CapabilityFloat16},
+        {"Int64", spv::Capability::CapabilityInt64},
+        {"GraphARM", spv::Capability::CapabilityGraphARM},
+        {"TensorsARM", spv::Capability::CapabilityTensorsARM},
+        {"Matrix", spv::Capability::CapabilityMatrix},
+        {"ReplicatedCompositesEXT", spv::Capability::CapabilityReplicatedCompositesEXT}};
+
     if (const auto it = capabilityMap.find(instruction); it != capabilityMap.end())
     {
         return it->second;
@@ -345,6 +477,46 @@ unsigned int GetResultIdPosition(const spv::Op op)
     }
 }
 
+std::string OpToString(const spv::Op op)
+{
+    const std::unordered_map<spv::Op, std::string> opToString = {
+        {spv::Op::OpCapability, "OpCapability"},
+        {spv::Op::OpExtension, "OpExtension"},
+        {spv::Op::OpMemoryModel, "OpMemoryModel"},
+        {spv::Op::OpTypeInt, "OpTypeInt"},
+        {spv::Op::OpTypeFloat, "OpTypeFloat"},
+        {spv::Op::OpTypeBool, "OpTypeBool"},
+        {spv::Op::OpConstantTrue, "OpConstantTrue"},
+        {spv::Op::OpConstantFalse, "OpConstantFalse"},
+        {spv::Op::OpConstant, "OpConstant"},
+        {spv::Op::OpConstantComposite, "OpConstantComposite"},
+        {spv::Op::OpConstantNull, "OpConstantNull"},
+        {spv::Op::OpConstantCompositeReplicateEXT, "OpConstantCompositeReplicateEXT"},
+        {spv::Op::OpTypeArray, "OpTypeArray"},
+        {spv::Op::OpTypeTensorARM, "OpTypeTensorARM"},
+        {spv::Op::OpTypeStruct, "OpTypeStruct"},
+        {spv::Op::OpExtInst, "OpExtInst"},
+        {spv::Op::OpCompositeExtract, "OpCompositeExtract"},
+        {spv::Op::OpTypeGraphARM, "OpTypeGraphARM"},
+        {spv::Op::OpExtInstImport, "OpExtInstImport"},
+        {spv::Op::OpGraphInputARM, "OpGraphInputARM"},
+        {spv::Op::OpGraphSetOutputARM, "OpGraphSetOutputARM"},
+        {spv::Op::OpGraphARM, "OpGraphARM"},
+        {spv::Op::OpTypePointer, "OpTypePointer"},
+        {spv::Op::OpVariable, "OpVariable"},
+        {spv::Op::OpDecorate, "OpDecorate"},
+        {spv::Op::OpGraphEntryPointARM, "OpGraphEntryPointARM"},
+        {spv::Op::OpGraphEndARM, "OpGraphEndARM"},
+        {spv::Op::OpName, "OpName"},
+        {spv::Op::OpGraphConstantARM, "OpGraphConstantARM"}};
+
+    if (const auto it = opToString.find(op); it != opToString.end())
+    {
+        return it->second;
+    }
+    throw std::invalid_argument("Unsupported op enum value");
+}
+
 unsigned int GetResId(const tosa2spirv::spirv::Instruction& instruction)
 {
     for (const auto& operand : instruction.m_Operands)
@@ -355,32 +527,4 @@ unsigned int GetResId(const tosa2spirv::spirv::Instruction& instruction)
         }
     }
     return 0;
-}
-
-std::string InstructionToString(const tosa2spirv::spirv::Instruction& instruction)
-{
-    std::string instructionString;
-
-    if (const auto resId = GetResId(instruction); resId != 0)
-    {
-        instructionString += "%" + std::to_string(resId) + " = ";
-    }
-
-    instructionString += GetOpString(instruction.m_Opcode);
-    for (const auto& operand : instruction.m_Operands)
-    {
-        switch (operand.m_Type)
-        {
-            case tosa2spirv::spirv::INSTRUCTION_POINTER:
-                instructionString += " %" + std::to_string(GetResId(*operand.m_InstructionPtr));
-                break;
-            case tosa2spirv::spirv::RES_ID: break;
-            case tosa2spirv::spirv::LITERAL_WORD:
-                instructionString += " " + std::to_string(operand.m_LiteralWord);
-                break;
-            case tosa2spirv::spirv::LITERAL_STRING: instructionString += " " + *operand.m_LiteralStr; break;
-            default: throw std::runtime_error("Invalid operand type");
-        }
-    }
-    return instructionString;
 }

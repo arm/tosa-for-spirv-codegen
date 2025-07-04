@@ -40,29 +40,29 @@ TEST(TOSA2SPIRV_LAYERS, MaxPool2d)
     auto binary = tosa2spirv::WriteToBinary(module);
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MAX_POOL2D", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MAX_POOL2D", outputStr));
 
-    testutils::CheckConstCompositeTensor({1, 1}, "MAX_POOL2D", outputStr, 0);
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1}, "MAX_POOL2D", outputStr, 0));
 
-    testutils::CheckConstCompositeTensor({1, 1}, "MAX_POOL2D", outputStr, 1);
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1}, "MAX_POOL2D", outputStr, 1));
 
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "MAX_POOL2D", outputStr, 2);
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "MAX_POOL2D", outputStr, 2));
 
-    testutils::CheckConstant(DataType::int32_t, "MAX_POOL2D", outputStr, 1, 3);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "MAX_POOL2D", outputStr);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "MAX_POOL2D", outputStr, 1, 3));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "MAX_POOL2D", outputStr));
 
     // Write binary a second time to ensure IDs remain consistent.
     binary = tosa2spirv::WriteToBinary(module);
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MAX_POOL2D", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MAX_POOL2D", outputStr));
 
-    testutils::CheckConstCompositeTensor({1, 1}, "MAX_POOL2D", outputStr, 0);
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1}, "MAX_POOL2D", outputStr, 0));
 
-    testutils::CheckConstCompositeTensor({1, 1}, "MAX_POOL2D", outputStr, 1);
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1}, "MAX_POOL2D", outputStr, 1));
 
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "MAX_POOL2D", outputStr, 2);
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "MAX_POOL2D", outputStr, 2));
 
-    testutils::CheckConstant(DataType::int32_t, "MAX_POOL2D", outputStr, 1, 3);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "MAX_POOL2D", outputStr);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "MAX_POOL2D", outputStr, 1, 3));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "MAX_POOL2D", outputStr));
 }

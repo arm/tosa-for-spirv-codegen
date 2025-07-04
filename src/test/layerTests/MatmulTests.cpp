@@ -40,25 +40,25 @@ TEST(TOSA2SPIRV_LAYERS, Matmul)
     auto binary = tosa2spirv::WriteToBinary(module);
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MATMUL", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MATMUL", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MATMUL", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MATMUL", outputStr));
 
-    testutils::CheckConstCompositeTensor({1}, "MATMUL", outputStr, 2, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "MATMUL", outputStr, 2, "uchar"));
 
-    testutils::CheckConstCompositeTensor({1}, "MATMUL", outputStr, 3, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "MATMUL", outputStr, 3, "uchar"));
 
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "MATMUL", outputStr);
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "MATMUL", outputStr));
 
     // Write binary a second time to ensure IDs remain consistent.
     binary = tosa2spirv::WriteToBinary(module);
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MATMUL", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MATMUL", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MATMUL", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MATMUL", outputStr));
 
-    testutils::CheckConstCompositeTensor({1}, "MATMUL", outputStr, 2, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "MATMUL", outputStr, 2, "uchar"));
 
-    testutils::CheckConstCompositeTensor({1}, "MATMUL", outputStr, 3, "uchar");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "MATMUL", outputStr, 3, "uchar"));
 
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "MATMUL", outputStr);
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "MATMUL", outputStr));
 }

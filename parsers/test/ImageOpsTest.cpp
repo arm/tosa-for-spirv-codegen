@@ -92,14 +92,14 @@ TEST(TOSA2SPIRV_PARSER, Resize)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "RESIZE", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "RESIZE", outputStr));
 
-    testutils::CheckGraphConstant({1, 1, 1, 1}, DataType::int32_t, "RESIZE", outputStr, 2, 0);
+    EXPECT_TRUE(testutils::CheckGraphConstant({1, 1, 1, 1}, DataType::int32_t, "RESIZE", outputStr, 2, 0));
 
-    testutils::CheckGraphConstant({1, 1}, DataType::int32_t, "RESIZE", outputStr, 3, 1);
+    EXPECT_TRUE(testutils::CheckGraphConstant({1, 1}, DataType::int32_t, "RESIZE", outputStr, 3, 1));
 
-    testutils::CheckGraphConstant({1, 1}, DataType::int32_t, "RESIZE", outputStr, 4, 2);
+    EXPECT_TRUE(testutils::CheckGraphConstant({1, 1}, DataType::int32_t, "RESIZE", outputStr, 4, 2));
 
-    testutils::CheckConstant(DataType::int32_t, "RESIZE", outputStr, 1, 0);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "RESIZE", outputStr);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "RESIZE", outputStr, 1, 0));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "RESIZE", outputStr));
 }

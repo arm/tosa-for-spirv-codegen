@@ -41,25 +41,25 @@ TEST(TOSA2SPIRV_LAYERS, Fft2d)
     auto binary = tosa2spirv::WriteToBinary(module);
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float32_t, "FFT2D", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float32_t, "FFT2D", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float32_t, "FFT2D", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float32_t, "FFT2D", outputStr));
 
-    testutils::CheckBoolConstant(DataType::bool_t, "FFT2D", outputStr, 1, 0);
+    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "FFT2D", outputStr, 1, 0));
 
-    testutils::CheckBoolConstant(DataType::bool_t, "FFT2D", outputStr, 1, 1);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float32_t, "FFT2D", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float32_t, "FFT2D", outputStr);
+    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "FFT2D", outputStr, 1, 1));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float32_t, "FFT2D", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float32_t, "FFT2D", outputStr));
 
     // Write binary a second time to ensure IDs remain consistent.
     binary = tosa2spirv::WriteToBinary(module);
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float32_t, "FFT2D", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float32_t, "FFT2D", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float32_t, "FFT2D", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float32_t, "FFT2D", outputStr));
 
-    testutils::CheckBoolConstant(DataType::bool_t, "FFT2D", outputStr, 1, 0);
+    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "FFT2D", outputStr, 1, 0));
 
-    testutils::CheckBoolConstant(DataType::bool_t, "FFT2D", outputStr, 1, 1);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float32_t, "FFT2D", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float32_t, "FFT2D", outputStr);
+    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "FFT2D", outputStr, 1, 1));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float32_t, "FFT2D", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float32_t, "FFT2D", outputStr));
 }

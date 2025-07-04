@@ -60,9 +60,9 @@ TEST(TOSA2SPIRV_PARSER, Gather)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "GATHER", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "GATHER", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "GATHER", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "GATHER", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "GATHER", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "GATHER", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, Scatter)
@@ -121,8 +121,8 @@ TEST(TOSA2SPIRV_PARSER, Scatter)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "SCATTER", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "SCATTER", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "SCATTER", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "SCATTER", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "SCATTER", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "SCATTER", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "SCATTER", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "SCATTER", outputStr));
 }

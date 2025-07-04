@@ -12,12 +12,13 @@ add_executable(spirv2tosaTool ${TOOL_SOURCE})
 # Include headers
 target_include_directories(spirv2tosaTool PUBLIC ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/tosa ${CMAKE_SOURCE_DIR}/include/spirv)
 target_include_directories(spirv2tosaTool PRIVATE ${CMAKE_SOURCE_DIR}/testutils/include)
+target_include_directories(spirv2tosaTool PRIVATE ${CMAKE_SOURCE_DIR}/src)
 
 target_include_directories(spirv2tosaTool PRIVATE ${SPIRV_HEADERS_SOURCE_PATH}/include)
 target_include_directories(spirv2tosaTool PRIVATE ${SPIRV_HEADERS_SOURCE_PATH})
 
 # Link libraries
 target_link_libraries(spirv2tosaTool PRIVATE tosa2spirv)
-target_link_libraries(spirv2tosaTool PRIVATE test_utils)
+target_link_libraries(spirv2tosaTool PRIVATE testutils)
 
 install(TARGETS spirv2tosaTool RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

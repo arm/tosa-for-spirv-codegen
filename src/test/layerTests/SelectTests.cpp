@@ -36,17 +36,17 @@ TEST(TOSA2SPIRV_LAYERS, Select)
     auto binary = tosa2spirv::WriteToBinary(module);
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "SELECT", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "SELECT", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "SELECT", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "SELECT", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "SELECT", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "SELECT", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "SELECT", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "SELECT", outputStr));
 
     // Write binary a second time to ensure IDs remain consistent.
     binary = tosa2spirv::WriteToBinary(module);
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "SELECT", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "SELECT", outputStr);
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "SELECT", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "SELECT", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "SELECT", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "SELECT", outputStr));
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "SELECT", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "SELECT", outputStr));
 }

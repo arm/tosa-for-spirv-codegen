@@ -38,23 +38,23 @@ TEST(TOSA2SPIRV_LAYERS, Pad)
     auto binary = tosa2spirv::WriteToBinary(module);
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "PAD", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "PAD", outputStr));
 
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "PAD", outputStr, 1, "uint");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "PAD", outputStr, 1, "uint"));
 
-    testutils::CheckConstCompositeTensor({1}, "PAD", outputStr, 2, "bool");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "PAD", outputStr, 2, "bool"));
 
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "PAD", outputStr);
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "PAD", outputStr));
 
     // Write binary a second time to ensure IDs remain consistent.
     binary = tosa2spirv::WriteToBinary(module);
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "PAD", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "PAD", outputStr));
 
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "PAD", outputStr, 1, "uint");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "PAD", outputStr, 1, "uint"));
 
-    testutils::CheckConstCompositeTensor({1}, "PAD", outputStr, 2, "bool");
+    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "PAD", outputStr, 2, "bool"));
 
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "PAD", outputStr);
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "PAD", outputStr));
 }

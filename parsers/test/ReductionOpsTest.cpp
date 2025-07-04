@@ -57,10 +57,10 @@ TEST(TOSA2SPIRV_PARSER, ReduceAll)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "REDUCE_ALL", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "REDUCE_ALL", outputStr));
 
-    testutils::CheckConstant(DataType::int32_t, "REDUCE_ALL", outputStr, 1, 0);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "REDUCE_ALL", outputStr);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "REDUCE_ALL", outputStr, 1, 0));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "REDUCE_ALL", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, ReduceAny)
@@ -106,10 +106,10 @@ TEST(TOSA2SPIRV_PARSER, ReduceAny)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "REDUCE_ANY", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "REDUCE_ANY", outputStr));
 
-    testutils::CheckConstant(DataType::int32_t, "REDUCE_ANY", outputStr, 1, 0);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "REDUCE_ANY", outputStr);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "REDUCE_ANY", outputStr, 1, 0));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "REDUCE_ANY", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, ReduceMax)
@@ -156,12 +156,12 @@ TEST(TOSA2SPIRV_PARSER, ReduceMax)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "REDUCE_MAX", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "REDUCE_MAX", outputStr));
 
-    testutils::CheckConstant(DataType::int32_t, "REDUCE_MAX", outputStr, 1, 0);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "REDUCE_MAX", outputStr, 1, 0));
 
-    testutils::CheckConstant(DataType::int32_t, "REDUCE_MAX", outputStr, 1, 1);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "REDUCE_MAX", outputStr);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "REDUCE_MAX", outputStr, 1, 1));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "REDUCE_MAX", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, ReduceMin)
@@ -208,12 +208,12 @@ TEST(TOSA2SPIRV_PARSER, ReduceMin)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "REDUCE_MIN", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "REDUCE_MIN", outputStr));
 
-    testutils::CheckConstant(DataType::int32_t, "REDUCE_MIN", outputStr, 1, 0);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "REDUCE_MIN", outputStr, 1, 0));
 
-    testutils::CheckConstant(DataType::int32_t, "REDUCE_MIN", outputStr, 1, 1);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "REDUCE_MIN", outputStr);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "REDUCE_MIN", outputStr, 1, 1));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "REDUCE_MIN", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, ReduceProduct)
@@ -259,10 +259,10 @@ TEST(TOSA2SPIRV_PARSER, ReduceProduct)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "REDUCE_PRODUCT", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "REDUCE_PRODUCT", outputStr));
 
-    testutils::CheckConstant(DataType::int32_t, "REDUCE_PRODUCT", outputStr, 1, 0);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "REDUCE_PRODUCT", outputStr);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "REDUCE_PRODUCT", outputStr, 1, 0));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "REDUCE_PRODUCT", outputStr));
 }
 
 TEST(TOSA2SPIRV_PARSER, ReduceSum)
@@ -308,8 +308,8 @@ TEST(TOSA2SPIRV_PARSER, ReduceSum)
     auto binarySpirv = parser.GenerateSPIRV("main");
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "REDUCE_SUM", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "REDUCE_SUM", outputStr));
 
-    testutils::CheckConstant(DataType::int32_t, "REDUCE_SUM", outputStr, 1, 0);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "REDUCE_SUM", outputStr);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "REDUCE_SUM", outputStr, 1, 0));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "REDUCE_SUM", outputStr));
 }

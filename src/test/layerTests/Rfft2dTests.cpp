@@ -37,19 +37,19 @@ TEST(TOSA2SPIRV_LAYERS, Rfft2d)
     auto binary = tosa2spirv::WriteToBinary(module);
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float32_t, "RFFT2D", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float32_t, "RFFT2D", outputStr));
 
-    testutils::CheckBoolConstant(DataType::bool_t, "RFFT2D", outputStr, 1, 0);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float32_t, "RFFT2D", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float32_t, "RFFT2D", outputStr);
+    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "RFFT2D", outputStr, 1, 0));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float32_t, "RFFT2D", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float32_t, "RFFT2D", outputStr));
 
     // Write binary a second time to ensure IDs remain consistent.
     binary = tosa2spirv::WriteToBinary(module);
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float32_t, "RFFT2D", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float32_t, "RFFT2D", outputStr));
 
-    testutils::CheckBoolConstant(DataType::bool_t, "RFFT2D", outputStr, 1, 0);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float32_t, "RFFT2D", outputStr);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float32_t, "RFFT2D", outputStr);
+    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "RFFT2D", outputStr, 1, 0));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float32_t, "RFFT2D", outputStr));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float32_t, "RFFT2D", outputStr));
 }

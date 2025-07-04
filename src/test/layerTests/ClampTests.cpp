@@ -38,25 +38,25 @@ TEST(TOSA2SPIRV_LAYERS, Clamp)
     auto binary = tosa2spirv::WriteToBinary(module);
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "CLAMP", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "CLAMP", outputStr));
 
-    testutils::CheckConstant(DataType::int8_t, "CLAMP", outputStr, 1, 0);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int8_t, "CLAMP", outputStr, 1, 0));
 
-    testutils::CheckConstant(DataType::int8_t, "CLAMP", outputStr, 1, 1);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int8_t, "CLAMP", outputStr, 1, 1));
 
-    testutils::CheckConstant(DataType::int32_t, "CLAMP", outputStr, 1, 2);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "CLAMP", outputStr);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "CLAMP", outputStr, 1, 2));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "CLAMP", outputStr));
 
     // Write binary a second time to ensure IDs remain consistent.
     binary = tosa2spirv::WriteToBinary(module);
     outputStr = testutils::DisassembleSPIRV(binary, true);
 
-    testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "CLAMP", outputStr);
+    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "CLAMP", outputStr));
 
-    testutils::CheckConstant(DataType::int8_t, "CLAMP", outputStr, 1, 0);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int8_t, "CLAMP", outputStr, 1, 0));
 
-    testutils::CheckConstant(DataType::int8_t, "CLAMP", outputStr, 1, 1);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int8_t, "CLAMP", outputStr, 1, 1));
 
-    testutils::CheckConstant(DataType::int32_t, "CLAMP", outputStr, 1, 2);
-    testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "CLAMP", outputStr);
+    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "CLAMP", outputStr, 1, 2));
+    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "CLAMP", outputStr));
 }

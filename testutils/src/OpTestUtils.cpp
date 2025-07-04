@@ -5,13 +5,11 @@
 
 #include <OpTestUtils.hpp>
 
-#include <iostream>
 #include <regex>
 #include <sstream>
 #include <stack>
 
 #include <effcee/effcee.h>
-#include <gtest/gtest.h>
 
 namespace testutils
 {
@@ -174,7 +172,7 @@ static effcee::Result CheckInputTensorDTypeFirst(const std::vector<int>& values,
     return effcee::Match(goldenSPIRV, check);
 }
 
-void CheckInputTensor(const std::vector<int>& values,
+bool CheckInputTensor(const std::vector<int>& values,
                       DataType dataType,
                       const std::string& instruction,
                       const std::string& goldenSPIRV)
@@ -185,8 +183,8 @@ void CheckInputTensor(const std::vector<int>& values,
     auto resultDTypeFirst = CheckInputTensorDTypeFirst(values, dataType, instruction, goldenSPIRV);
     auto resultConstant = CheckInputTensorConstant(values, dataType, instruction, goldenSPIRV);
 
-    EXPECT_TRUE(resultDAG.message().empty() || resultNonDAG.message().empty() || resultDTypeFirst.message().empty() ||
-                resultConstant.message().empty());
+    return (resultDAG.message().empty() || resultNonDAG.message().empty() || resultDTypeFirst.message().empty() ||
+            resultConstant.message().empty());
 }
 
 std::string GetLastInstructionIDs(const std::string& text, const std::string& instruction)
@@ -295,7 +293,7 @@ std::string ReverseString(const std::string& s)
     return rString;
 }
 
-void CheckOutput(const std::vector<int>& values,
+bool CheckOutput(const std::vector<int>& values,
                  DataType dataType,
                  const std::string& instruction,
                  const std::string& spirv)
@@ -312,9 +310,7 @@ void CheckOutput(const std::vector<int>& values,
         CHECK:       [[ARRAY:%\w+]] = OpTypeArray {{%\w+}} [[LENGTH]]
     )";
     const auto m = effcee::Match(rSpirv, check).message();
-    std::cout << m;
-    EXPECT_TRUE(m.empty());
-    //    CHECK:      [[LENGTH:%\w+]] = OpConstant {{%\w+}} )" + std::to_string(values.size()) + R"(
+    return m.empty();
 }
 
 static effcee::Result CheckOutputTensorDTypeFirst(const std::vector<int>& values,
@@ -361,7 +357,7 @@ static effcee::Result CheckOutputTensorTypeStruct(const std::vector<int>& values
     return effcee::Match(goldenSPIRV, check);
 }
 
-void CheckOutputTensor(const std::vector<int>& values,
+bool CheckOutputTensor(const std::vector<int>& values,
                        DataType dataType,
                        const std::string& instruction,
                        const std::string& goldenSPIRV)
@@ -371,11 +367,11 @@ void CheckOutputTensor(const std::vector<int>& values,
     auto resultTypeStruct = CheckOutputTensorTypeStruct(values, dataType, instruction, goldenSPIRV);
     auto res4 = CheckOutput4Tensor(values, dataType, instruction, goldenSPIRV);
 
-    EXPECT_TRUE(resultDataTypeFirst.message().empty() || resultNonDAG.message().empty() ||
-                resultTypeStruct.message().empty() || res4.message().empty());
+    return (resultDataTypeFirst.message().empty() || resultNonDAG.message().empty() ||
+            resultTypeStruct.message().empty() || res4.message().empty());
 }
 
-void CheckConstCompositeTensor(const std::vector<int>& values,
+bool CheckConstCompositeTensor(const std::vector<int>& values,
                                const std::string& instruction,
                                const std::string& goldenSPIRV,
                                const int index,
@@ -391,7 +387,7 @@ void CheckConstCompositeTensor(const std::vector<int>& values,
     {
         if (auto pos = line.find(instruction); pos != std::string::npos)
         {
-            std::string args_list = std::move(line.substr(pos + instruction.size() + 1));
+            std::string args_list = line.substr(pos + instruction.size() + 1);
 
             iss.clear();
             iss.str(args_list);
@@ -405,11 +401,11 @@ void CheckConstCompositeTensor(const std::vector<int>& values,
     }
     if (args.empty())
     {
-        FAIL() << "CheckConstCompositeTensor(): Instruction: '" << instruction << "' not found in SPIR-V.";
+        return false;
     }
     if (values.empty())
     {
-        FAIL() << "CheckConstCompositeTensor(): Must not have empty values vector.";
+        return false;
     }
 
     // Example path of Effcee check for MAX_POOL2D
@@ -445,10 +441,10 @@ void CheckConstCompositeTensor(const std::vector<int>& values,
 
     auto result = effcee::Match(goldenSPIRV, check);
 
-    EXPECT_EQ(result.message(), "");
+    return result.message().empty();
 }
 
-void CheckGraphConstant(const std::vector<int>& values,
+bool CheckGraphConstant(const std::vector<int>& values,
                         DataType dataType,
                         const std::string& instruction,
                         const std::string& goldenSPIRV,
@@ -466,10 +462,10 @@ void CheckGraphConstant(const std::vector<int>& values,
 
     auto result = effcee::Match(goldenSPIRV, check);
 
-    EXPECT_EQ(result.message(), "");
+    return result.message().empty();
 }
 
-void CheckConstant(DataType dataType,
+bool CheckConstant(DataType dataType,
                    const std::string& instruction,
                    const std::string& goldenSPIRV,
                    const uint32_t value,
@@ -489,10 +485,10 @@ void CheckConstant(DataType dataType,
 
     auto result = effcee::Match(goldenSPIRV, check);
 
-    EXPECT_EQ(result.message(), "");
+    return result.message().empty();
 }
 
-void CheckBoolConstant(DataType dataType,
+bool CheckBoolConstant(DataType dataType,
                        const std::string& instruction,
                        const std::string& goldenSPIRV,
                        const bool flag,
@@ -510,7 +506,7 @@ void CheckBoolConstant(DataType dataType,
 
     auto result = effcee::Match(goldenSPIRV, check);
 
-    EXPECT_EQ(result.message(), "");
+    return result.message().empty();
 }
 
 } // namespace testutils

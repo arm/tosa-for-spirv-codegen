@@ -21,41 +21,41 @@ std::string AddSpacers(int index);
 
 std::string CreateEffceeCheckFromDataType(DataType dataType);
 
-void CheckInputTensor(const std::vector<int>& values,
+bool CheckInputTensor(const std::vector<int>& values,
                       DataType dataType,
                       const std::string& instruction,
                       const std::string& goldenSPIRV);
 
-void CheckOutputTensor(const std::vector<int>& values,
+bool CheckOutputTensor(const std::vector<int>& values,
                        DataType dataType,
                        const std::string& instruction,
                        const std::string& goldenSPIRV);
 
-void CheckOutput(const std::vector<int>& values,
+bool CheckOutput(const std::vector<int>& values,
                  DataType dataType,
                  const std::string& instruction,
                  const std::string& spirv);
 
-void CheckConstCompositeTensor(const std::vector<int>& values,
+bool CheckConstCompositeTensor(const std::vector<int>& values,
                                const std::string& instruction,
                                const std::string& goldenSPIRV,
                                const int index,
                                const std::string& dataType = "uint");
 
-void CheckGraphConstant(const std::vector<int>& values,
+bool CheckGraphConstant(const std::vector<int>& values,
                         DataType dataType,
                         const std::string& instruction,
                         const std::string& goldenSPIRV,
                         int index,
                         int identifier);
 
-void CheckConstant(DataType dataType,
+bool CheckConstant(DataType dataType,
                    const std::string& instruction,
                    const std::string& goldenSPIRV,
                    uint32_t value,
                    int index);
 
-void CheckBoolConstant(DataType dataType,
+bool CheckBoolConstant(DataType dataType,
                        const std::string& instruction,
                        const std::string& goldenSPIRV,
                        bool flag,
