@@ -246,10 +246,6 @@ void ParseSpirvTextImpl(const std::string& text, Module& module, ResIdMap& resId
                 try
                 {
                     opcode = GetOpEnum(token);
-                    if (opcode == 44)
-                    {
-                        std::cout << "";
-                    }
                     if (firstPass && (opcode == spv::Op::OpDecorate || opcode == spv::Op::OpGraphEntryPointARM ||
                                       opcode == spv::Op::OpName))
                     {

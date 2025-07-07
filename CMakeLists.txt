@@ -1,5 +1,5 @@
 #
-# Copyright © 2023-2025 Arm Ltd and Contributors. All rights reserved.
+# Copyright © 2025 Arm Ltd and Contributors. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -11,7 +11,7 @@ include(GNUInstallDirs)  # Ensure standard install directory variables are defin
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Build options
+# By default tosa2spirv is a static library.
 option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
 option(BUILD_TOSA_SERIALIZATION_PARSER
        "Build the TOSA Serialization Parser. This library can parse a TOSA Serialization structure and \
@@ -28,6 +28,7 @@ option(BUILD_VGF_WRITER "Build the VGF Writer library.
                          A wrapper of the VGF Encoder allowing users to create .vgf files with tosa2spirv output." ON)
 # Option for Unittest Coverage testing
 option(BUILD_FOR_COVERAGE "Output .gcno and .gcda files used for Unittest Coverage checking." OFF)
+# By default build UnitTests
 option(BUILD_UNITTESTS "Build UnitTests for tosa2spirv" ON)
 
 # External paths
@@ -45,7 +46,7 @@ set(RE2_SOURCE_PATH ${EFFCEE_SOURCE_PATH}/third_party/re2 CACHE PATH "")
 set(ABSEIL_SOURCE_PATH ${EFFCEE_SOURCE_PATH}/third_party/abseil-cpp CACHE PATH "")
 set(EFFCEE_BUILD_PATH ${EFFCEE_SOURCE_PATH}/build CACHE PATH "")
 
-# Option validation
+# Parser can be enabled without generator but generator requires parser.
 if(BUILD_TOSA_2_SPIRV_GENERATOR AND NOT BUILD_TOSA_SERIALIZATION_PARSER)
     message(FATAL_ERROR
         "TOSA Serialization Parser is required to build the tosa2spirv generator.")
@@ -115,7 +116,7 @@ if(BUILD_UNITTESTS)
     include(${CMAKE_SOURCE_DIR}/cmake/unittests.cmake)
 endif()
 
-# Install interface
+# install include directories into their respective folders
 install(FILES ${CMAKE_SOURCE_DIR}/include/tosa2spirv.hpp
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
