@@ -214,8 +214,13 @@ TEST(TOSA2SPIRV_PARSER, ConstInputOpTest)
     ops.push_back(std::move(rescaleOp));
 
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("main", "main", std::move(ops), std::move(tensors),
-        std::vector<std::unique_ptr<TosaSerializationShape>>{}, {inputName}, {outputName});
+    TosaSerializationBasicBlock block("main",
+                                      "main",
+                                      std::move(ops),
+                                      std::move(tensors),
+                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
+                                      {inputName},
+                                      {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");
@@ -247,8 +252,8 @@ TEST(TOSA2SPIRV_PARSER, UnsupportedOperator)
 
     // Create a tosa single-op basic block
     // The raw pointers of operators will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("unknown", "main", std::move(ops), {},
-        std::vector<std::unique_ptr<TosaSerializationShape>>{}, {}, {});
+    TosaSerializationBasicBlock
+        block("unknown", "main", std::move(ops), {}, std::vector<std::unique_ptr<TosaSerializationShape>>{}, {}, {});
 
     TosaSerializationParser parser(&block);
 
@@ -292,8 +297,13 @@ TEST(TOSA2SPIRV_PARSER, InvalidDtype)
     ops.push_back(std::move(op));
 
     // Create a tosa single-op basic block
-    TosaSerializationBasicBlock block("unknown", "main", std::move(ops), std::move(tensors),
-        std::vector<std::unique_ptr<TosaSerializationShape>>{}, {inputName}, {outputName});
+    TosaSerializationBasicBlock block("unknown",
+                                      "main",
+                                      std::move(ops),
+                                      std::move(tensors),
+                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
+                                      {inputName},
+                                      {outputName});
 
     TosaSerializationParser parser(&block);
 
@@ -303,7 +313,7 @@ TEST(TOSA2SPIRV_PARSER, InvalidDtype)
 }
 
 // MAX POOL
-std::unique_ptr<TosaSerializationBasicBlock> GeneratorSimpleMaxpool2dModel()
+std::unique_ptr<TosaSerializationBasicBlock> ParserGeneratorSimpleMaxpool2dModel()
 {
     // Create Attribute
     std::vector<int> pad = {1, 1, 1, 1};
@@ -352,7 +362,7 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorSimpleMaxpool2dModel()
 TEST(TOSA2SPIRV_PARSER, Readme)
 {
     // Create a simple MaxPool2d model block.
-    auto block = GeneratorSimpleMaxpool2dModel();
+    auto block = ParserGeneratorSimpleMaxpool2dModel();
 
     // Construct TosaSerializationParser object using TosaSerializationBlock or TosaSerializationHandler
     TosaSerializationParser parser(block.get());
@@ -1451,13 +1461,8 @@ TEST(TOSA2SPIRV_PARSER, EmptyTensor)
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("add",
-                                      "main",
-                                      std::move(ops),
-                                      std::move(tensors),
-                                      {},
-                                      {input1Name, input2Name},
-                                      {outputName});
+    TosaSerializationBasicBlock
+        block("add", "main", std::move(ops), std::move(tensors), {}, {input1Name, input2Name}, {outputName});
 
     TosaSerializationParser parser(&block);
 

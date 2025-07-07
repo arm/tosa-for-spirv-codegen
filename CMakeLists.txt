@@ -18,7 +18,7 @@ option(BUILD_TOSA_SERIALIZATION_PARSER
         generate SPIRV." ON)
 option(BUILD_TOSA_2_SPIRV_GENERATOR
        "Build the tosa2spirv generator. This command line tool generates SPIRV binary from a TOSA \
-        Flatbuffers file." OFF)
+        Flatbuffers file." ON)
 option(BUILD_VGF_WRITER
        "Build the VGF Writer library. A wrapper of the VGF Encoder allowing users to create .vgf files \
         with tosa2spirv output." ON)
