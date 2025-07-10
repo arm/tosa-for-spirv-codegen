@@ -52,7 +52,7 @@ TEST(TOSA2SPIRV_PARSER, Equal)
                                       "main",
                                       std::move(ops),
                                       std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{}, // empty shapes vector
+                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
                                       {input1Name, input2Name},
                                       {outputName});
 
@@ -103,7 +103,7 @@ TEST(TOSA2SPIRV_PARSER, Greater)
                                       "main",
                                       std::move(ops),
                                       std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{}, // empty shapes vector
+                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
                                       {input1Name, input2Name},
                                       {outputName});
 
@@ -154,7 +154,7 @@ TEST(TOSA2SPIRV_PARSER, GreaterEqual)
                                       "main",
                                       std::move(ops),
                                       std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{}, // empty shapes vector
+                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
                                       {input1Name, input2Name},
                                       {outputName});
 

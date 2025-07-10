@@ -90,8 +90,13 @@ TEST(TOSA2SPIRV_PARSER, Resize)
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("resize", "main", std::move(ops), std::move(tensors),
-        std::vector<std::unique_ptr<TosaSerializationShape>>{}, {inputName}, {outputName});
+    TosaSerializationBasicBlock block("resize",
+                                      "main",
+                                      std::move(ops),
+                                      std::move(tensors),
+                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
+                                      {inputName},
+                                      {outputName});
 
     TosaSerializationParser parser(&block);
     auto binarySpirv = parser.GenerateSPIRV("main");

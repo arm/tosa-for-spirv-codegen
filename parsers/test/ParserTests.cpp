@@ -252,8 +252,9 @@ TEST(TOSA2SPIRV_PARSER, UnsupportedOperator)
 
     // Create a tosa single-op basic block
     // The raw pointers of operators will be deleted by the destructor of the block
-    TosaSerializationBasicBlock
-        block("unknown", "main", std::move(ops), {}, std::vector<std::unique_ptr<TosaSerializationShape>>{}, {}, {});
+    TosaSerializationBasicBlock block("unknown", "main", std::move(ops), {},
+        std::vector<std::unique_ptr<TosaSerializationShape>>{}, {}, {});
+
 
     TosaSerializationParser parser(&block);
 
@@ -1461,8 +1462,13 @@ TEST(TOSA2SPIRV_PARSER, EmptyTensor)
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock
-        block("add", "main", std::move(ops), std::move(tensors), {}, {input1Name, input2Name}, {outputName});
+    TosaSerializationBasicBlock block("add",
+                                      "main",
+                                      std::move(ops),
+                                      std::move(tensors),
+                                      {},
+                                      {input1Name, input2Name},
+                                      {outputName});
 
     TosaSerializationParser parser(&block);
 

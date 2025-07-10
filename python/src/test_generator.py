@@ -106,7 +106,7 @@ class FileWriter:
         try:
             result = subprocess.run(
                 [
-                    "clang-format-11",
+                    "clang-format",
                     "-i",
                     "--style=file",
                     self.file_dir,
@@ -615,7 +615,7 @@ class TestGenerator:
                                                                                                           argument.name, self.get_dtype(datatype), valuesStr)
         tensor_line += "    tensors.push_back(std::move({}Tensor));\n".format(argument.name)
         if self.is_constant_input(argument):
-            tensor_line += '    auto {}Op = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST, Attribute::Attribute_NONE, nullptr, std::vector<std::string>{{}}, std::vector<std::string>{{ {}Name }});\n'.format(argument.name, argument.name)
+            tensor_line += '    auto {}Op = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST, Attribute::Attribute_NONE, nullptr, std::vector<std::string>{{}}, std::vector<std::string>{{ {}Name }}, TosaOpLocation{{}});\n'.format(argument.name, argument.name)
             tensor_line += '    ops.push_back(std::move({}Op));\n'.format(argument.name)
 
         return [name_line, shape_line, tensor_line]
@@ -1068,7 +1068,7 @@ class TestGenerator:
                 file.append("{} }}".format(output_name))
             else:
                 file.append("{}, ".format(output_name))
-        file.append(");\n")
+        file.append(", TosaOpLocation{});\n")
 
         file.write("ops.push_back(std::move(op));\n")
 
@@ -1084,7 +1084,7 @@ class TestGenerator:
         file.write(first_line + "\"{}\",\n".format(op.name.lower()))
         file.write(' ' * len(first_line) + "\"main\",\n")
         file.write(' ' * len(first_line) + "std::move(ops),\n")
-        file.write(' ' * len(first_line) + "std::move(tensors),\n")
+        file.write(' ' * len(first_line) + "std::move(tensors),std::vector<std::unique_ptr<TosaSerializationShape>>{},\n")
         file.write(' ' * len(first_line) + "{ ")
         for input_name in dynamic_input_names:
             if input_name == dynamic_input_names[-1]:

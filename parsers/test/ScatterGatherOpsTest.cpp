@@ -54,7 +54,7 @@ TEST(TOSA2SPIRV_PARSER, Gather)
                                       "main",
                                       std::move(ops),
                                       std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{}, //empty shape vector
+                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
                                       {valuesName, indicesName},
                                       {outputName});
 
@@ -117,7 +117,7 @@ TEST(TOSA2SPIRV_PARSER, Scatter)
                                       "main",
                                       std::move(ops),
                                       std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{}, // empty shapes vector
+                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
                                       {values_inName, indicesName, inputName},
                                       {values_outName});
 
