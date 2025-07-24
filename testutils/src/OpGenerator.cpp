@@ -159,7 +159,7 @@ tosa::Attribute GetAttributeFromInstruction(const spirv::Instruction& attributeI
     }
 }
 
-std::string GetTensorString(tosa::Tensor& tensor)
+std::string GetTensorString(const tosa::Tensor& tensor)
 {
     std::string result;
     result += "{DataType::" + GetDataTypeName(tensor.GetDataType()) + ", {";
@@ -174,10 +174,10 @@ std::string GetTensorString(tosa::Tensor& tensor)
     return result;
 }
 
-std::string GetAttributeString(tosa::Attribute& attribute)
+std::string GetAttributeString(const tosa::Attribute& attribute)
 {
     std::string result;
-    result += "{{";
+    result += "{std::initializer_list<uint32_t>{";
     // Print data initializer list
     for (size_t dataIdx = 0; dataIdx < attribute.GetData().size(); ++dataIdx)
     {
@@ -244,6 +244,14 @@ bool defaultOpComparator(const TosaOperator& lhs, const TosaOperator& rhs)
     {
         return lhs.inputs.size() < rhs.inputs.size();
     }
+    if (lhs.graphConstants.size() != rhs.graphConstants.size())
+    {
+        return lhs.graphConstants.size() < rhs.graphConstants.size();
+    }
+    if (lhs.tensorConstants.size() != rhs.tensorConstants.size())
+    {
+        return lhs.tensorConstants.size() < rhs.tensorConstants.size();
+    }
     if (lhs.outputs.size() != rhs.outputs.size())
     {
         return lhs.outputs.size() < rhs.outputs.size();
@@ -257,6 +265,18 @@ bool defaultOpComparator(const TosaOperator& lhs, const TosaOperator& rhs)
     {
         if (lhs.inputs[idx].GetNumElements() != rhs.inputs[idx].GetNumElements())
             return lhs.inputs[idx].GetNumElements() < rhs.inputs[idx].GetNumElements();
+    }
+    for (size_t idx = 0; idx < lhs.graphConstants.size(); ++idx)
+    {
+        if (lhs.graphConstants[idx].GetNumElements() != rhs.graphConstants[idx].GetNumElements())
+            return lhs.graphConstants[idx].GetNumElements() < rhs.graphConstants[idx].GetNumElements();
+    }
+    for (size_t idx = 0; idx < lhs.tensorConstants.size(); ++idx)
+    {
+        if (lhs.tensorConstants[idx].GetTensor().GetNumElements() !=
+            rhs.tensorConstants[idx].GetTensor().GetNumElements())
+            return lhs.tensorConstants[idx].GetTensor().GetNumElements() <
+                   rhs.tensorConstants[idx].GetTensor().GetNumElements();
     }
     for (size_t idx = 0; idx < lhs.outputs.size(); ++idx)
     {
@@ -278,33 +298,7 @@ std::vector<std::string> Spirv2tosa(const std::shared_ptr<spirv::Module>& module
 
     for (auto op : operators)
     {
-        std::string opString = "const OperatorEnum op = OperatorEnum::" + GetEnumName(op.op) + ";\n";
-        opString += "const std::vector<Tensor> inputs {";
-        for (size_t inputIdx = 0; inputIdx < op.inputs.size(); ++inputIdx)
-        {
-            auto input = op.inputs[inputIdx];
-            opString += GetTensorString(input);
-            if (inputIdx < op.inputs.size() - 1)
-                opString += ", ";
-        }
-        opString += "};\nconst std::vector<Tensor> outputs {";
-        for (size_t outputIdx = 0; outputIdx < op.outputs.size(); ++outputIdx)
-        {
-            auto output = op.outputs[outputIdx];
-            opString += GetTensorString(output);
-            if (outputIdx < op.outputs.size() - 1)
-                opString += ", ";
-        }
-        opString += "};\nconst std::vector<Attribute> attributes {";
-        for (size_t attributeIdx = 0; attributeIdx < op.attributes.size(); ++attributeIdx)
-        {
-            auto attribute = op.attributes[attributeIdx];
-            opString += GetAttributeString(attribute);
-            if (attributeIdx < op.attributes.size() - 1)
-                opString += ", ";
-        }
-        opString += "};";
-        result.push_back(opString);
+        result.push_back(OperatorToString(op));
     }
     return result;
 }
@@ -324,6 +318,181 @@ std::vector<TosaOperator> Spirv2operators(const std::shared_ptr<spirv::Module>& 
     return result;
 }
 
+std::string OperatorToString(const TosaOperator& op)
+{
+    std::string opString = "const OperatorEnum op = OperatorEnum::" + GetOperatorName(op.op) + ";\n";
+    opString += "const std::vector<Tensor> inputs {";
+    for (size_t inputIdx = 0; inputIdx < op.inputs.size(); ++inputIdx)
+    {
+        const auto& input = op.inputs[inputIdx];
+        opString += GetTensorString(input);
+        if (inputIdx < op.inputs.size() - 1)
+            opString += ", ";
+    }
+    opString += "};\nconst std::vector<Tensor> graphConstants {";
+    for (size_t constIdx = 0; constIdx < op.graphConstants.size(); ++constIdx)
+    {
+        const auto& graphConst = op.graphConstants[constIdx];
+        opString += GetTensorString(graphConst);
+        if (constIdx < op.graphConstants.size() - 1)
+            opString += ", ";
+    }
+    opString += "};\nconst std::vector<Attribute> tensorConstants {";
+    for (size_t tensorIdx = 0; tensorIdx < op.tensorConstants.size(); ++tensorIdx)
+    {
+        const auto& tensorConst = op.tensorConstants[tensorIdx];
+        opString += GetAttributeString(tensorConst);
+        if (tensorIdx < op.tensorConstants.size() - 1)
+            opString += ", ";
+    }
+    opString += "};\nconst std::vector<Tensor> outputs {";
+    for (size_t outputIdx = 0; outputIdx < op.outputs.size(); ++outputIdx)
+    {
+        const auto& output = op.outputs[outputIdx];
+        opString += GetTensorString(output);
+        if (outputIdx < op.outputs.size() - 1)
+            opString += ", ";
+    }
+    opString += "};\nconst std::vector<Attribute> attributes {";
+    for (size_t attributeIdx = 0; attributeIdx < op.attributes.size(); ++attributeIdx)
+    {
+        const auto& attribute = op.attributes[attributeIdx];
+        opString += GetAttributeString(attribute);
+        if (attributeIdx < op.attributes.size() - 1)
+            opString += ", ";
+    }
+    opString += "};";
+    return opString;
+}
+
+std::string OperatorToGraphDefinition(const TosaOperator& op,
+                                      std::string graphVarName,
+                                      std::string inputsName,
+                                      std::string graphConstsName,
+                                      std::string tensorConstsName,
+                                      std::string outputsName,
+                                      std::string attributesName)
+{
+    std::string operatorLine =
+        "const auto& graphRes = " + graphVarName + ".Add" + tosa::GetOperatorName(op.op) + "Operator(";
+
+    std::string opString;
+    if (op.op == tosa::OperatorEnum::Concat)
+    {
+        operatorLine += "{";
+    }
+    // Adding input tensors
+    for (size_t inputIdx = 0; inputIdx < op.inputs.size(); ++inputIdx)
+    {
+        // Adding tensor to graph
+        opString += "const auto& input" + std::to_string(inputIdx + 1) + " = " + graphVarName + ".AddInput(";
+        if (inputsName != "")
+        {
+            opString += inputsName + "[" + std::to_string(inputIdx) + "], ";
+        }
+        else
+        {
+            opString += "Tensor" + GetTensorString(op.inputs[inputIdx]) + ", ";
+        }
+        opString += std::to_string(inputIdx) + ");\n";
+        // Adding tensor name to Add*Operator
+        operatorLine += "input" + std::to_string(inputIdx + 1);
+        if (op.op == tosa::OperatorEnum::Concat && inputIdx + 1 == op.inputs.size())
+        {
+            operatorLine += "}";
+        }
+        operatorLine += ", ";
+    }
+    // Adding graph constant inputs
+    for (size_t graphConstIdx = 0; graphConstIdx < op.graphConstants.size(); ++graphConstIdx)
+    {
+        // Adding tensor to graph
+        opString += "const auto& graphConstInput" + std::to_string(graphConstIdx + 1) + " = " + graphVarName +
+                    ".AddGraphConstant(";
+        if (graphConstsName != "")
+        {
+            opString += graphConstsName + "[" + std::to_string(graphConstIdx) + "]);\n";
+        }
+        else
+        {
+            opString += "Tensor" + GetTensorString(op.graphConstants[graphConstIdx]) + ");\n";
+        }
+        // Adding tensor name to Add*Operator
+        operatorLine += "graphConstInput" + std::to_string(graphConstIdx + 1) + ", ";
+    }
+    // Adding tensor constant inputs
+    for (size_t tensorConstIdx = 0; tensorConstIdx < op.tensorConstants.size(); ++tensorConstIdx)
+    {
+        // Adding attribute to graph
+        opString += "const auto& tensorConstInput" + std::to_string(tensorConstIdx + 1) + " = " + graphVarName +
+                    ".AddTensorConstant(";
+        if (tensorConstsName != "")
+        {
+            opString += tensorConstsName + "[" + std::to_string(tensorConstIdx) + "]);\n";
+        }
+        else
+        {
+            opString += "Attribute" + GetAttributeString(op.tensorConstants[tensorConstIdx]) + ");\n";
+        }
+        // Adding attribute name to Add*Operator
+        operatorLine += "tensorConstInput" + std::to_string(tensorConstIdx + 1) + ", ";
+    }
+    opString += "\n";
+
+    // Adding attributes
+    for (size_t attributeIdx = 0; attributeIdx < op.attributes.size(); ++attributeIdx)
+    {
+        // Creating attribute variable
+        opString += "const auto& attribute" + std::to_string(attributeIdx + 1) + " = ";
+        if (attributesName != "")
+        {
+            opString += attributesName + "[" + std::to_string(attributeIdx) + "];\n";
+        }
+        else
+        {
+            opString += "Attribute" + GetAttributeString(op.attributes[attributeIdx]) + ";\n";
+        }
+        // Adding attribute name to Add*Operator
+        operatorLine += "attribute" + std::to_string(attributeIdx + 1) + ", ";
+    }
+    opString += "\n";
+
+    // Adding outputs to the graph
+    for (size_t outputIdx = 0; outputIdx < op.outputs.size(); ++outputIdx)
+    {
+        // Creating output variable
+        opString += "const auto& output" + std::to_string(outputIdx + 1) + " = ";
+        if (outputsName != "")
+        {
+            opString += outputsName + "[" + std::to_string(outputIdx) + "];\n";
+        }
+        else
+        {
+            opString += "Tensor" + GetTensorString(op.outputs[outputIdx]) + ";\n";
+        }
+        // Adding output name to Add*Operator
+        operatorLine += "output" + std::to_string(outputIdx + 1);
+        if ((outputIdx + 1) != op.outputs.size())
+            operatorLine += ", ";
+    }
+    opString += operatorLine + ");\n";
+
+    // Binding output tensors to graph outputs
+    if (op.outputs.size() > 1)
+    {
+        for (size_t idx = 0; idx < op.outputs.size(); ++idx)
+            opString +=
+                graphVarName + ".AddOutput(graphRes[" + std::to_string(idx) + "], " + std::to_string(idx) + ");\n";
+    }
+    else
+    {
+        opString += graphVarName + ".AddOutput(graphRes, 0);\n";
+    }
+
+    opString += graphVarName + ".FinalizeGraph();";
+    return opString;
+}
+
 TosaOperator GetTosaOperator(const spirv::Instruction& instruction)
 {
     if (instruction.GetOpCode() != spv::Op::OpExtInst)
@@ -338,6 +507,8 @@ TosaOperator GetTosaOperator(const spirv::Instruction& instruction)
     TosaOperator tosaOp;
 
     tosaOp.op = GetOperatorEnum(static_cast<TOSAInstructions>(instruction.m_Operands[3].m_LiteralWord));
+
+    const tosa::OperatorDefinition& tosaOpDefinition = tosa::GetOperatorDefinition(tosaOp.op);
 
     // Processing output
     if (instruction.m_Operands[0].m_Type != spirv::INSTRUCTION_POINTER)
@@ -356,28 +527,61 @@ TosaOperator GetTosaOperator(const spirv::Instruction& instruction)
     {
         tosaOp.outputs.push_back(GetTensorFromInstruction(*outputInstruction));
     }
+    // Checking outputs are correct
+    if (tosaOp.outputs.size() != tosaOpDefinition.m_OutputSize)
+    {
+        std::string errText = "GetTosaOperator: Invalid output size for operator ";
+        errText += tosa::GetOperatorName(tosaOp.op);
+        throw std::invalid_argument{errText};
+    }
 
     // Processing input and attributes
+    if ((instruction.m_Operands.size() - 4) < (tosaOpDefinition.m_InputSize + tosaOpDefinition.m_AttributeSize))
+    {
+        throw std::invalid_argument{"GetTosaOperator: Invalid input/attribute operand count"};
+    }
+    size_t lastAttributeIdx = 0;
     for (size_t idx = 4; idx < instruction.m_Operands.size(); ++idx)
     {
         const auto currentInst = instruction.m_Operands[idx].m_InstructionPtr;
-        if (currentInst->GetOpCode() == spv::Op::OpGraphInputARM ||
-            currentInst->GetOpCode() == spv::Op::OpGraphConstantARM || currentInst->GetOpCode() == spv::Op::OpExtInst)
-        {
-            // OpGraphInputARM Input Tensor format: OpTypeTensorARM, RES_ID, OpConstant (input index)
-            tosaOp.inputs.push_back(GetTensorFromInstruction(*currentInst->m_Operands[0].m_InstructionPtr));
-        }
-        else
+
+        if (lastAttributeIdx < tosaOpDefinition.m_AttributeSize)
         {
             try
             {
                 tosaOp.attributes.push_back(GetAttributeFromInstruction(*currentInst));
             }
-            catch (std::invalid_argument error)
+            catch (std::invalid_argument& error)
             {
                 std::string errText = "GetTosaOperator: Operand parsing error: ";
                 errText += error.what();
                 throw std::invalid_argument{errText};
+            }
+            ++lastAttributeIdx;
+        }
+        else
+        {
+            if (currentInst->GetOpCode() == spv::Op::OpGraphInputARM || currentInst->GetOpCode() == spv::Op::OpExtInst)
+            {
+                // OpGraphInputARM Input Tensor format: OpTypeTensorARM, RES_ID, OpConstant (input index)
+                tosaOp.inputs.push_back(GetTensorFromInstruction(*currentInst->m_Operands[0].m_InstructionPtr));
+            }
+            else if (currentInst->GetOpCode() == spv::Op::OpGraphConstantARM)
+            {
+                tosaOp.graphConstants.push_back(GetTensorFromInstruction(*currentInst->m_Operands[0].m_InstructionPtr));
+            }
+            else
+            {
+                try
+                {
+                    tosaOp.tensorConstants.push_back(GetAttributeFromInstruction(*currentInst));
+                }
+                catch (std::invalid_argument& error)
+                {
+                    std::string errText = "GetTosaOperator: Tensor Constant parsing error:";
+                    errText += error.what();
+                    throw std::invalid_argument{errText};
+                }
             }
         }
     }

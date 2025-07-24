@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// THIS FILE IS GENERATED WITH TOSA 1.0.0. DO NOT EDIT!
+// THIS FILE IS GENERATED WITH TOSA 1.0.1. DO NOT EDIT!
 // See tosa2spirv/python/code_generator.py and README
 
 #include <AssemblyUtils.hpp>
@@ -52,11 +52,14 @@ TEST(TOSA2SPIRV_PARSER, Cast)
                                       {outputName});
 
     TosaSerializationParser parser(&block);
-    auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
+    const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "CAST", outputStr));
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "CAST", outputStr));
+    testutils::CheckModule(spirvModule,
+                           TOSACAST,
+                           {{DataType::bool_t, {1, 1, 1, 1}}},
+                           {},
+                           {},
+                           {{DataType::int8_t, {1, 1, 1, 1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, Rescale)
@@ -164,27 +167,20 @@ TEST(TOSA2SPIRV_PARSER, Rescale)
                                       {outputName});
 
     TosaSerializationParser parser(&block);
-    auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
+    const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "RESCALE", outputStr));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 6, "uint"));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 7, "uchar"));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 8, "uchar"));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "RESCALE", outputStr, 9, "uchar"));
-
-    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 0));
-
-    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "RESCALE", outputStr, 1, 1));
-
-    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 2));
-
-    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 3));
-
-    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "RESCALE", outputStr, 1, 4));
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "RESCALE", outputStr));
+    testutils::CheckModule(spirvModule,
+                           TOSARESCALE,
+                           {{DataType::int8_t, {1, 1, 1, 1}}},
+                           {},
+                           {{{1}, DataType::bool_t, {1}},
+                            {{1}, DataType::int32_t, {1}},
+                            {{1}, DataType::bool_t, {1}},
+                            {{1}, DataType::bool_t, {1}},
+                            {{1}, DataType::bool_t, {1}},
+                            {{1}, DataType::int32_t, {1}},
+                            {{1}, DataType::int8_t, {1}},
+                            {{1}, DataType::int8_t, {1}},
+                            {{1}, DataType::int8_t, {1}}},
+                           {{DataType::int8_t, {1, 1, 1, 1}}});
 }

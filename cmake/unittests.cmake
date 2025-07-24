@@ -37,9 +37,7 @@ target_link_libraries(tosa_for_spirv_tests PRIVATE
   tosa2spirv
   module_comparator
   testutils
-  GTest::gtest_main
-  absl::strings absl::base absl::flags absl::flags_parse
-  absl::status absl::str_format absl::hash)
+  GTest::gtest_main)
 
 find_library(SPIRV_TOOLS_LIBRARY_PATH
              NAMES libSPIRV-Tools.a
@@ -96,25 +94,6 @@ if (BUILD_TOSA_2_SPIRV_GENERATOR)
   endif()
 
   target_link_libraries(tosa_for_spirv_tests PRIVATE ${VGF_ENCODER_LIBRARY_PATH} vgfWriter)
-endif()
-
-if (EFFCEE_BUILD_PATH AND EXISTS ${EFFCEE_BUILD_PATH}/effcee/libeffcee.a)
-  add_library(effcee STATIC IMPORTED)
-  set_target_properties(effcee PROPERTIES IMPORTED_LOCATION
-                        ${EFFCEE_BUILD_PATH}/effcee/libeffcee.a)
-
-  target_link_options(effcee INTERFACE
-    $<$<LINK_LANGUAGE:CXX>:LINKER:-whole-archive>
-    $<$<LINK_LANGUAGE:CXX>:LINKER:-no-whole-archive>)
-
-  target_link_libraries(tosa_for_spirv_tests PRIVATE effcee)
-endif()
-
-if (EXISTS ${EFFCEE_BUILD_PATH}/third_party/re2/libre2.a)
-  add_library(re2 STATIC IMPORTED)
-  set_target_properties(re2 PROPERTIES IMPORTED_LOCATION
-                        ${EFFCEE_BUILD_PATH}/third_party/re2/libre2.a)
-  target_link_libraries(tosa_for_spirv_tests PRIVATE re2)
 endif()
 
 # Don't run unit tests automatically if it is an Android build.

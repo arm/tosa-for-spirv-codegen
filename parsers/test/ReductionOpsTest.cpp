@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// THIS FILE IS GENERATED WITH TOSA 1.0.0. DO NOT EDIT!
+// THIS FILE IS GENERATED WITH TOSA 1.0.1. DO NOT EDIT!
 // See tosa2spirv/python/code_generator.py and README
 
 #include <AssemblyUtils.hpp>
@@ -56,13 +56,14 @@ TEST(TOSA2SPIRV_PARSER, ReduceAll)
                                       {outputName});
 
     TosaSerializationParser parser(&block);
-    auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
+    const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "REDUCE_ALL", outputStr));
-
-    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "REDUCE_ALL", outputStr, 1, 0));
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "REDUCE_ALL", outputStr));
+    testutils::CheckModule(spirvModule,
+                           TOSAREDUCE_ALL,
+                           {{DataType::bool_t, {1, 1, 1, 1}}},
+                           {},
+                           {{{1}, DataType::int32_t, {1}}},
+                           {{DataType::bool_t, {1, 1, 1, 1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, ReduceAny)
@@ -107,13 +108,14 @@ TEST(TOSA2SPIRV_PARSER, ReduceAny)
                                       {outputName});
 
     TosaSerializationParser parser(&block);
-    auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
+    const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "REDUCE_ANY", outputStr));
-
-    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "REDUCE_ANY", outputStr, 1, 0));
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "REDUCE_ANY", outputStr));
+    testutils::CheckModule(spirvModule,
+                           TOSAREDUCE_ANY,
+                           {{DataType::bool_t, {1, 1, 1, 1}}},
+                           {},
+                           {{{1}, DataType::int32_t, {1}}},
+                           {{DataType::bool_t, {1, 1, 1, 1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, ReduceMax)
@@ -159,15 +161,14 @@ TEST(TOSA2SPIRV_PARSER, ReduceMax)
                                       {outputName});
 
     TosaSerializationParser parser(&block);
-    auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
+    const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "REDUCE_MAX", outputStr));
-
-    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "REDUCE_MAX", outputStr, 1, 0));
-
-    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "REDUCE_MAX", outputStr, 1, 1));
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "REDUCE_MAX", outputStr));
+    testutils::CheckModule(spirvModule,
+                           TOSAREDUCE_MAX,
+                           {{DataType::int8_t, {1, 1, 1, 1}}},
+                           {},
+                           {{{1}, DataType::int32_t, {1}}, {{1}, DataType::int32_t, {1}}},
+                           {{DataType::int8_t, {1, 1, 1, 1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, ReduceMin)
@@ -213,15 +214,14 @@ TEST(TOSA2SPIRV_PARSER, ReduceMin)
                                       {outputName});
 
     TosaSerializationParser parser(&block);
-    auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
+    const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "REDUCE_MIN", outputStr));
-
-    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "REDUCE_MIN", outputStr, 1, 0));
-
-    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "REDUCE_MIN", outputStr, 1, 1));
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "REDUCE_MIN", outputStr));
+    testutils::CheckModule(spirvModule,
+                           TOSAREDUCE_MIN,
+                           {{DataType::int8_t, {1, 1, 1, 1}}},
+                           {},
+                           {{{1}, DataType::int32_t, {1}}, {{1}, DataType::int32_t, {1}}},
+                           {{DataType::int8_t, {1, 1, 1, 1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, ReduceProduct)
@@ -266,13 +266,14 @@ TEST(TOSA2SPIRV_PARSER, ReduceProduct)
                                       {outputName});
 
     TosaSerializationParser parser(&block);
-    auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
+    const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float16_t, "REDUCE_PRODUCT", outputStr));
-
-    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "REDUCE_PRODUCT", outputStr, 1, 0));
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float16_t, "REDUCE_PRODUCT", outputStr));
+    testutils::CheckModule(spirvModule,
+                           TOSAREDUCE_PRODUCT,
+                           {{DataType::float16_t, {1, 1, 1, 1}}},
+                           {},
+                           {{{1}, DataType::int32_t, {1}}},
+                           {{DataType::float16_t, {1, 1, 1, 1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, ReduceSum)
@@ -317,11 +318,12 @@ TEST(TOSA2SPIRV_PARSER, ReduceSum)
                                       {outputName});
 
     TosaSerializationParser parser(&block);
-    auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
+    const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "REDUCE_SUM", outputStr));
-
-    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "REDUCE_SUM", outputStr, 1, 0));
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "REDUCE_SUM", outputStr));
+    testutils::CheckModule(spirvModule,
+                           TOSAREDUCE_SUM,
+                           {{DataType::int32_t, {1, 1, 1, 1}}},
+                           {},
+                           {{{1}, DataType::int32_t, {1}}},
+                           {{DataType::int32_t, {1, 1, 1, 1}}});
 }

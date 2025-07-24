@@ -252,9 +252,8 @@ TEST(TOSA2SPIRV_PARSER, UnsupportedOperator)
 
     // Create a tosa single-op basic block
     // The raw pointers of operators will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("unknown", "main", std::move(ops), {},
-        std::vector<std::unique_ptr<TosaSerializationShape>>{}, {}, {});
-
+    TosaSerializationBasicBlock
+        block("unknown", "main", std::move(ops), {}, std::vector<std::unique_ptr<TosaSerializationShape>>{}, {}, {});
 
     TosaSerializationParser parser(&block);
 
@@ -899,15 +898,21 @@ TEST(TOSA2SPIRV_PARSER, IdentityConv2dIdentity)
 
     TosaSerializationParser parser(block.get());
 
-    auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, false));
+    const auto &spirvModule = parser.GenerateSPIRVModule("main");
 
-    testutils::CheckInputTensor({1, 7, 7, 1}, DataType::int8_t, "CONV2D", outputStr);
-    testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "CONV2D", outputStr, 0);
-    testutils::CheckConstCompositeTensor({2, 2}, "CONV2D", outputStr, 1);
-    testutils::CheckConstCompositeTensor({1, 1}, "CONV2D", outputStr, 2);
-    testutils::CheckConstant(DataType::int32_t, "CONV2D", outputStr, 1, 3);
-    testutils::CheckBoolConstant(DataType::bool_t, "CONV2D", outputStr, true, 4);
+    testutils::CheckModule(spirvModule,
+                           TOSACONV2D,
+                           {{DataType::int8_t, {1, 7, 7, 1}}},
+                           {{DataType::int8_t, {1, 3, 3, 1}}},
+                           {{{1, 1, 1, 1}, DataType::int32_t, {1}},
+                            {{2, 2}, DataType::int32_t, {1}},
+                            {{1, 1}, DataType::int32_t, {1}},
+                            {{1}, DataType::int32_t, {1}},
+                            {{1}, DataType::bool_t, {1}},
+                            {{0}, DataType::int32_t, {1}},
+                            {{1}, DataType::int8_t, {1}},
+                            {{1}, DataType::int8_t, {1}}},
+                           {{DataType::int8_t, {1, 3, 3, 1}}});
 }
 
 // Multi Layer CONV2D - IDENTITY - RESCALE - CONV2D reusing the weight and bias GraphConstantId
@@ -1462,13 +1467,8 @@ TEST(TOSA2SPIRV_PARSER, EmptyTensor)
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("add",
-                                      "main",
-                                      std::move(ops),
-                                      std::move(tensors),
-                                      {},
-                                      {input1Name, input2Name},
-                                      {outputName});
+    TosaSerializationBasicBlock
+        block("add", "main", std::move(ops), std::move(tensors), {}, {input1Name, input2Name}, {outputName});
 
     TosaSerializationParser parser(&block);
 

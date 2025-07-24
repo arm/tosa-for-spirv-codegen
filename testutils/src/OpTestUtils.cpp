@@ -5,508 +5,182 @@
 
 #include <OpTestUtils.hpp>
 
-#include <regex>
-#include <sstream>
-#include <stack>
-
-#include <effcee/effcee.h>
+#include <ValidationUtils.hpp>
 
 namespace testutils
 {
 
-std::string ExpandValues(const std::vector<int>& values, const std::string& dataType)
+bool CheckModule(const std::shared_ptr<spirv::Module>& module,
+                 const TOSAInstructions op,
+                 const std::vector<tosa::Tensor>& inputs,
+                 const std::vector<tosa::Tensor>& graphConstants,
+                 const std::vector<tosa::Attribute>& tensorConstants,
+                 const std::vector<tosa::Tensor>& outputs,
+                 const std::vector<tosa::Attribute>& attributes)
 {
-    std::string result;
-
-    for (const int i : values)
+    // Validating Module SPIR-V
+    const auto binary = tosa2spirv::WriteToBinary(module);
+    if (testutils::DisassembleSPIRV(binary, true) == "")
     {
-        if (dataType == "bool")
+        return false;
+    }
+
+    // Validating module content
+    std::vector<tosa::Attribute> jointAttributes;
+    if (!attributes.empty())
+    {
+        jointAttributes.insert(jointAttributes.end(), attributes.begin(), attributes.end());
+    }
+    jointAttributes.insert(jointAttributes.end(), tensorConstants.begin(), tensorConstants.end());
+
+    const auto& opInstruction = module->GetInstructionsOfType(spv::Op::OpExtInst).first;
+
+    EXPECT_TRUE(opInstruction != module->GetSpirvGraph().end() && opInstruction->m_Operands.size() >= 4);
+
+    const auto& opCodeInstruction = opInstruction->m_Operands[3];
+    EXPECT_TRUE(opCodeInstruction.m_Type == spirv::LITERAL_WORD &&
+                static_cast<TOSAInstructions>(opCodeInstruction.m_LiteralWord) == op);
+
+    EXPECT_EQ(opInstruction->m_Operands[0].m_Type, spirv::INSTRUCTION_POINTER);
+    const auto& outputInstruction = opInstruction->m_Operands[0].m_InstructionPtr;
+
+    EXPECT_TRUE(outputs.size() == 1 || outputs.size() == 2);
+    if (outputs.size() == 1)
+    {
+        CheckTensorType(outputInstruction,
+                        outputs[0].GetDataType(),
+                        outputs[0].GetTensorShape().size(),
+                        outputs[0].GetTensorShape());
+    }
+    else if (outputs.size() == 2)
+    {
+        EXPECT_EQ(outputInstruction->GetOpCode(), spv::Op::OpTypeStruct);
+        const auto& output1 = outputInstruction->m_Operands[1];
+        const auto& output2 = outputInstruction->m_Operands[2];
+        EXPECT_TRUE(output1.m_Type == spirv::INSTRUCTION_POINTER && output2.m_Type == spirv::INSTRUCTION_POINTER);
+        CheckTensorType(output1.m_InstructionPtr,
+                        outputs[0].GetDataType(),
+                        outputs[0].GetTensorShape().size(),
+                        outputs[0].GetTensorShape());
+        CheckTensorType(output2.m_InstructionPtr,
+                        outputs[1].GetDataType(),
+                        outputs[1].GetTensorShape().size(),
+                        outputs[1].GetTensorShape());
+    }
+
+    size_t inputIdx = 0;
+    size_t graphConstIdx = 0;
+    size_t tensorConstIdx = 0;
+    for (size_t opIdx = 4; opIdx < opInstruction->m_Operands.size(); ++opIdx)
+    {
+        EXPECT_EQ(opInstruction->m_Operands[opIdx].m_Type, spirv::INSTRUCTION_POINTER);
+        const auto& currentInst = opInstruction->m_Operands[opIdx].m_InstructionPtr;
+
+        if (currentInst->GetOpCode() == spv::Op::OpGraphInputARM || currentInst->GetOpCode() == spv::Op::OpExtInst)
         {
-            std::string str = (i == 1) ? "true" : "false";
-            result += "%" + str + ' ';
+            const auto& inputInstruction = currentInst->m_Operands[0].m_InstructionPtr;
+            const auto& currentInputTensor = inputs[inputIdx++];
+            CheckTensorType(inputInstruction,
+                            currentInputTensor.GetDataType(),
+                            currentInputTensor.GetTensorShape().size(),
+                            currentInputTensor.GetTensorShape());
+        }
+        else if (currentInst->GetOpCode() == spv::Op::OpGraphConstantARM)
+        {
+            const auto& graphConstInstruction = currentInst->m_Operands[0].m_InstructionPtr;
+            const auto& currentGraphConstTensor = graphConstants[graphConstIdx++];
+            CheckTensorType(graphConstInstruction,
+                            currentGraphConstTensor.GetDataType(),
+                            currentGraphConstTensor.GetTensorShape().size(),
+                            currentGraphConstTensor.GetTensorShape());
         }
         else
         {
-            result += "%" + dataType + "_" + std::to_string(i) + ' ';
-        }
-    }
-
-    return result;
-}
-
-std::string AddSpacers(const int index)
-{
-    std::string spacer;
-
-    for (int i = 0; i != index; ++i)
-    {
-        spacer += R"({{%\w+}} )";
-    }
-
-    return spacer;
-};
-
-std::string CreateEffceeCheckFromDataType(DataType dataType)
-{
-    switch (dataType)
-    {
-        // Note types are all signless in TOSA SPIRV so for example int8_t will always be uint8_t i.e. signedness = 0.
-        case DataType::int4_t: return R"(CHECK: [[DATATYPE:%\w+]] = OpTypeInt 4 0)";
-        case DataType::int8_t:
-        case DataType::uint8_t: return R"(CHECK: [[DATATYPE:%\w+]] = OpTypeInt 8 0)";
-        case DataType::int16_t:
-        case DataType::uint16_t: return R"(CHECK: [[DATATYPE:%\w+]] = OpTypeInt 16 0)";
-        case DataType::int32_t:
-        case DataType::uint32_t: return R"(CHECK: [[DATATYPE:%\w+]] = OpTypeInt 32 0)";
-        case DataType::float16_t: return R"(CHECK: [[DATATYPE:%\w+]] = OpTypeFloat 16)";
-        case DataType::float32_t: return R"(CHECK: [[DATATYPE:%\w+]] = OpTypeFloat 32)";
-        case DataType::bfloat16_t: return R"(CHECK: [[DATATYPE:%\w+]] = OpTypeFloat 16 BFLOAT16)";
-        case DataType::bool_t: return R"(CHECK: [[DATATYPE:%\w+]] = OpTypeBool)";
-        default: throw std::invalid_argument("Data type not recognised!");
-    }
-}
-
-static std::string CreateEffceeCheckFromDataTypeDAG(DataType dataType)
-{
-    switch (dataType)
-    {
-        // Note types are all signless in TOSA SPIRV so for example int8_t will always be uint8_t i.e. signedness = 0.
-        case DataType::int4_t: return R"(CHECK-DAG: [[DATATYPE:%\w+]] = OpTypeInt 4 0)";
-        case DataType::int8_t:
-        case DataType::uint8_t: return R"(CHECK-DAG: [[DATATYPE:%\w+]] = OpTypeInt 8 0)";
-        case DataType::int16_t:
-        case DataType::uint16_t: return R"(CHECK-DAG: [[DATATYPE:%\w+]] = OpTypeInt 16 0)";
-        case DataType::int32_t:
-        case DataType::uint32_t: return R"(CHECK-DAG: [[DATATYPE:%\w+]] = OpTypeInt 32 0)";
-        case DataType::float16_t: return R"(CHECK-DAG: [[DATATYPE:%\w+]] = OpTypeFloat 16)";
-        case DataType::float32_t: return R"(CHECK-DAG: [[DATATYPE:%\w+]] = OpTypeFloat 32)";
-        case DataType::bfloat16_t: return R"(CHECK-DAG: [[DATATYPE:%\w+]] = OpTypeFloat 16 BFLOAT16)";
-        case DataType::bool_t: return R"(CHECK-DAG: [[DATATYPE:%\w+]] = OpTypeBool)";
-        default: throw std::invalid_argument("Data type not recognised!");
-    }
-}
-
-static effcee::Result CheckInputTensorDAG(const std::vector<int>& values,
-                                          DataType dataType,
-                                          const std::string& instruction,
-                                          const std::string& goldenSPIRV)
-{
-    const std::string check = R"(
-        CHECK:      [[LENGTH:%\w+]] = OpConstant {{%\w+}} )" +
-                              std::to_string(values.size()) + R"(
-        CHECK-DAG:      [[ARRAY:%\w+]] = OpTypeArray {{%\w+}} [[LENGTH]]
-        )" + CreateEffceeCheckFromDataTypeDAG(dataType) +
-                              R"(
-        CHECK-DAG: [[CONST_COMP:%\w+]] = OpConstantComposite [[ARRAY]] )" +
-                              ExpandValues(values) + R"(
-        CHECK: [[INPUT_TYPE:%\w+]] = OpTypeTensorARM [[DATATYPE]] {{%\w+}} [[CONST_COMP]]
-        CHECK:      [[INPUT:%\w+]] = OpGraphInputARM [[INPUT_TYPE]]
-        CHECK:                       )" +
-                              instruction + R"({{.*}}[[INPUT]]
-    )";
-
-    return effcee::Match(goldenSPIRV, check);
-}
-
-static effcee::Result CheckInputTensorNonDAG(const std::vector<int>& values,
-                                             DataType dataType,
-                                             const std::string& instruction,
-                                             const std::string& goldenSPIRV)
-{
-    const std::string check = R"(
-        CHECK:      [[LENGTH:%\w+]] = OpConstant {{%\w+}} )" +
-                              std::to_string(values.size()) + R"(
-        CHECK-DAG:      [[ARRAY:%\w+]] = OpTypeArray {{%\w+}} [[LENGTH]]
-        )" + CreateEffceeCheckFromDataType(dataType) +
-                              R"(
-        CHECK-DAG: [[CONST_COMP:%\w+]] = OpConstantComposite [[ARRAY]] )" +
-                              ExpandValues(values) + R"(
-        CHECK: [[INPUT_TYPE:%\w+]] = OpTypeTensorARM [[DATATYPE]] {{%\w+}} [[CONST_COMP]]
-        CHECK:      [[INPUT:%\w+]] = OpGraphInputARM [[INPUT_TYPE]]
-        CHECK:                       )" +
-                              instruction + R"({{.*}}[[INPUT]]
-    )";
-
-    return effcee::Match(goldenSPIRV, check);
-}
-
-static effcee::Result CheckInputTensorConstant(const std::vector<int>& values,
-                                               DataType dataType,
-                                               const std::string& instruction,
-                                               const std::string& goldenSPIRV)
-{
-    const std::string check = R"(
-        CHECK-DAG:      [[LENGTH:%\w+]] = OpConstant {{%\w+}} )" +
-                              std::to_string(values.size()) + R"(
-        CHECK-DAG:      [[ARRAY:%\w+]] = OpTypeArray {{%\w+}} [[LENGTH]]
-        )" + CreateEffceeCheckFromDataTypeDAG(dataType) +
-                              R"(
-        CHECK-DAG: [[CONST_COMP:%\w+]] = OpConstantComposite [[ARRAY]] )" +
-                              ExpandValues(values) + R"(
-        CHECK: [[INPUT_TYPE:%\w+]] = OpTypeTensorARM [[DATATYPE]] {{%\w+}} [[CONST_COMP]]
-        CHECK: [[INPUT:%\w+]] = OpGraphConstantARM [[INPUT_TYPE]]
-        CHECK:                       )" +
-                              instruction + R"({{.*}}[[INPUT]]
-    )";
-
-    return effcee::Match(goldenSPIRV, check);
-}
-
-static effcee::Result CheckInputTensorDTypeFirst(const std::vector<int>& values,
-                                                 DataType dataType,
-                                                 const std::string& instruction,
-                                                 const std::string& goldenSPIRV)
-{
-    const std::string check = CreateEffceeCheckFromDataType(dataType) + R"(
-        CHECK:      [[LENGTH:%\w+]] = OpConstant {{%\w+}} )" +
-                              std::to_string(values.size()) + R"(
-        CHECK-DAG:      [[ARRAY:%\w+]] = OpTypeArray {{%\w+}} [[LENGTH]]
-        CHECK-DAG: [[CONST_COMP:%\w+]] = OpConstantComposite [[ARRAY]] )" +
-                              ExpandValues(values) + R"(
-        CHECK: [[INPUT_TYPE:%\w+]] = OpTypeTensorARM [[DATATYPE]] {{%\w+}} [[CONST_COMP]]
-        CHECK:      [[INPUT:%\w+]] = OpGraphInputARM [[INPUT_TYPE]]
-        CHECK:                       )" +
-                              instruction + R"({{.*}}[[INPUT]]
-    )";
-
-    return effcee::Match(goldenSPIRV, check);
-}
-
-bool CheckInputTensor(const std::vector<int>& values,
-                      DataType dataType,
-                      const std::string& instruction,
-                      const std::string& goldenSPIRV)
-{
-
-    auto resultDAG = CheckInputTensorDAG(values, dataType, instruction, goldenSPIRV);
-    auto resultNonDAG = CheckInputTensorNonDAG(values, dataType, instruction, goldenSPIRV);
-    auto resultDTypeFirst = CheckInputTensorDTypeFirst(values, dataType, instruction, goldenSPIRV);
-    auto resultConstant = CheckInputTensorConstant(values, dataType, instruction, goldenSPIRV);
-
-    return (resultDAG.message().empty() || resultNonDAG.message().empty() || resultDTypeFirst.message().empty() ||
-            resultConstant.message().empty());
-}
-
-std::string GetLastInstructionIDs(const std::string& text, const std::string& instruction)
-{
-    std::string result;
-
-    // Create a regex pattern with the specified instruction
-    std::string pattern = instruction + R"(\s+((%\w+\s*)+(?=\n)))";
-    std::regex instructionRegex(pattern);
-    std::smatch match;
-    std::string::const_iterator searchStart(text.cbegin());
-    std::string lastMatch;
-
-    // Search through the text for all occurrences of the specified instruction
-    while (std::regex_search(searchStart, text.cend(), match, instructionRegex))
-    {
-        lastMatch = match[1];               // Capture the entire match
-        searchStart = match.suffix().first; // Move the search start position forward
-    }
-
-    // If we found a match, extract the IDs
-    if (!lastMatch.empty())
-    {
-        std::regex idRegex(R"(%\w+)");
-        std::sregex_iterator it(lastMatch.begin(), lastMatch.end(), idRegex);
-        std::sregex_iterator end;
-        while (it != end)
-        {
-            result += " "; // Add a space between IDs
-            result += it->str();
-            ++it;
-        }
-    }
-
-    return result;
-}
-
-static effcee::Result CheckOutputTensorNonDAG(const std::vector<int>& values,
-                                              DataType dataType,
-                                              const std::string& instruction,
-                                              const std::string& goldenSPIRV)
-{
-    const std::string check = R"(
-        CHECK:      [[LENGTH_SHAPE_ARRAY:%\w+]] = OpConstant %uint )" +
-                              std::to_string(values.size()) + R"(
-        )" + CreateEffceeCheckFromDataType(dataType) +
-                              R"(
-        CHECK:       [[ARRAY:%\w+]] = OpTypeArray %uint [[LENGTH_SHAPE_ARRAY]]
-        CHECK:  [[CONST_COMP:%\w+]] = OpConstantComposite [[ARRAY]] )" +
-                              ExpandValues(values) + R"(
-        CHECK: [[OUTPUT_TYPE:%\w+]] = OpTypeTensorARM [[DATATYPE]] {{%\w+}} [[CONST_COMP]]
-        CHECK:        [[OUTPUT:%\w+]] = OpExtInst [[OUTPUT_TYPE]] {{%\w+}} )" +
-                              instruction + GetLastInstructionIDs(goldenSPIRV, instruction) + R"(
-        CHECK:                        OpGraphSetOutputARM [[OUTPUT]]
-    )";
-
-    return effcee::Match(goldenSPIRV, check);
-}
-
-static effcee::Result CheckOutput4Tensor(const std::vector<int>& values,
-                                         DataType dataType,
-                                         const std::string& instruction,
-                                         const std::string& goldenSPIRV)
-{
-    const std::string check = R"(
-        CHECK:      [[LENGTH_SHAPE_ARRAY:%\w+]] = OpConstant %uint )" +
-                              std::to_string(values.size()) + R"(
-        CHECK:       [[ARRAY:%\w+]] = OpTypeArray %uint [[LENGTH_SHAPE_ARRAY]]
-        CHECK:  [[CONST_COMP:%\w+]] = OpConstantComposite [[ARRAY]] )" +
-                              ExpandValues(values) + R"(
-        )" + CreateEffceeCheckFromDataType(dataType) +
-                              R"(
-        CHECK: [[OUTPUT_TYPE:%\w+]] = OpTypeTensorARM [[DATATYPE]] {{%\w+}} [[CONST_COMP]]
-        CHECK:        [[OUTPUT:%\w+]] = OpExtInst [[OUTPUT_TYPE]] {{%\w+}} )" +
-                              instruction + GetLastInstructionIDs(goldenSPIRV, instruction) + R"(
-        CHECK:                        OpGraphSetOutputARM [[OUTPUT]]
-    )";
-
-    return effcee::Match(goldenSPIRV, check);
-}
-
-std::string ReverseString(const std::string& s)
-{
-    std::stack<std::string> stringStack;
-    std::string instruction;
-    for (auto it = s.begin(); it != s.end(); ++it)
-    {
-        if (*it != '\n')
-        {
-            instruction.push_back(*it);
-        }
-        else
-        {
-            stringStack.push(instruction);
-            instruction.clear();
-        }
-    }
-    std::string rString;
-
-    while (!stringStack.empty())
-    {
-        rString += stringStack.top();
-        stringStack.pop();
-    }
-
-    return rString;
-}
-
-bool CheckOutput(const std::vector<int>& values,
-                 DataType dataType,
-                 const std::string& instruction,
-                 const std::string& spirv)
-{
-    const auto rSpirv = ReverseString(spirv);
-
-    const std::string check = R"(
-        CHECK:                        OpGraphSetOutputARM [[OUTPUT]] %uint_0
-        CHECK:        [[OUTPUT:%\w+]] = OpExtInst [[OUTPUT_TYPE]] {{%\w+}} )" +
-                              instruction + R"(
-        CHECK: [[OUTPUT_TYPE:%\w+]] = OpTypeTensorARM [[DATATYPE]] {{%\w+}} [[CONST_COMP]]
-        CHECK:  [[CONST_COMP:%\w+]] = OpConstantComposite [[ARRAY]] )" +
-                              ExpandValues(values) + R"(
-        CHECK:       [[ARRAY:%\w+]] = OpTypeArray {{%\w+}} [[LENGTH]]
-    )";
-    const auto m = effcee::Match(rSpirv, check).message();
-    return m.empty();
-}
-
-static effcee::Result CheckOutputTensorDTypeFirst(const std::vector<int>& values,
-                                                  DataType dataType,
-                                                  const std::string& instruction,
-                                                  const std::string& goldenSPIRV)
-{
-    const std::string check = CreateEffceeCheckFromDataType(dataType) + R"(
-        CHECK:      [[LENGTH:%\w+]] = OpConstant {{%\w+}} )" +
-                              std::to_string(values.size()) + R"(
-        CHECK:       [[ARRAY:%\w+]] = OpTypeArray {{%\w+}} [[LENGTH]]
-        CHECK:  [[CONST_COMP:%\w+]] = OpConstantComposite [[ARRAY]] )" +
-                              ExpandValues(values) + R"(
-        CHECK: [[OUTPUT_TYPE:%\w+]] = OpTypeTensorARM [[DATATYPE]] {{%\w+}} [[CONST_COMP]]
-        CHECK:        [[OUTPUT:%\w+]] = OpExtInst [[OUTPUT_TYPE]] {{%\w+}} )" +
-                              instruction + R"(
-        CHECK:                        OpGraphSetOutputARM [[OUTPUT]] %uint_0
-    )";
-
-    return effcee::Match(goldenSPIRV, check);
-}
-
-static effcee::Result CheckOutputTensorTypeStruct(const std::vector<int>& values,
-                                                  DataType dataType,
-                                                  const std::string& instruction,
-                                                  const std::string& goldenSPIRV)
-{
-    const std::string check = R"(
-        CHECK-DAG:      [[LENGTH_SHAPE_ARRAY:%\w+]] = OpConstant %uint )" +
-                              std::to_string(values.size()) + R"(
-        )" + CreateEffceeCheckFromDataTypeDAG(dataType) +
-                              R"(
-        CHECK:       [[ARRAY:%\w+]] = OpTypeArray %uint [[LENGTH_SHAPE_ARRAY]]
-        CHECK:  [[CONST_COMP:%\w+]] = OpConstantComposite [[ARRAY]] )" +
-                              ExpandValues(values) + R"(
-        CHECK: [[OUTPUT_TYPE:%\w+]] = OpTypeTensorARM [[DATATYPE]] {{%\w+}} [[CONST_COMP]]
-        CHECK: [[STRUCT_TYPE:%\w+]] = OpTypeStruct [[OUTPUT_TYPE]] {{%\w+}}
-        CHECK: [[OUTPUT_STRUCT:%\w+]] = OpExtInst [[STRUCT_TYPE]] {{%\w+}} )" +
-                              instruction + GetLastInstructionIDs(goldenSPIRV, instruction) + R"(
-        CHECK: [[OUTPUT:%\w+]] = OpCompositeExtract [[OUTPUT_TYPE]] [[OUTPUT_STRUCT]]
-        CHECK:                        OpGraphSetOutputARM [[OUTPUT]]
-    )";
-
-    return effcee::Match(goldenSPIRV, check);
-}
-
-bool CheckOutputTensor(const std::vector<int>& values,
-                       DataType dataType,
-                       const std::string& instruction,
-                       const std::string& goldenSPIRV)
-{
-    auto resultDataTypeFirst = CheckOutputTensorDTypeFirst(values, dataType, instruction, goldenSPIRV);
-    auto resultNonDAG = CheckOutputTensorNonDAG(values, dataType, instruction, goldenSPIRV);
-    auto resultTypeStruct = CheckOutputTensorTypeStruct(values, dataType, instruction, goldenSPIRV);
-    auto res4 = CheckOutput4Tensor(values, dataType, instruction, goldenSPIRV);
-
-    return (resultDataTypeFirst.message().empty() || resultNonDAG.message().empty() ||
-            resultTypeStruct.message().empty() || res4.message().empty());
-}
-
-bool CheckConstCompositeTensor(const std::vector<int>& values,
-                               const std::string& instruction,
-                               const std::string& goldenSPIRV,
-                               const int index,
-                               const std::string& dataType)
-{
-    // Parse the golden spir-v, find the instruction, then split out its arguments for later reference
-
-    std::istringstream iss(goldenSPIRV);
-    std::string line;
-    std::vector<std::string> args;
-
-    while (std::getline(iss, line))
-    {
-        if (auto pos = line.find(instruction); pos != std::string::npos)
-        {
-            std::string args_list = line.substr(pos + instruction.size() + 1);
-
-            iss.clear();
-            iss.str(args_list);
-
-            std::string arg;
-            while (std::getline(iss, arg, ' '))
+            const auto& currentTensorConst = jointAttributes[tensorConstIdx++];
+            if (currentInst->GetOpCode() == spv::Op::OpConstant)
             {
-                args.push_back(std::move(arg));
+                CheckConstant(
+                    currentInst,
+                    currentTensorConst.GetTensor().GetDataType(),
+                    currentTensorConst.GetData()[0],
+                    (currentTensorConst.GetTensor().GetDataType() == DataType::int48_t ? currentTensorConst.GetData()[1]
+                                                                                       : std::optional<uint32_t>{}));
+            }
+            else if (currentInst->GetOpCode() == spv::Op::OpConstantTrue ||
+                     currentInst->GetOpCode() == spv::Op::OpConstantFalse)
+            {
+                EXPECT_EQ(currentTensorConst.GetTensor().GetDataType(), DataType::bool_t);
+                EXPECT_EQ(currentTensorConst.GetData().size(), 1);
+                if (currentInst->GetOpCode() == spv::Op::OpConstantTrue)
+                {
+                    EXPECT_EQ(currentTensorConst.GetData()[0], 1);
+                }
+                else
+                {
+                    EXPECT_EQ(currentTensorConst.GetData()[0], 0);
+                }
+            }
+            else if (currentInst->GetOpCode() == spv::Op::OpConstantComposite ||
+                     currentInst->GetOpCode() == spv::Op::OpConstantCompositeReplicateEXT ||
+                     currentInst->GetOpCode() == spv::Op::OpConstantNull)
+            {
+                CheckConstantComposite(currentInst,
+                                       currentTensorConst.GetData(),
+                                       currentTensorConst.GetTensor().GetDataType(),
+                                       currentTensorConst.GetTensor().GetDataType());
             }
         }
     }
-    if (args.empty())
+    return (inputIdx == inputs.size() && graphConstIdx == graphConstants.size() &&
+            tensorConstIdx == jointAttributes.size());
+}
+
+bool CheckOperator(const tosa::OperatorEnum op,
+                   const std::vector<tosa::Tensor>& inputs,
+                   const std::vector<tosa::Tensor>& graphConstants,
+                   const std::vector<tosa::Attribute>& tensorConstants,
+                   const std::vector<tosa::Tensor>& outputs,
+                   const std::vector<tosa::Attribute>& attributes)
+{
+    std::shared_ptr<spirv::Module> module = CreateModule(TOSAVersion::v1_0);
+    tosa::Graph graph{module};
+
+    std::vector<tosa::ResId> inputIds;
+    for (size_t inputIdx = 0; inputIdx < inputs.size(); ++inputIdx)
+    {
+        const auto& inputId = graph.AddInput(inputs[inputIdx], inputIdx);
+        inputIds.push_back(inputId);
+    }
+    for (const auto& graphConst : graphConstants)
+    {
+        const auto& graphConstId = graph.AddGraphConstant(graphConst);
+        inputIds.push_back(graphConstId);
+    }
+    for (const auto& tensorConst : tensorConstants)
+    {
+        const auto& tensorId = graph.AddTensorConstant(tensorConst);
+        inputIds.push_back(tensorId);
+    }
+
+    // Adding Operator to Module based on the given parameters
+    const auto res = graph.AddOperator(op, inputIds, outputs, attributes)[0];
+    graph.AddOutput(res, 0);
+    graph.FinalizeGraph();
+
+    // Running validation on generated SPIR-V Module
+    const auto binary = tosa2spirv::WriteToBinary(module);
+    if (testutils::DisassembleSPIRV(binary, true) == "")
     {
         return false;
     }
-    if (values.empty())
-    {
-        return false;
-    }
 
-    // Example path of Effcee check for MAX_POOL2D
-    //  %9 = OpTypeTensorARM %uint %uint_1 %8
-    //  %10 = OpConstantComposite %9 %uint_1 %uint_1
-    //  %2 = OpExtInst %18 %3 MAX_POOL2D %10 %10 %14 %22
+    // Verifying that generated SPIR-V Instruction in Graph is correct
+    const auto& instruction = module->GetInstructionsOfType(spv::Op::OpExtInst).first;
+    testutils::TosaOperator generatedOp = testutils::GetTosaOperator(*instruction);
 
-    auto replicatedComposite = true;
-    for (auto& value : values)
-    {
-        if (value != values.front())
-        {
-            replicatedComposite = false;
-            break;
-        }
-    }
+    testutils::TosaOperator inputOp{op, inputs, graphConstants, tensorConstants, outputs, attributes};
 
-    std::string check;
-    if (replicatedComposite)
-    {
-        check = R"(
-        CHECK: )" +
-                args[index] + R"( = OpConstantCompositeReplicateEXT{{.*}})" + ExpandValues({values[0]}, dataType) + R"(
-        )";
-    }
-    else
-    {
-        check = R"(
-        CHECK: )" +
-                args[index] + R"( = OpConstantComposite{{.*}})" + ExpandValues(values) + R"(
-        )";
-    }
-
-    auto result = effcee::Match(goldenSPIRV, check);
-
-    return result.message().empty();
-}
-
-bool CheckGraphConstant(const std::vector<int>& values,
-                        DataType dataType,
-                        const std::string& instruction,
-                        const std::string& goldenSPIRV,
-                        const int index,
-                        const int identifier)
-{
-    const std::string check = CreateEffceeCheckFromDataType(dataType) + R"(
-        CHECK:      [[TENSOR:%\w+]] = OpTypeTensorARM [[DATATYPE]] %uint_)" +
-                              std::to_string(values.size()) + R"( {{%\w+}}
-        CHECK: [[GRAPH_CONST:%\w+]] = OpGraphConstantARM [[TENSOR]] )" +
-                              std::to_string(identifier) + R"(
-        CHECK:                        )" +
-                              instruction + R"( )" + AddSpacers(index) + R"({{.*}}[[GRAPH_CONST]]
-    )";
-
-    auto result = effcee::Match(goldenSPIRV, check);
-
-    return result.message().empty();
-}
-
-bool CheckConstant(DataType dataType,
-                   const std::string& instruction,
-                   const std::string& goldenSPIRV,
-                   const uint32_t value,
-                   const int index)
-{
-    // Example path of Effcee check for CLAMP
-    //  5:             %uchar = OpTypeInt 8 0
-    //  7:  %uchar_4294967295 = OpConstant %uchar 4294967295
-    // 21:                 %2 = OpExtInst %13 %4 CLAMP %uchar_1 %uchar_4294967295 %16
-
-    const std::string check = CreateEffceeCheckFromDataType(dataType) + R"(
-        CHECK: [[CONST:%\w+]] = OpConstant [[DATATYPE]] )" +
-                              std::to_string(value) + R"(
-        CHECK:                  )" +
-                              instruction + R"( )" + AddSpacers(index) + R"([[CONST]]
-    )";
-
-    auto result = effcee::Match(goldenSPIRV, check);
-
-    return result.message().empty();
-}
-
-bool CheckBoolConstant(DataType dataType,
-                       const std::string& instruction,
-                       const std::string& goldenSPIRV,
-                       const bool flag,
-                       const int index)
-{
-    // Example path of Effcee check for RESCALE
-    // 21:              %false = OpConstantFalse %bool
-    // 32:                  %2 = OpExtInst %24 %4 RESCALE %uint_20 %uint_128 %8 %14 %true %false %false %false %true %27
-
-    std::string flagStr = flag ? "%true" : "%false";
-    const std::string check = CreateEffceeCheckFromDataType(dataType) + R"(
-        CHECK: )" + flagStr + R"( = OpConstant{{True|False}} [[DATATYPE]]
-        CHECK:                   )" +
-                              instruction + R"( )" + AddSpacers(index) + flagStr;
-
-    auto result = effcee::Match(goldenSPIRV, check);
-
-    return result.message().empty();
+    return generatedOp == inputOp;
 }
 
 } // namespace testutils

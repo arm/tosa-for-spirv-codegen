@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <string>
+
 #include <spirv/unified1/TOSA.001000.1.h>
 
 namespace tosa2spirv::tosa
@@ -58,5 +60,6 @@ struct OperatorDefinition
 
 TOSAInstructions GetTOSAInstructions(OperatorEnum operatorType);
 OperatorDefinition GetOperatorDefinition(OperatorEnum op);
+std::string GetOperatorName(const OperatorEnum op);
 
 } // namespace tosa2spirv::tosa

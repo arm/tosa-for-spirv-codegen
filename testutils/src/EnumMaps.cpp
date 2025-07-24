@@ -14,7 +14,8 @@
 // Maps separated into their own functions to enable test coverage
 static const std::unordered_map<std::string, spv::Op>& getInstructionMap()
 {
-    static const auto mapInstance = []() {
+    static const auto mapInstance = []()
+    {
         std::unordered_map<std::string, spv::Op> tmp;
         tmp.reserve(29);
         tmp.emplace("OpCapability", spv::Op::OpCapability);
@@ -95,7 +96,8 @@ spv::Op GetOpEnum(const std::string& instruction)
 
 static const std::unordered_map<spv::Op, std::string>& getOpToStringMap()
 {
-    static const auto mapInstance = []() {
+    static const auto mapInstance = []()
+    {
         std::unordered_map<spv::Op, std::string> tmp;
         tmp.reserve(29);
         tmp.emplace(spv::Op::OpCapability, "OpCapability");
@@ -173,7 +175,8 @@ std::string GetOpString(const spv::Op op)
 
 static const std::unordered_map<std::string, TOSAInstructions>& getTosaInstructionsMap()
 {
-    static const auto mapInstance = []() {
+    static const auto mapInstance = []()
+    {
         std::unordered_map<std::string, TOSAInstructions> tmp;
         tmp.reserve(66);
         tmp.emplace("ARGMAX", TOSAARGMAX);
@@ -285,6 +288,7 @@ TOSAInstructions GetTosaOpEnum(const std::string& instruction)
         {"BITWISE_NOT", TOSABITWISE_NOT},
         {"CEIL", TOSACEIL},
         {"CLZ", TOSACLZ},
+        {"COS", TOSACOS},
         {"EXP", TOSAEXP},
         {"FLOOR", TOSAFLOOR},
         {"LOG", TOSALOG},
@@ -292,6 +296,7 @@ TOSAInstructions GetTosaOpEnum(const std::string& instruction)
         {"NEGATE", TOSANEGATE},
         {"RECIPROCAL", TOSARECIPROCAL},
         {"RSQRT", TOSARSQRT},
+        {"SIN", TOSASIN},
         {"SELECT", TOSASELECT},
         {"EQUAL", TOSAEQUAL},
         {"GREATER", TOSAGREATER},
@@ -399,7 +404,8 @@ tosa2spirv::tosa::OperatorEnum GetOperatorEnum(TOSAInstructions instructionType)
 
 static const std::unordered_map<std::string, spv::Capability>& getCapabilityMap()
 {
-    static const auto mapInstance = []() {
+    static const auto mapInstance = []()
+    {
         std::unordered_map<std::string, spv::Capability> tmp;
         tmp.reserve(10);
         tmp.emplace("VulkanMemoryModel", spv::Capability::CapabilityVulkanMemoryModel);
@@ -446,6 +452,7 @@ unsigned int GetResultIdPosition(const spv::Op op)
         case spv::Op::OpTypeFloat:
         case spv::Op::OpTypeBool:
         case spv::Op::OpTypeArray:
+        case spv::Op::OpTypeStruct:
         case spv::Op::OpTypeTensorARM:
         case spv::Op::OpTypePointer:
         case spv::Op::OpTypeGraphARM:
@@ -455,6 +462,7 @@ unsigned int GetResultIdPosition(const spv::Op op)
         case spv::Op::OpConstantFalse:
         case spv::Op::OpConstantNull:
         case spv::Op::OpConstantComposite:
+        case spv::Op::OpCompositeExtract:
         case spv::Op::OpVariable:
         case spv::Op::OpGraphInputARM:
         case spv::Op::OpExtInst:

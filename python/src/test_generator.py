@@ -132,20 +132,16 @@ class TestGenerator:
         self,
         input_template_dict,
         tosa_serialization_parser_path,
-        layer_test_path,
         xml_path,
-        cmake_file_path,
-        force_generate,
+        cmake_file_path
     ):
 
         self.input_template_dict = input_template_dict
         # set number of copyright lines which we can ignore from these input files
         self.num_copyright_lines = 5
-        self.layer_test_path = layer_test_path
         self.spec = tosa.TOSASpec(xml_path)
         self.tosa_serialization_parser_path = tosa_serialization_parser_path
         self.cmake_file_dir = cmake_file_path
-        self.force_generate = force_generate
         self.operator_exception = ['CUSTOM', 'CONST', "CONST_SHAPE", 'IDENTITY', 'DIM', 'VARIABLE', 'VARIABLE_WRITE', 'VARIABLE_READ']
 
         self.load_tosa_version()
@@ -347,12 +343,6 @@ class TestGenerator:
                         operator_list_in_group.append(op)
                 operator_map[group.name] = operator_list_in_group
         return operator_map
-
-    def get_layer_test_path(self, name):
-        return self.layer_test_path + "/{}Tests.cpp".format(name)
-
-    def check_layer_test(self, name):
-        return os.path.exists(self.get_layer_test_path(name))
 
     def has_argument_category_name(self, arg, string):
         hasName = False
@@ -628,47 +618,6 @@ class TestGenerator:
                 file.write(lines[line_idx][col_idx])
             file.append("\n")
 
-    # main generator for unit tests
-    def generate_unit_tests(self):
-        # check unit test path
-        if not os.path.exists(self.layer_test_path):
-            os.mkdir(self.layer_test_path)
-
-        layer_counter = 0
-        skip_layer_counter = 0
-
-        # generate layer classes
-        names, ops = self.get_operators()
-        for idx in range(len(names)):
-            if not ops[idx].name in self.operator_exception:
-                if not self.force_generate:
-                    if not self.check_layer_test(names[idx]):
-                        self.generate_layer_test(ops[idx], names[idx])
-                    else:
-                        print(
-                            "[Code Generator] Found existing {}.".format(
-                                self.get_layer_test_path(names[idx])
-                            )
-                        )
-                        skip_layer_counter += 1
-                else:
-                    if not names[idx] in self.operator_exception:
-                        self.generate_layer_test(ops[idx], names[idx])
-                    else:
-                        print(
-                            "[Code Generator] Skipping {}".format(
-                                self.get_layer_test_path(names[idx])
-                            )
-                        )
-                        skip_layer_counter += 1
-                layer_counter += 1
-        print(
-            "[Code Generator] Generated unit tests for {} layers, skipped {} layers".format(
-                layer_counter, skip_layer_counter
-            )
-        )
-
-
     def generate_test_arguments(self, op, name, file):
 
         for argument in op.arguments:
@@ -745,182 +694,55 @@ class TestGenerator:
     def get_layer_variable_name(self, name):
         return name[0].lower() + name[1:] + "Layer"
 
-    def get_effcee_string(self, op, is_graph=False, layerTests=False):
+    def get_validation_string(self, op):
 
-        categoryEffceeCheckDict = {
-            tosa_spirv.TOSAType.RANKED_TENSOR: 'EXPECT_TRUE(testutils::Check{INPUTOUTPUT}Tensor({{{VALUES}}}, DataType::{DATATYPE}, "{OP_NAME}", outputStr));',
-            tosa_spirv.TOSAType.SHAPED_TENSOR: 'EXPECT_TRUE(testutils::CheckOutputTensor({{{VALUES}}}, DataType::{DATATYPE}, "{OP_NAME}", outputStr));',  # constant input and outputs
-            tosa_spirv.TOSAType.SCALAR: 'EXPECT_TRUE(testutils::Check{BOOL}Constant(DataType::{DATATYPE}, "{OP_NAME}", outputStr, {VALUE}, {ARG_INDEX}));',
-            tosa_spirv.TOSAType.SHAPE: 'EXPECT_TRUE(testutils::CheckConstCompositeTensor({{{VALUES}}}, "{OP_NAME}", outputStr, {ARG_INDEX}));',
-            tosa_spirv.TOSAType.TENSOR_LIST: "UNKNOWNTENSOR_LIST",
-            tosa_spirv.TOSAType.TENSOR_LIST_UNIFORM_ETYPE: 'EXPECT_TRUE(testutils::Check{INPUTOUTPUT}Tensor({{{VALUES}}}, DataType::{DATATYPE}, "{OP_NAME}", outputStr));',  # concat
-            tosa_spirv.TOSAType.ENUM: 'EXPECT_TRUE(testutils::Check{BOOL}Constant(DataType::{DATATYPE}, "{OP_NAME}", outputStr, {VALUE}, {ARG_INDEX}));',
-            tosa_spirv.TOSAType.GRAPH: "UNKNOWNGRAPH",
-            tosa_spirv.TOSAType.UNKNOWN: "UNKNOWN",
-        }
+        inputStr = []
+        outputStr = []
+        graphConstStr = []
+        tensorConstStr = []
+        inputTensorConstStr = []
 
-        idx = 0
-        inputIdx = 0
-        effceestring = ""
-
-        graphConstantIdentifier = 0
         for argument in op.arguments:
-            # Decide on number of values to give for shape
-            values = self.get_num_values_template(argument)[1]
+            # Number of values for the shape
+            numValues, values = self.get_num_values_template(argument)
 
-            effcee_check_str = categoryEffceeCheckDict[tosa_spirv.TOSAType.type_category_for_arg(argument)]
             datatype = self.get_arg_data_type(op, argument)
-            isInput = self.has_argument_category_name(argument, 'input')
-            isOutput = self.has_argument_category_name(argument, 'output')
-            isAttr = self.has_argument_category_name(argument, 'attribute')
+            datatype_str = str(datatype) + "_t"
 
-            if isAttr:
+            if self.has_argument_category_name(argument, 'attribute'):
                 if tosa_spirv.TOSAType.type_category_for_arg(argument) == tosa_spirv.TOSAType.SCALAR or tosa_spirv.TOSAType.type_category_for_arg(argument) == tosa_spirv.TOSAType.ENUM:
-                    datatype_str = str(datatype) + '_t'
-
-                    boolStr = ''
-                    if self.has_argument_type_name(argument, 'bool_t'):
-                        boolStr = "Bool"
-                        datatype_str = "bool_t"
+                    shape = "1"
                     if op.name == "RFFT2D" and argument.name == "local_bound":
-                        # RFFT2D alway returns false for attribute.local_bound() in Parser
-                        if layerTests:
-                            constantValue = "1"
-                        else:
-                            constantValue = "0"
-                    elif op.name == "CLAMP" and argument.type == "in_out_t":
+                        values = "0"
+                    else:
+                        values = "1"
+                    if op.name == "CLAMP" and argument.type == "in_out_t":
                         datatype_str = "int8_t"
-                        constantValue = "1"
-                    else:
-                        constantValue = "1"
-                    effceestring += "\n    " + effcee_check_str.format(BOOL=boolStr, OP_NAME=op.name, VALUE=constantValue, ARG_INDEX=idx, DATATYPE=datatype_str) + "\n"
-                    idx += 1
-                    continue
-                effcee_check_str = '\n    EXPECT_TRUE(testutils::CheckConstCompositeTensor({{{VALUES}}}, "{OP_NAME}", outputStr, {ARG_INDEX}));\n'
-                effceestring += effcee_check_str.format(VALUES=values, OP_NAME=op.name, ARG_INDEX=idx)
-                idx += 1
-
-            # Handle Inputs
-            elif isInput:
-                if not self.is_dynamic_input(argument):
-                    if datatype == "int32":
-                        dataTypeStr = "uint"
-                    elif datatype == "int8":
-                        dataTypeStr = "uchar"
-                    elif datatype == "bool":
-                        dataTypeStr = "bool"
-                    else:
-                        raise ValueError("Unhandled datatype: " + datatype)
-
-                    # LayerTests always pass constants in as ConstCompositeTensor
-                    if values == '1' or layerTests:
-                        effcee_check_str = '\n    EXPECT_TRUE(testutils::CheckConstCompositeTensor({{{VALUES}}}, "{OP_NAME}", outputStr, {ARG_INDEX}, "' + dataTypeStr + '"));\n'
-                    else:
-                        effcee_check_str = '\n    EXPECT_TRUE(testutils::CheckGraphConstant({{{VALUES}}}, DataType::{DATATYPE}, "{OP_NAME}", outputStr, {ARG_INDEX}, ' + str(graphConstantIdentifier) + '));\n'
-                        graphConstantIdentifier += 1
-
-
-                functionName = "Input"
-                if inputIdx > 0:
-                    effceestring += "    "
-
-                opIndex = tosa_spirv.TOSASPIRVSpec.operand_index_for_argument(op, argument) - tosa_spirv.TOSASPIRVSpec.FIRST_IN_ARGUMENT_OPERAND_OFFSET
-
-                datatype_str = str(datatype) + '_t'
-                effceestring += effcee_check_str.format(OP_NAME=op.name, INPUTOUTPUT=functionName, VALUES=values, ARG_INDEX=opIndex, DATATYPE=datatype_str) + "\n"
-                inputIdx += 1
-            # Handle Outputs
-            elif isOutput:
-                functionName = "Output"
-                datatype_str = str(datatype) + '_t'
-                effceestring += "    " + effcee_check_str.format(OP_NAME=op.name, INPUTOUTPUT=functionName, VALUES=values, ARG_INDEX=idx, DATATYPE=datatype_str) + "\n"
-                idx += 1
-
-        return effceestring
-
-    def generate_layer_test(self, op, name):
-
-        print(
-            "[Test Generator] Generating {} ...".format(self.get_layer_test_path(name))
-        )
-
-        file = FileWriter(self.get_layer_test_path(name))
-
-        file.write(self.preamble_free_edit())
-
-        # include files
-        file.write("#include <tosa2spirv.hpp>\n")
-        file.write("#include <Graph.hpp>\n")
-
-        file.write("#include <AssemblyUtils.hpp>\n\n")
-        file.write("#include <OpTestUtils.hpp>\n")
-
-        file.write("#include <gtest/gtest.h>\n")
-        file.write("#include <iostream>\n\n")
-
-        # namespaces
-        file.write("using namespace tosa2spirv::tosa;\n")
-
-        # test case
-        file.write("// Automatically generated by code_generator.py\n")
-        file.write("TEST(TOSA2SPIRV_LAYERS, {})\n".format(name))
-        file.write("{\n")
-
-        # test body
-        file.start_block()
-
-        file.write("auto module = CreateModule(tosa2spirv::TOSAVersion{});\n")
-        file.write("auto graph = Graph(module);\n")
-        file.append("\n")
-
-        # argument assignment
-        self.generate_test_arguments(op, name, file)
-
-        file.append("\n")
-
-        first_line = "const auto res = graph.Add{}Operator(".format(
-            name, self.get_layer_variable_name(name)
-        )
-        num_indentation = len(first_line)
-
-        file.write(first_line)
-
-        for argument in op.arguments:
-            if argument is op.arguments[0]:
-                if argument.type == "tensor_list_t":
-                    file.append("{},\n".format("inputs"))
+                    if self.has_argument_type_name(argument, 'bool_t'):
+                        datatype_str = "bool_t"
                 else:
-                    file.append("{},\n".format(argument.name))
-            elif argument is op.arguments[len(op.arguments) - 1]:
-                file.write(" " * num_indentation + "{});\n".format(argument.name))
-            else:
-                file.write(" " * num_indentation + "{},\n".format(argument.name))
+                    shape = numValues
+                tensorConstStr.append("{{" + values + "}, DataType::" + datatype_str + ", {" + shape + "}}")
+            elif self.has_argument_category_name(argument, 'input'):
+                if not self.is_dynamic_input(argument):
+                    if values == "1":
+                        inputTensorConstStr.append("{{1}, DataType::" + datatype_str + ", {1}}")
+                    else:
+                        graphConstStr.append("{DataType::" + datatype_str + ", {" + values + "}}")
+                else:
+                    inputStr.append("{DataType::" + datatype_str + ", {" + values + "}}")
+            elif self.has_argument_category_name(argument, 'output'):
+                outputStr.append("{DataType::" + datatype_str + ", {" + values + "}}")
+        tensorConstStr += inputTensorConstStr
 
-        if (op.name == "FFT2D") or (op.name == "RFFT2D"):
-            file.write("graph.AddOutput(res[0], 0);\n")
-            file.write("graph.AddOutput(res[1], 0);\n")
-        else:
-            file.write("graph.AddOutput(res, 0);\n")
-        file.write("graph.FinalizeGraph();\n")
-        file.append("\n")
+        output =  "testutils::CheckModule(spirvModule,\n"
+        output += "                       TOSA" + op.name + ",\n"
+        output += "                       {" + ",".join(inputStr) + "},\n"
+        output += "                       {" + ",".join(graphConstStr) + "},\n"
+        output += "                       {" + ",".join(tensorConstStr) + "},\n"
+        output += "                       {" + ",".join(outputStr) + "});\n"
 
-        file.write("auto binary = tosa2spirv::WriteToBinary(module);\n")
-        file.write(
-            "std::string outputStr(testutils::DisassembleSPIRV(binary, true));\n\n"
-        )
-
-        effceestring = self.get_effcee_string(op, False, True)
-
-        file.write(effceestring + "\n")
-        file.write("// Write binary a second time to ensure IDs remain consistent.\n")
-        file.write("binary = tosa2spirv::WriteToBinary(module);\n")
-        file.write("outputStr = testutils::DisassembleSPIRV(binary, true);\n\n")
-        file.write(effceestring)
-
-        file.end_block()
-        file.write("}")
-
-        file.close()
+        return output
 
     def generate_CMake_lists_parser_test(self):
         NUM_IND = 15
@@ -1104,16 +926,12 @@ class TestGenerator:
         # Create parser
         file.write("TosaSerializationParser parser(&block);\n")
 
-        # Generate and Disassemble SPIRV
-        file.write('auto binarySpirv = parser.GenerateSPIRV("main");\n')
-        file.write(
-            "const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));\n"
-        )
+        # Generate SPIRV Module
+        file.write('const auto& spirvModule = parser.GenerateSPIRVModule("main");\n')
         file.append("\n")
 
-        # Generate effcee check string
-        effceestring = self.get_effcee_string(op, is_graph=True)
-        file.write(effceestring)
+        validation_string = self.get_validation_string(op)
+        file.write(validation_string)
 
         file.end_block()
         file.write("}\n")

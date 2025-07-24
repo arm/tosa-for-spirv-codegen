@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// THIS FILE IS GENERATED WITH TOSA 1.0.0. DO NOT EDIT!
+// THIS FILE IS GENERATED WITH TOSA 1.0.1. DO NOT EDIT!
 // See tosa2spirv/python/code_generator.py and README
 
 #include <AssemblyUtils.hpp>
@@ -99,17 +99,13 @@ TEST(TOSA2SPIRV_PARSER, Resize)
                                       {outputName});
 
     TosaSerializationParser parser(&block);
-    auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
+    const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "RESIZE", outputStr));
-
-    EXPECT_TRUE(testutils::CheckGraphConstant({1, 1, 1, 1}, DataType::int32_t, "RESIZE", outputStr, 2, 0));
-
-    EXPECT_TRUE(testutils::CheckGraphConstant({1, 1}, DataType::int32_t, "RESIZE", outputStr, 3, 1));
-
-    EXPECT_TRUE(testutils::CheckGraphConstant({1, 1}, DataType::int32_t, "RESIZE", outputStr, 4, 2));
-
-    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "RESIZE", outputStr, 1, 0));
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "RESIZE", outputStr));
+    testutils::CheckModule(
+        spirvModule,
+        TOSARESIZE,
+        {{DataType::int8_t, {1, 1, 1, 1}}},
+        {{DataType::int32_t, {1, 1, 1, 1}}, {DataType::int32_t, {1, 1}}, {DataType::int32_t, {1, 1}}},
+        {{{1}, DataType::int32_t, {1}}},
+        {{DataType::int32_t, {1, 1, 1, 1}}});
 }

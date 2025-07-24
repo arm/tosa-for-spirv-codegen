@@ -31,6 +31,7 @@ if __name__ == "__main__":
         help="-u 1 (by default) to generate unit tests, -u 0 to disable",
         default=1,
     )
+    # DEPRECATED, For backwards compatibility with pipeline scripts for now
     parser.add_argument(
         "-f",
         "--force_generate",
@@ -61,17 +62,13 @@ if __name__ == "__main__":
         input_template_dict[input_name] = input_template_dir + "/" + file
 
     tosa_serialization_parser_path = "parsers"
-    layer_test_path = "src/test/layerTests"
     cmake_file_path = "python/ClassFiles.txt"
 
     if int(args.unit_test_enabled) == 1:
         code_generator = TestGenerator(
             input_template_dict,
             tosa_serialization_parser_path,
-            layer_test_path,
             xml_path,
             cmake_file_path,
-            bool(int(args.force_generate)),
         )
-        code_generator.generate_unit_tests()
         code_generator.generate_parser_tests()

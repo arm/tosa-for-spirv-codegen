@@ -7,7 +7,6 @@
 
 #include <array>
 #include <stdexcept>
-#include <string>
 
 namespace tosa2spirv::tosa
 {
@@ -25,7 +24,7 @@ std::string GetOperatorName(const OperatorEnum op)
         }
         case OperatorEnum::AvgPool2d:
         {
-            return {"Avgpool2d"};
+            return {"AvgPool2d"};
         }
         case OperatorEnum::Conv2d:
         {
@@ -37,7 +36,7 @@ std::string GetOperatorName(const OperatorEnum op)
         }
         case OperatorEnum::DepthwiseConv2d:
         {
-            return {"Depthwiseconv2d"};
+            return {"DepthwiseConv2d"};
         }
         case OperatorEnum::Fft2d:
         {
@@ -49,7 +48,7 @@ std::string GetOperatorName(const OperatorEnum op)
         }
         case OperatorEnum::MaxPool2d:
         {
-            return {"Maxpool2d"};
+            return {"MaxPool2d"};
         }
         case OperatorEnum::Rfft2d:
         {
@@ -57,7 +56,7 @@ std::string GetOperatorName(const OperatorEnum op)
         }
         case OperatorEnum::TransposeConv2d:
         {
-            return {"Transposeconv2d"};
+            return {"TransposeConv2d"};
         }
         case OperatorEnum::Clamp:
         {
@@ -81,19 +80,19 @@ std::string GetOperatorName(const OperatorEnum op)
         }
         case OperatorEnum::ArithmeticRightShift:
         {
-            return {"Arithmeticrightshift"};
+            return {"ArithmeticRightShift"};
         }
         case OperatorEnum::BitwiseAnd:
         {
-            return {"Bitwiseand"};
+            return {"BitwiseAnd"};
         }
         case OperatorEnum::BitwiseOr:
         {
-            return {"Bitwiseor"};
+            return {"BitwiseOr"};
         }
         case OperatorEnum::BitwiseXor:
         {
-            return {"Bitwisexor"};
+            return {"BitwiseXor"};
         }
         case OperatorEnum::IntDiv:
         {
@@ -101,23 +100,23 @@ std::string GetOperatorName(const OperatorEnum op)
         }
         case OperatorEnum::LogicalAnd:
         {
-            return {"Logicaland"};
+            return {"LogicalAnd"};
         }
         case OperatorEnum::LogicalLeftShift:
         {
-            return {"Logicalleftshift"};
+            return {"LogicalLeftShift"};
         }
         case OperatorEnum::LogicalRightShift:
         {
-            return {"Logicalrightshift"};
+            return {"LogicalRightShift"};
         }
         case OperatorEnum::LogicalOr:
         {
-            return {"Logicalor"};
+            return {"LogicalOr"};
         }
         case OperatorEnum::LogicalXor:
         {
-            return {"Logicalxor"};
+            return {"LogicalXor"};
         }
         case OperatorEnum::Maximum:
         {
@@ -149,7 +148,7 @@ std::string GetOperatorName(const OperatorEnum op)
         }
         case OperatorEnum::BitwiseNot:
         {
-            return {"Bitwisenot"};
+            return {"BitwiseNot"};
         }
         case OperatorEnum::Ceil:
         {
@@ -177,7 +176,7 @@ std::string GetOperatorName(const OperatorEnum op)
         }
         case OperatorEnum::LogicalNot:
         {
-            return {"Logicalnot"};
+            return {"LogicalNot"};
         }
         case OperatorEnum::Negate:
         {
@@ -209,31 +208,31 @@ std::string GetOperatorName(const OperatorEnum op)
         }
         case OperatorEnum::GreaterEqual:
         {
-            return {"Greaterequal"};
+            return {"GreaterEqual"};
         }
         case OperatorEnum::ReduceAll:
         {
-            return {"Reduceall"};
+            return {"ReduceAll"};
         }
         case OperatorEnum::ReduceAny:
         {
-            return {"Reduceany"};
+            return {"ReduceAny"};
         }
         case OperatorEnum::ReduceMax:
         {
-            return {"Reducemax"};
+            return {"ReduceMax"};
         }
         case OperatorEnum::ReduceMin:
         {
-            return {"Reducemin"};
+            return {"ReduceMin"};
         }
         case OperatorEnum::ReduceProduct:
         {
-            return {"Reduceproduct"};
+            return {"ReduceProduct"};
         }
         case OperatorEnum::ReduceSum:
         {
-            return {"Reducesum"};
+            return {"ReduceSum"};
         }
         case OperatorEnum::Concat:
         {

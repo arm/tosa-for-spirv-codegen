@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// THIS FILE IS GENERATED WITH TOSA 1.0.0. DO NOT EDIT!
+// THIS FILE IS GENERATED WITH TOSA 1.0.1. DO NOT EDIT!
 // See tosa2spirv/python/code_generator.py and README
 
 #include <AssemblyUtils.hpp>
@@ -56,13 +56,14 @@ TEST(TOSA2SPIRV_PARSER, Concat)
                                       {outputName});
 
     TosaSerializationParser parser(&block);
-    auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
+    const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "CONCAT", outputStr));
-
-    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "CONCAT", outputStr, 1, 0));
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "CONCAT", outputStr));
+    testutils::CheckModule(spirvModule,
+                           TOSACONCAT,
+                           {{DataType::bool_t, {1, 1, 1, 1}}},
+                           {},
+                           {{{1}, DataType::int32_t, {1}}},
+                           {{DataType::bool_t, {1, 1, 1, 1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, Pad)
@@ -132,16 +133,14 @@ TEST(TOSA2SPIRV_PARSER, Pad)
                                       {outputName});
 
     TosaSerializationParser parser(&block);
-    auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
+    const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "PAD", outputStr));
-
-    EXPECT_TRUE(testutils::CheckGraphConstant({1, 1, 1, 1}, DataType::int32_t, "PAD", outputStr, 1, 0));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "PAD", outputStr, 2, "bool"));
-
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "PAD", outputStr));
+    testutils::CheckModule(spirvModule,
+                           TOSAPAD,
+                           {{DataType::bool_t, {1, 1, 1, 1}}},
+                           {{DataType::int32_t, {1, 1, 1, 1}}},
+                           {{{1}, DataType::bool_t, {1}}},
+                           {{DataType::bool_t, {1, 1, 1, 1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, Reshape)
@@ -196,14 +195,14 @@ TEST(TOSA2SPIRV_PARSER, Reshape)
                                       {outputName});
 
     TosaSerializationParser parser(&block);
-    auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
+    const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "RESHAPE", outputStr));
-
-    EXPECT_TRUE(testutils::CheckGraphConstant({1, 1, 1, 1}, DataType::int32_t, "RESHAPE", outputStr, 1, 0));
-
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "RESHAPE", outputStr));
+    testutils::CheckModule(spirvModule,
+                           TOSARESHAPE,
+                           {{DataType::bool_t, {1, 1, 1, 1}}},
+                           {{DataType::int32_t, {1, 1, 1, 1}}},
+                           {},
+                           {{DataType::bool_t, {1, 1, 1, 1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, Reverse)
@@ -248,13 +247,14 @@ TEST(TOSA2SPIRV_PARSER, Reverse)
                                       {outputName});
 
     TosaSerializationParser parser(&block);
-    auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
+    const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "REVERSE", outputStr));
-
-    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "REVERSE", outputStr, 1, 0));
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "REVERSE", outputStr));
+    testutils::CheckModule(spirvModule,
+                           TOSAREVERSE,
+                           {{DataType::bool_t, {1, 1, 1, 1}}},
+                           {},
+                           {{{1}, DataType::int32_t, {1}}},
+                           {{DataType::bool_t, {1, 1, 1, 1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, Slice)
@@ -324,16 +324,14 @@ TEST(TOSA2SPIRV_PARSER, Slice)
                                       {outputName});
 
     TosaSerializationParser parser(&block);
-    auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
+    const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "SLICE", outputStr));
-
-    EXPECT_TRUE(testutils::CheckGraphConstant({1, 1, 1, 1}, DataType::int32_t, "SLICE", outputStr, 1, 0));
-
-    EXPECT_TRUE(testutils::CheckGraphConstant({1, 1, 1, 1}, DataType::int32_t, "SLICE", outputStr, 2, 1));
-
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "SLICE", outputStr));
+    testutils::CheckModule(spirvModule,
+                           TOSASLICE,
+                           {{DataType::bool_t, {1, 1, 1, 1}}},
+                           {{DataType::int32_t, {1, 1, 1, 1}}, {DataType::int32_t, {1, 1, 1, 1}}},
+                           {},
+                           {{DataType::bool_t, {1, 1, 1, 1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, Tile)
@@ -388,14 +386,14 @@ TEST(TOSA2SPIRV_PARSER, Tile)
                                       {outputName});
 
     TosaSerializationParser parser(&block);
-    auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
+    const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "TILE", outputStr));
-
-    EXPECT_TRUE(testutils::CheckGraphConstant({1, 1, 1, 1}, DataType::int32_t, "TILE", outputStr, 1, 0));
-
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "TILE", outputStr));
+    testutils::CheckModule(spirvModule,
+                           TOSATILE,
+                           {{DataType::bool_t, {1, 1, 1, 1}}},
+                           {{DataType::int32_t, {1, 1, 1, 1}}},
+                           {},
+                           {{DataType::bool_t, {1, 1, 1, 1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, Transpose)
@@ -440,11 +438,12 @@ TEST(TOSA2SPIRV_PARSER, Transpose)
                                       {outputName});
 
     TosaSerializationParser parser(&block);
-    auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
+    const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::bool_t, "TRANSPOSE", outputStr));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "TRANSPOSE", outputStr, 0));
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::bool_t, "TRANSPOSE", outputStr));
+    testutils::CheckModule(spirvModule,
+                           TOSATRANSPOSE,
+                           {{DataType::bool_t, {1, 1, 1, 1}}},
+                           {},
+                           {{{1, 1, 1, 1}, DataType::int32_t, {4}}},
+                           {{DataType::bool_t, {1, 1, 1, 1}}});
 }

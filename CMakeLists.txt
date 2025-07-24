@@ -41,10 +41,6 @@ set(GOOGLETEST_PATH ${CMAKE_SOURCE_DIR}/external/googletest CACHE PATH "")
 set(SERIALIZATION_LIB_BUILD_PATH ${CMAKE_SOURCE_DIR}/external/serialization_lib/build CACHE PATH "")
 set(SPIRV_TOOLS_BUILD_PATH ${CMAKE_SOURCE_DIR}/external/SPIRV-Tools/build CACHE PATH "")
 set(NLOHMANN_PATH ${CMAKE_SOURCE_DIR}/external/json CACHE PATH "")
-set(EFFCEE_SOURCE_PATH ${CMAKE_SOURCE_DIR}/external/effcee CACHE PATH "")
-set(RE2_SOURCE_PATH ${EFFCEE_SOURCE_PATH}/third_party/re2 CACHE PATH "")
-set(ABSEIL_SOURCE_PATH ${EFFCEE_SOURCE_PATH}/third_party/abseil-cpp CACHE PATH "")
-set(EFFCEE_BUILD_PATH ${EFFCEE_SOURCE_PATH}/build CACHE PATH "")
 
 # Parser can be enabled without generator but generator requires parser.
 if(BUILD_TOSA_2_SPIRV_GENERATOR AND NOT BUILD_TOSA_SERIALIZATION_PARSER)

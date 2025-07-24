@@ -9,16 +9,13 @@
 #include <Module.hpp>
 #include <OpGenerator.hpp>
 #include <Operand.hpp>
+#include <OperatorDefinitions.hpp>
 #include <OperatorEnum.hpp>
 #include <Tensor.hpp>
 #include <tosa2spirv.hpp>
 
 #include <gtest/gtest.h>
 #include <spirv/unified1/spirv.hpp>
-#include <spirvmodels/Add.hpp>
-#include <spirvmodels/Conv2d.hpp>
-#include <spirvmodels/MaxPool.hpp>
-#include <spirvmodels/Rescale.hpp>
 
 #include <algorithm>
 #include <stdexcept>
@@ -26,17 +23,6 @@
 
 namespace testutils
 {
-
-std::vector<std::string> GetSpirvModels()
-{
-    return {spirvmodels::SimpleMaxpool2d,
-            spirvmodels::SimpleMaxpool2dGenerator,
-            spirvmodels::SimpleConv2d,
-            spirvmodels::Conv2DRescaleConv2D,
-            spirvmodels::Conv2DRescaleConv2DDualOutput,
-            spirvmodels::simpleRescale,
-            spirvmodels::AddZeroDimOutputTensor};
-}
 
 bool GetTosaOperatorTest(TosaOperator op)
 {
@@ -47,6 +33,16 @@ bool GetTosaOperatorTest(TosaOperator op)
     {
         const auto inputId = graph.AddInput(op.inputs[idx], idx);
         inputIds.push_back(inputId);
+    }
+    for (const auto& tensorConst : op.tensorConstants)
+    {
+        const auto tensorId = graph.AddTensorConstant(tensorConst);
+        inputIds.push_back(tensorId);
+    }
+    for (const auto& graphConst : op.graphConstants)
+    {
+        const auto graphConstId = graph.AddGraphConstant(graphConst);
+        inputIds.push_back(graphConstId);
     }
 
     const auto operatorId = graph.AddOperator(op.op, inputIds, op.outputs, op.attributes);
@@ -73,6 +69,16 @@ bool Spirv2operatorsTest(const std::vector<TosaOperator> ops,
         {
             const auto inputId = graph.AddInput(op.inputs[inputIdx], inputIdx);
             inputIds.push_back(inputId);
+        }
+        for (const auto& tensorConst : op.tensorConstants)
+        {
+            const auto tensorId = graph.AddTensorConstant(tensorConst);
+            inputIds.push_back(tensorId);
+        }
+        for (const auto& graphConst : op.graphConstants)
+        {
+            const auto graphConstId = graph.AddGraphConstant(graphConst);
+            inputIds.push_back(graphConstId);
         }
         graph.AddOperator(op.op, inputIds, op.outputs, op.attributes);
     }
@@ -110,6 +116,16 @@ bool Spirv2tosaTest(const std::vector<TosaOperator> ops, const std::vector<std::
             const auto inputId = graph.AddInput(op.inputs[inputIdx], inputIdx);
             inputIds.push_back(inputId);
         }
+        for (const auto& graphConst : op.graphConstants)
+        {
+            const auto constId = graph.AddGraphConstant(graphConst);
+            inputIds.push_back(constId);
+        }
+        for (const auto& tensorConst : op.tensorConstants)
+        {
+            const auto constId = graph.AddTensorConstant(tensorConst);
+            inputIds.push_back(constId);
+        }
         graph.AddOperator(op.op, inputIds, op.outputs, op.attributes);
     }
     graph.FinalizeGraph();
@@ -134,15 +150,13 @@ TEST(Spirv2TosaTest, GetTosaOperatorBasicTest)
     op.outputs.emplace_back(tosa::DataType::uint32_t, tosa::Tensor::TensorShape{1});
     EXPECT_TRUE(GetTosaOperatorTest(op));
 
-    op.outputs.emplace_back(tosa::DataType::uint32_t, tosa::Tensor::TensorShape{1});
-    EXPECT_TRUE(GetTosaOperatorTest(op));
-
     op.op = tosa::OperatorEnum::ArithmeticRightShift;
-    op.attributes.emplace_back(std::vector<uint32_t>{3}, tosa::DataType::uint32_t, tosa::Tensor::TensorShape{1});
+    op.attributes.emplace_back(std::vector<uint32_t>{1}, tosa::DataType::bool_t, tosa::Tensor::TensorShape{1});
     EXPECT_TRUE(GetTosaOperatorTest(op));
 
     op.op = tosa::OperatorEnum::Fft2d;
     op.attributes.emplace_back(std::vector<uint32_t>{1}, tosa::DataType::bool_t, tosa::Tensor::TensorShape{1});
+    op.outputs.emplace_back(tosa::DataType::uint32_t, tosa::Tensor::TensorShape{1});
     EXPECT_TRUE(GetTosaOperatorTest(op));
 }
 
@@ -150,17 +164,16 @@ TEST(Spirv2TosaTest, GetTosaOperatorTest)
 {
     TosaOperator op;
     op.op = tosa::OperatorEnum::AvgPool2d;
-    op.inputs.emplace_back(tosa::DataType::uint32_t, tosa::Tensor::TensorShape{1});
-    op.inputs.emplace_back(tosa::DataType::uint32_t, tosa::Tensor::TensorShape{2});
-    op.outputs.emplace_back(tosa::DataType::uint32_t, tosa::Tensor::TensorShape{1});
-    op.outputs.emplace_back(tosa::DataType::uint32_t, tosa::Tensor::TensorShape{2});
+    op.inputs.emplace_back(tosa::DataType::uint32_t, tosa::Tensor::TensorShape{4});
+    op.outputs.emplace_back(tosa::DataType::uint32_t, tosa::Tensor::TensorShape{4});
+    op.attributes.emplace_back(std::vector<uint32_t>{2, 3}, tosa::DataType::uint32_t, tosa::Tensor::TensorShape{2});
+    op.attributes.emplace_back(std::vector<uint32_t>{0, 0}, tosa::DataType::uint32_t, tosa::Tensor::TensorShape{2});
     op.attributes.emplace_back(std::vector<uint32_t>{1, 1, 1, 1},
                                tosa::DataType::uint32_t,
                                tosa::Tensor::TensorShape{4});
-    op.attributes.emplace_back(std::vector<uint32_t>{2, 3}, tosa::DataType::uint32_t, tosa::Tensor::TensorShape{2});
-    op.attributes.emplace_back(std::vector<uint32_t>{0, 0}, tosa::DataType::uint32_t, tosa::Tensor::TensorShape{2});
     op.attributes.emplace_back(std::vector<uint32_t>{1}, tosa::DataType::uint32_t, tosa::Tensor::TensorShape{1});
-
+    op.tensorConstants.emplace_back(std::vector<uint32_t>{0}, tosa::DataType::uint32_t, tosa::Tensor::TensorShape{1});
+    op.tensorConstants.emplace_back(std::vector<uint32_t>{0}, tosa::DataType::uint32_t, tosa::Tensor::TensorShape{1});
     EXPECT_TRUE(GetTosaOperatorTest(op));
 }
 
@@ -217,16 +230,17 @@ TEST(Spirv2TosaTest, GetTosaOperatorErrorTest2)
     // Replacing invalid instruction with a valid one, expect no throw
     spirv::Instruction validInstruction{spv::Op::OpGraphInputARM, {spirv::Operand{&outputTensor}}};
     instruction.m_Operands[4].m_InstructionPtr = &validInstruction;
+    instruction.m_Operands.push_back(spirv::Operand{&validInstruction});
     EXPECT_NO_THROW(GetTosaOperator(instruction));
 }
 
 TEST(Spirv2TosaTest, Spirv2OperatorsBasicTest)
 {
     std::vector<TosaOperator> ops;
-    for (size_t i = 0; i < 5; ++i)
+    for (size_t i = 0; i < 9; ++i)
     {
         TosaOperator op;
-        op.op = static_cast<tosa::OperatorEnum>(static_cast<size_t>(tosa::OperatorEnum::Add) + i);
+        op.op = static_cast<tosa::OperatorEnum>(static_cast<size_t>(tosa::OperatorEnum::BitwiseAnd) + i);
         op.inputs.emplace_back(tosa::DataType::uint32_t, tosa::Tensor::TensorShape{1});
         op.inputs.emplace_back(tosa::DataType::uint32_t, tosa::Tensor::TensorShape{1});
         op.outputs.emplace_back(tosa::DataType::uint32_t, tosa::Tensor::TensorShape{1});
@@ -239,10 +253,11 @@ TEST(Spirv2TosaTest, Spirv2OperatorsComparatorTest)
 {
     std::vector<TosaOperator> ops;
     std::vector<TosaOperator> expectedOps;
-    for (size_t i = 0; i < 5; ++i)
+    for (size_t i = 0; i < 9; ++i)
     {
         TosaOperator op;
-        op.op = static_cast<tosa::OperatorEnum>(static_cast<size_t>(tosa::OperatorEnum::Sub) + i);
+        op.op = static_cast<tosa::OperatorEnum>(static_cast<size_t>(tosa::OperatorEnum::BitwiseAnd) + i);
+        op.inputs.emplace_back(tosa::DataType::uint32_t, tosa::Tensor::TensorShape{1, static_cast<uint32_t>(i)});
         op.inputs.emplace_back(tosa::DataType::uint32_t, tosa::Tensor::TensorShape{1, static_cast<uint32_t>(i)});
         op.outputs.emplace_back(tosa::DataType::uint32_t, tosa::Tensor::TensorShape{1, static_cast<uint32_t>(i)});
         ops.push_back(op);
@@ -260,33 +275,114 @@ TEST(Spirv2TosaTest, Spirv2TosaTest)
     std::vector<std::string> strings = {
         "const OperatorEnum op = OperatorEnum::Add;\n"
         "const std::vector<Tensor> inputs {{DataType::uint32_t, {1}}, {DataType::uint32_t, {1}}};\n"
+        "const std::vector<Tensor> graphConstants {};\n"
+        "const std::vector<Attribute> tensorConstants {};\n"
         "const std::vector<Tensor> outputs {{DataType::uint32_t, {1}}};\n"
         "const std::vector<Attribute> attributes {};",
         "const OperatorEnum op = OperatorEnum::Sub;\n"
-        "const std::vector<Tensor> inputs {{DataType::uint32_t, {1}}, {DataType::uint32_t, {1}}};\n"
+        "const std::vector<Tensor> inputs {{DataType::uint32_t, {1}}};\n"
+        "const std::vector<Tensor> graphConstants {{DataType::uint32_t, {1}}};\n"
+        "const std::vector<Attribute> tensorConstants {};\n"
         "const std::vector<Tensor> outputs {{DataType::uint32_t, {1}}};\n"
         "const std::vector<Attribute> attributes {};",
         "const OperatorEnum op = OperatorEnum::ArithmeticRightShift;\n"
         "const std::vector<Tensor> inputs {{DataType::uint32_t, {1}}, {DataType::uint32_t, {1}}};\n"
+        "const std::vector<Tensor> graphConstants {};\n"
+        "const std::vector<Attribute> tensorConstants {};\n"
         "const std::vector<Tensor> outputs {{DataType::uint32_t, {1}}};\n"
-        "const std::vector<Attribute> attributes {{{1}, DataType::uint32_t, {1}}};"};
+        "const std::vector<Attribute> attributes {{std::initializer_list<uint32_t>{1}, DataType::uint32_t, {1}}};"};
     std::vector<TosaOperator> ops = {{tosa::OperatorEnum::Add,
                                       {tosa::Tensor{tosa::DataType::uint32_t, tosa::Tensor::TensorShape{1}},
                                        tosa::Tensor{tosa::DataType::uint32_t, tosa::Tensor::TensorShape{1}}},
+                                      {},
+                                      {},
                                       {tosa::Tensor{tosa::DataType::uint32_t, tosa::Tensor::TensorShape{1}}},
                                       {}},
                                      {tosa::OperatorEnum::Sub,
-                                      {tosa::Tensor{tosa::DataType::uint32_t, tosa::Tensor::TensorShape{1}},
-                                       tosa::Tensor{tosa::DataType::uint32_t, tosa::Tensor::TensorShape{1}}},
+                                      {tosa::Tensor{tosa::DataType::uint32_t, tosa::Tensor::TensorShape{1}}},
+                                      {tosa::Tensor{tosa::DataType::uint32_t, tosa::Tensor::TensorShape{1}}},
+                                      {},
                                       {tosa::Tensor{tosa::DataType::uint32_t, tosa::Tensor::TensorShape{1}}},
                                       {}},
                                      {tosa::OperatorEnum::ArithmeticRightShift,
                                       {tosa::Tensor{tosa::DataType::uint32_t, tosa::Tensor::TensorShape{1}},
                                        tosa::Tensor{tosa::DataType::uint32_t, tosa::Tensor::TensorShape{1}}},
+                                      {},
+                                      {},
                                       {tosa::Tensor{tosa::DataType::uint32_t, tosa::Tensor::TensorShape{1}}},
                                       {tosa::Attribute{{1}, tosa::DataType::uint32_t, {1}}}}};
 
     EXPECT_TRUE(Spirv2tosaTest(ops, strings));
+}
+
+TEST(Spirv2TosaTest, GetOperatorNameTest)
+{
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::ArgMax), "ArgMax");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::AvgPool2d), "AvgPool2d");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Conv2d), "Conv2d");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Conv3d), "Conv3d");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::DepthwiseConv2d), "DepthwiseConv2d");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Fft2d), "Fft2d");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Matmul), "Matmul");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::MaxPool2d), "MaxPool2d");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Rfft2d), "Rfft2d");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::TransposeConv2d), "TransposeConv2d");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Clamp), "Clamp");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Erf), "Erf");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Sigmoid), "Sigmoid");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Tanh), "Tanh");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Add), "Add");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::ArithmeticRightShift), "ArithmeticRightShift");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::BitwiseAnd), "BitwiseAnd");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::BitwiseOr), "BitwiseOr");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::BitwiseXor), "BitwiseXor");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::IntDiv), "IntDiv");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::LogicalAnd), "LogicalAnd");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::LogicalLeftShift), "LogicalLeftShift");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::LogicalRightShift), "LogicalRightShift");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::LogicalOr), "LogicalOr");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::LogicalXor), "LogicalXor");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Maximum), "Maximum");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Minimum), "Minimum");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Mul), "Mul");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Pow), "Pow");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Sub), "Sub");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Table), "Table");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Abs), "Abs");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::BitwiseNot), "BitwiseNot");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Ceil), "Ceil");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Clz), "Clz");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Cos), "Cos");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Exp), "Exp");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Floor), "Floor");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Log), "Log");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::LogicalNot), "LogicalNot");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Negate), "Negate");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Reciprocal), "Reciprocal");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Rsqrt), "Rsqrt");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Sin), "Sin");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Select), "Select");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Equal), "Equal");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Greater), "Greater");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::GreaterEqual), "GreaterEqual");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::ReduceAll), "ReduceAll");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::ReduceAny), "ReduceAny");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::ReduceMax), "ReduceMax");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::ReduceMin), "ReduceMin");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::ReduceProduct), "ReduceProduct");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::ReduceSum), "ReduceSum");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Concat), "Concat");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Pad), "Pad");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Reshape), "Reshape");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Reverse), "Reverse");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Slice), "Slice");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Tile), "Tile");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Transpose), "Transpose");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Gather), "Gather");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Scatter), "Scatter");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Resize), "Resize");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Cast), "Cast");
+    EXPECT_EQ(tosa::GetOperatorName(tosa::OperatorEnum::Rescale), "Rescale");
 }
 
 } // namespace testutils

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// THIS FILE IS GENERATED WITH TOSA 1.0.0. DO NOT EDIT!
+// THIS FILE IS GENERATED WITH TOSA 1.0.1. DO NOT EDIT!
 // See tosa2spirv/python/code_generator.py and README
 
 #include <AssemblyUtils.hpp>
@@ -57,15 +57,14 @@ TEST(TOSA2SPIRV_PARSER, ArgMax)
                                       {outputName});
 
     TosaSerializationParser parser(&block);
-    auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
+    const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "ARGMAX", outputStr));
-
-    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "ARGMAX", outputStr, 1, 0));
-
-    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "ARGMAX", outputStr, 1, 1));
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "ARGMAX", outputStr));
+    testutils::CheckModule(spirvModule,
+                           TOSAARGMAX,
+                           {{DataType::int8_t, {1, 1, 1, 1}}},
+                           {},
+                           {{{1}, DataType::int32_t, {1}}, {{1}, DataType::int32_t, {1}}},
+                           {{DataType::int32_t, {1, 1, 1, 1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, AvgPool2d)
@@ -142,23 +141,19 @@ TEST(TOSA2SPIRV_PARSER, AvgPool2d)
                                       {outputName});
 
     TosaSerializationParser parser(&block);
-    auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
+    const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "AVG_POOL2D", outputStr));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "AVG_POOL2D", outputStr, 5, "uchar"));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "AVG_POOL2D", outputStr, 6, "uchar"));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1}, "AVG_POOL2D", outputStr, 0));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1}, "AVG_POOL2D", outputStr, 1));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "AVG_POOL2D", outputStr, 2));
-
-    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "AVG_POOL2D", outputStr, 1, 3));
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "AVG_POOL2D", outputStr));
+    testutils::CheckModule(spirvModule,
+                           TOSAAVG_POOL2D,
+                           {{DataType::int8_t, {1, 1, 1, 1}}},
+                           {},
+                           {{{1, 1}, DataType::int32_t, {2}},
+                            {{1, 1}, DataType::int32_t, {2}},
+                            {{1, 1, 1, 1}, DataType::int32_t, {4}},
+                            {{1}, DataType::int32_t, {1}},
+                            {{1}, DataType::int8_t, {1}},
+                            {{1}, DataType::int8_t, {1}}},
+                           {{DataType::int8_t, {1, 1, 1, 1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, Conv2d)
@@ -246,27 +241,21 @@ TEST(TOSA2SPIRV_PARSER, Conv2d)
                                       {outputName});
 
     TosaSerializationParser parser(&block);
-    auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
+    const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "CONV2D", outputStr));
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "CONV2D", outputStr));
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "CONV2D", outputStr));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "CONV2D", outputStr, 8, "uchar"));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "CONV2D", outputStr, 9, "uchar"));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "CONV2D", outputStr, 0));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1}, "CONV2D", outputStr, 1));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1}, "CONV2D", outputStr, 2));
-
-    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "CONV2D", outputStr, 1, 3));
-
-    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "CONV2D", outputStr, 1, 4));
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "CONV2D", outputStr));
+    testutils::CheckModule(
+        spirvModule,
+        TOSACONV2D,
+        {{DataType::int8_t, {1, 1, 1, 1}}, {DataType::int8_t, {1, 1, 1, 1}}, {DataType::int32_t, {1, 1, 1, 1}}},
+        {},
+        {{{1, 1, 1, 1}, DataType::int32_t, {4}},
+         {{1, 1}, DataType::int32_t, {2}},
+         {{1, 1}, DataType::int32_t, {2}},
+         {{1}, DataType::int32_t, {1}},
+         {{1}, DataType::bool_t, {1}},
+         {{1}, DataType::int8_t, {1}},
+         {{1}, DataType::int8_t, {1}}},
+        {{DataType::int32_t, {1, 1, 1, 1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, Conv3d)
@@ -354,27 +343,21 @@ TEST(TOSA2SPIRV_PARSER, Conv3d)
                                       {outputName});
 
     TosaSerializationParser parser(&block);
-    auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
+    const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "CONV3D", outputStr));
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "CONV3D", outputStr));
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "CONV3D", outputStr));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "CONV3D", outputStr, 8, "uchar"));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "CONV3D", outputStr, 9, "uchar"));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1, 1, 1, 1}, "CONV3D", outputStr, 0));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1}, "CONV3D", outputStr, 1));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1}, "CONV3D", outputStr, 2));
-
-    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "CONV3D", outputStr, 1, 3));
-
-    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "CONV3D", outputStr, 1, 4));
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "CONV3D", outputStr));
+    testutils::CheckModule(
+        spirvModule,
+        TOSACONV3D,
+        {{DataType::int8_t, {1, 1, 1, 1}}, {DataType::int8_t, {1, 1, 1, 1}}, {DataType::int32_t, {1, 1, 1, 1}}},
+        {},
+        {{{1, 1, 1, 1, 1, 1}, DataType::int32_t, {6}},
+         {{1, 1, 1}, DataType::int32_t, {3}},
+         {{1, 1, 1}, DataType::int32_t, {3}},
+         {{1}, DataType::int32_t, {1}},
+         {{1}, DataType::bool_t, {1}},
+         {{1}, DataType::int8_t, {1}},
+         {{1}, DataType::int8_t, {1}}},
+        {{DataType::int32_t, {1, 1, 1, 1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, DepthwiseConv2d)
@@ -462,27 +445,21 @@ TEST(TOSA2SPIRV_PARSER, DepthwiseConv2d)
                                       {outputName});
 
     TosaSerializationParser parser(&block);
-    auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
+    const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "DEPTHWISE_CONV2D", outputStr));
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "DEPTHWISE_CONV2D", outputStr));
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "DEPTHWISE_CONV2D", outputStr));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "DEPTHWISE_CONV2D", outputStr, 8, "uchar"));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "DEPTHWISE_CONV2D", outputStr, 9, "uchar"));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "DEPTHWISE_CONV2D", outputStr, 0));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1}, "DEPTHWISE_CONV2D", outputStr, 1));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1}, "DEPTHWISE_CONV2D", outputStr, 2));
-
-    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "DEPTHWISE_CONV2D", outputStr, 1, 3));
-
-    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "DEPTHWISE_CONV2D", outputStr, 1, 4));
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "DEPTHWISE_CONV2D", outputStr));
+    testutils::CheckModule(
+        spirvModule,
+        TOSADEPTHWISE_CONV2D,
+        {{DataType::int8_t, {1, 1, 1, 1}}, {DataType::int8_t, {1, 1, 1, 1}}, {DataType::int32_t, {1, 1, 1, 1}}},
+        {},
+        {{{1, 1, 1, 1}, DataType::int32_t, {4}},
+         {{1, 1}, DataType::int32_t, {2}},
+         {{1, 1}, DataType::int32_t, {2}},
+         {{1}, DataType::int32_t, {1}},
+         {{1}, DataType::bool_t, {1}},
+         {{1}, DataType::int8_t, {1}},
+         {{1}, DataType::int8_t, {1}}},
+        {{DataType::int32_t, {1, 1, 1, 1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, Fft2d)
@@ -547,17 +524,14 @@ TEST(TOSA2SPIRV_PARSER, Fft2d)
                                       {output_realName, output_imagName});
 
     TosaSerializationParser parser(&block);
-    auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
+    const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float32_t, "FFT2D", outputStr));
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float32_t, "FFT2D", outputStr));
-
-    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "FFT2D", outputStr, 1, 0));
-
-    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "FFT2D", outputStr, 1, 1));
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float32_t, "FFT2D", outputStr));
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float32_t, "FFT2D", outputStr));
+    testutils::CheckModule(spirvModule,
+                           TOSAFFT2D,
+                           {{DataType::float32_t, {1, 1, 1, 1}}, {DataType::float32_t, {1, 1, 1, 1}}},
+                           {},
+                           {{{1}, DataType::bool_t, {1}}, {{1}, DataType::bool_t, {1}}},
+                           {{DataType::float32_t, {1, 1, 1, 1}}, {DataType::float32_t, {1, 1, 1, 1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, Matmul)
@@ -626,17 +600,14 @@ TEST(TOSA2SPIRV_PARSER, Matmul)
                                       {outputName});
 
     TosaSerializationParser parser(&block);
-    auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
+    const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MATMUL", outputStr));
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MATMUL", outputStr));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "MATMUL", outputStr, 2, "uchar"));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "MATMUL", outputStr, 3, "uchar"));
-
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "MATMUL", outputStr));
+    testutils::CheckModule(spirvModule,
+                           TOSAMATMUL,
+                           {{DataType::int8_t, {1, 1, 1, 1}}, {DataType::int8_t, {1, 1, 1, 1}}},
+                           {},
+                           {{{1}, DataType::int8_t, {1}}, {{1}, DataType::int8_t, {1}}},
+                           {{DataType::int32_t, {1, 1, 1, 1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, MaxPool2d)
@@ -684,19 +655,17 @@ TEST(TOSA2SPIRV_PARSER, MaxPool2d)
                                       {outputName});
 
     TosaSerializationParser parser(&block);
-    auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
+    const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "MAX_POOL2D", outputStr));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1}, "MAX_POOL2D", outputStr, 0));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1}, "MAX_POOL2D", outputStr, 1));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "MAX_POOL2D", outputStr, 2));
-
-    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "MAX_POOL2D", outputStr, 1, 3));
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int8_t, "MAX_POOL2D", outputStr));
+    testutils::CheckModule(spirvModule,
+                           TOSAMAX_POOL2D,
+                           {{DataType::int8_t, {1, 1, 1, 1}}},
+                           {},
+                           {{{1, 1}, DataType::int32_t, {2}},
+                            {{1, 1}, DataType::int32_t, {2}},
+                            {{1, 1, 1, 1}, DataType::int32_t, {4}},
+                            {{1}, DataType::int32_t, {1}}},
+                           {{DataType::int8_t, {1, 1, 1, 1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, Rfft2d)
@@ -753,14 +722,14 @@ TEST(TOSA2SPIRV_PARSER, Rfft2d)
                                       {output_realName, output_imagName});
 
     TosaSerializationParser parser(&block);
-    auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
+    const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::float32_t, "RFFT2D", outputStr));
-
-    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "RFFT2D", outputStr, 0, 0));
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float32_t, "RFFT2D", outputStr));
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::float32_t, "RFFT2D", outputStr));
+    testutils::CheckModule(spirvModule,
+                           TOSARFFT2D,
+                           {{DataType::float32_t, {1, 1, 1, 1}}},
+                           {},
+                           {{{0}, DataType::bool_t, {1}}},
+                           {{DataType::float32_t, {1, 1, 1, 1}}, {DataType::float32_t, {1, 1, 1, 1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, TransposeConv2d)
@@ -847,23 +816,18 @@ TEST(TOSA2SPIRV_PARSER, TransposeConv2d)
                                       {outputName});
 
     TosaSerializationParser parser(&block);
-    auto binarySpirv = parser.GenerateSPIRV("main");
-    const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
+    const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "TRANSPOSE_CONV2D", outputStr));
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int8_t, "TRANSPOSE_CONV2D", outputStr));
-    EXPECT_TRUE(testutils::CheckInputTensor({1, 1, 1, 1}, DataType::int32_t, "TRANSPOSE_CONV2D", outputStr));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "TRANSPOSE_CONV2D", outputStr, 7, "uchar"));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1}, "TRANSPOSE_CONV2D", outputStr, 8, "uchar"));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1, 1, 1}, "TRANSPOSE_CONV2D", outputStr, 0));
-
-    EXPECT_TRUE(testutils::CheckConstCompositeTensor({1, 1}, "TRANSPOSE_CONV2D", outputStr, 1));
-
-    EXPECT_TRUE(testutils::CheckConstant(DataType::int32_t, "TRANSPOSE_CONV2D", outputStr, 1, 2));
-
-    EXPECT_TRUE(testutils::CheckBoolConstant(DataType::bool_t, "TRANSPOSE_CONV2D", outputStr, 1, 3));
-    EXPECT_TRUE(testutils::CheckOutputTensor({1, 1, 1, 1}, DataType::int32_t, "TRANSPOSE_CONV2D", outputStr));
+    testutils::CheckModule(
+        spirvModule,
+        TOSATRANSPOSE_CONV2D,
+        {{DataType::int8_t, {1, 1, 1, 1}}, {DataType::int8_t, {1, 1, 1, 1}}, {DataType::int32_t, {1, 1, 1, 1}}},
+        {},
+        {{{1, 1, 1, 1}, DataType::int32_t, {4}},
+         {{1, 1}, DataType::int32_t, {2}},
+         {{1}, DataType::int32_t, {1}},
+         {{1}, DataType::bool_t, {1}},
+         {{1}, DataType::int8_t, {1}},
+         {{1}, DataType::int8_t, {1}}},
+        {{DataType::int32_t, {1, 1, 1, 1}}});
 }

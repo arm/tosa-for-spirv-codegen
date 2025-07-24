@@ -64,17 +64,11 @@ function BuildVgfEncoder {
   scripts/build_vgf_encoder.sh $BUILD_TYPE $CMAKE_PATH $TARGET || exit 1
 }
 
-function BuildEffcee {
-    scripts/build_effcee.sh $BUILD_TYPE $CMAKE_PATH $TARGET || exit 1
-}
-
 # Function to clean previously built third party libraries to avoid cross compiling issues
 function CleanPreviouslyBuiltDependencies {
     export EXTERNAL_DIR="$(pwd)/external"
     rm -rf ${EXTERNAL_DIR}/serialization_lib/build
     rm -rf ${EXTERNAL_DIR}/vgf_encoder/build
-    rm -rf ${EXTERNAL_DIR}/effcee/build
-    rm -rf ${EXTERNAL_DIR}/effcee/third_party/abseil-cpp/out
 }
 
 echo "*** Building tosa2spirv dependencies."
@@ -83,6 +77,5 @@ CleanPreviouslyBuiltDependencies
 BuildSpirvTools
 BuildTOSASerializationLibrary
 BuildVgfEncoder
-BuildEffcee
 
 echo "*** All dependencies built successfully."

@@ -20,6 +20,7 @@ target_include_directories(testutils PUBLIC src)
 target_include_directories(testutils PUBLIC ${CMAKE_SOURCE_DIR}/src)
 target_include_directories(testutils PUBLIC ${SPIRV_HEADERS_SOURCE_PATH}/include)
 target_include_directories(testutils PUBLIC ${SPIRV_HEADERS_SOURCE_PATH})
+target_include_directories(testutils PUBLIC ${GOOGLETEST_PATH}/googletest/include)
 
 target_link_libraries(testutils PUBLIC tosa2spirv)
 
@@ -63,26 +64,9 @@ else()
             -Wl,--whole-archive ${FLATBUFFERS_LIBRARY_PATH} -Wl,--no-whole-archive)
 endif()
 
-target_include_directories(testutils PUBLIC ${EFFCEE_SOURCE_PATH})
-target_include_directories(testutils PUBLIC ${RE2_SOURCE_PATH})
-target_include_directories(testutils PUBLIC ${ABSEIL_SOURCE_PATH})
-add_subdirectory(${ABSEIL_SOURCE_PATH} ${ABSEIL_SOURCE_PATH}/out)
-
 target_link_libraries(testutils PUBLIC
                       -Wl,--whole-archive
-                      ${EFFCEE_BUILD_PATH}/effcee/libeffcee.a
                       -Wl,--no-whole-archive)
-
-target_link_libraries(testutils PUBLIC ${EFFCEE_BUILD_PATH}/third_party/re2/libre2.a)
-
-target_link_libraries(testutils PUBLIC
-                      absl::strings
-                      absl::base
-                      absl::flags
-                      absl::flags_parse
-                      absl::status
-                      absl::str_format
-                      absl::hash)
 
 if(NOT SPIRV_TOOLS_LIBRARY_PATH)
     message(WARNING "SPIRV-Tools library (${SPIRV_TOOLS_LIBRARY}) not found.")
@@ -91,4 +75,3 @@ else()
     target_link_libraries(testutils PUBLIC ${SPIRV_TOOLS_LIBRARY_PATH})
 endif()
 
-target_include_directories(testutils PUBLIC ${EFFCEE_SOURCE_PATH})

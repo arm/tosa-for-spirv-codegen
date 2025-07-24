@@ -91,7 +91,7 @@ class SourceGenerator:
         file.write("switch (op){")
         for name in self._operator_name_list:
             file.start_block()
-            file.write("case OperatorEnum::" + name + ': { return {"' + operator_name_to_pascal_case(name) + '"};}\n')
+            file.write("case OperatorEnum::" + name + ': { return {"' + name + '"};}\n')
             file.end_block()
 
     def generate_op_definitions(self):

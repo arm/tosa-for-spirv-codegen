@@ -40,10 +40,6 @@ function DownloadNgpRuntime {
   scripts/clone_ngp_runtime.sh $USERNAME || exit 1 # To be moved to external repo in IVGCVSW-8415
 }
 
-function DownloadEffcee {
-  scripts/clone_effcee.sh || exit 1
-}
-
 function DownloadArgparse {
   scripts/clone_argparse.sh || exit 1
 }
@@ -62,7 +58,6 @@ DownloadTOSASerializationLibrary
 DownloadTosaSpec
 DownloadVgfEncoder
 DownloadNgpRuntime
-DownloadEffcee
 DownloadArgparse
 DownloadJson
 
