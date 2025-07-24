@@ -16,12 +16,12 @@ rm -rf $VGF_ENCODER_DIR
 rm -rf $FLATBUFFERS_DIR
 
 # Pinned SHA for branch
-VGF_ENCODER_REVISION="main" # Use main to streamline absorption of changes
+VGF_ENCODER_REVISION="bf2de11731b7e60a8f1fe04da47a56fa003a80ed"
 FLATBUFFERS_REVISION="v23.5.26" # To align with flatbuffer version in the latest serialization lib
 
 echo "+++ Cloning VGF Encoder"
 mkdir -p $VGF_ENCODER_DIR
-git clone ssh://$USERNAME@eu-gerrit-2.euhpc.arm.com:29418/ml/ngp/ml-sdk-vgf-lib $VGF_ENCODER_DIR
+git clone ssh://$USERNAME@eu-gerrit-2.euhpc.arm.com:29418/mirrors/opensource/github/arm/ai-ml-sdk-vgf-library $VGF_ENCODER_DIR
 git -C $VGF_ENCODER_DIR checkout $VGF_ENCODER_REVISION
 
 mkdir -p $FLATBUFFERS_DIR

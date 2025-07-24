@@ -11,7 +11,7 @@ TOSA_SERIALIZATION_LIB_DIR=$EXTERNAL_DIR/serialization_lib
 
 rm -rf $TOSA_SERIALIZATION_LIB_DIR
 
-TOSA_SERIALIZATION_LIB_REVISION="3a7d3b81c5111355722d3fe56e2248eceab10288" # To align with Systest
+TOSA_SERIALIZATION_LIB_REVISION="359145e768e565d7666aa6ebd0abb92784f398cb" # Released with TOSA Software v2025.07.0
 
 echo "+++ Cloning TOSA Serialization Library"
 git clone "https://review.mlplatform.org/tosa/serialization_lib" $TOSA_SERIALIZATION_LIB_DIR
