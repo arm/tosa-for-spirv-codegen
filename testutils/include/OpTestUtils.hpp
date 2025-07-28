@@ -23,7 +23,7 @@ namespace testutils
 {
 
 /// Checks that a given spirv Module instance contains an operator with the given parameters
-bool CheckModule(const std::shared_ptr<spirv::Module>& module,
+void CheckModule(const std::shared_ptr<spirv::Module>& module,
                  const TOSAInstructions op,
                  const std::vector<tosa::Tensor>& inputs,
                  const std::vector<tosa::Tensor>& graphConstants,
@@ -32,7 +32,7 @@ bool CheckModule(const std::shared_ptr<spirv::Module>& module,
                  const std::vector<tosa::Attribute>& attributes = {});
 
 /// CheckModule overload taking an OperatorEnum instead of TOSAInstructions operator
-inline bool CheckModule(const std::shared_ptr<spirv::Module>& module,
+inline void CheckModule(const std::shared_ptr<spirv::Module>& module,
                         const tosa::OperatorEnum op,
                         const std::vector<tosa::Tensor>& inputs,
                         const std::vector<tosa::Tensor>& graphConstants,
@@ -40,13 +40,7 @@ inline bool CheckModule(const std::shared_ptr<spirv::Module>& module,
                         const std::vector<tosa::Tensor>& outputs,
                         const std::vector<tosa::Attribute>& attributes = {})
 {
-    return CheckModule(module,
-                       tosa::GetTOSAInstructions(op),
-                       inputs,
-                       graphConstants,
-                       tensorConstants,
-                       outputs,
-                       attributes);
+    CheckModule(module, tosa::GetTOSAInstructions(op), inputs, graphConstants, tensorConstants, outputs, attributes);
 }
 
 /// Operator Test Fixture, attempts to create a new operator using the GraphAPI defined using the given parameters, and

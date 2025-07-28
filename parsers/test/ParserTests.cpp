@@ -843,12 +843,12 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorIdentityConv2DIdentityMode
 
     auto identity2InputTensor = std::make_unique<TosaSerializationTensor>(identity2InputName,
                                                                           outputShape,
-                                                                          DType::DType_INT8,
+                                                                          DType::DType_INT32,
                                                                           std::vector<uint8_t>{});
     tensors.push_back(std::move(identity2InputTensor));
     auto identity2OutputTensor = std::make_unique<TosaSerializationTensor>(identity2OutputName,
                                                                            outputShape,
-                                                                           DType::DType_INT8,
+                                                                           DType::DType_INT32,
                                                                            std::vector<uint8_t>{});
     tensors.push_back(std::move(identity2OutputTensor));
 
@@ -912,7 +912,7 @@ TEST(TOSA2SPIRV_PARSER, IdentityConv2dIdentity)
                             {{0}, DataType::int32_t, {1}},
                             {{1}, DataType::int8_t, {1}},
                             {{1}, DataType::int8_t, {1}}},
-                           {{DataType::int8_t, {1, 3, 3, 1}}});
+                           {{DataType::int32_t, {1, 3, 3, 1}}});
 }
 
 // Multi Layer CONV2D - IDENTITY - RESCALE - CONV2D reusing the weight and bias GraphConstantId

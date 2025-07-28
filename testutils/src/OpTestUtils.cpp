@@ -10,7 +10,7 @@
 namespace testutils
 {
 
-bool CheckModule(const std::shared_ptr<spirv::Module>& module,
+void CheckModule(const std::shared_ptr<spirv::Module>& module,
                  const TOSAInstructions op,
                  const std::vector<tosa::Tensor>& inputs,
                  const std::vector<tosa::Tensor>& graphConstants,
@@ -20,10 +20,7 @@ bool CheckModule(const std::shared_ptr<spirv::Module>& module,
 {
     // Validating Module SPIR-V
     const auto binary = tosa2spirv::WriteToBinary(module);
-    if (testutils::DisassembleSPIRV(binary, true) == "")
-    {
-        return false;
-    }
+    EXPECT_FALSE(testutils::DisassembleSPIRV(binary, true) == "");
 
     // Validating module content
     std::vector<tosa::Attribute> jointAttributes;
@@ -131,8 +128,8 @@ bool CheckModule(const std::shared_ptr<spirv::Module>& module,
             }
         }
     }
-    return (inputIdx == inputs.size() && graphConstIdx == graphConstants.size() &&
-            tensorConstIdx == jointAttributes.size());
+    EXPECT_TRUE(inputIdx == inputs.size() && graphConstIdx == graphConstants.size() &&
+                tensorConstIdx == jointAttributes.size());
 }
 
 bool CheckOperator(const tosa::OperatorEnum op,
