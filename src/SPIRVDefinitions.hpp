@@ -17,6 +17,7 @@ Operand CreateConstantDouble(uint32_t valueLow, uint32_t valueHigh, Module& modu
 Operand
 CreateConstantComposite(const std::vector<uint32_t>& array, const Operand& typeId, Module& module, bool reduce = true);
 Operand CreateConstantCompositeDouble(const std::vector<uint32_t>& array, const Operand& typeId, Module& module);
+Operand CreateConstantCompositeTyped(const std::vector<uint32_t>& array, const Operand& typeId, Module& module, tosa::DataType type);
 Operand CreateTensor(const tosa::Tensor& tensor, Module& module);
 Operand CreateAttribute(const tosa::Attribute& attribute, Module& module);
 

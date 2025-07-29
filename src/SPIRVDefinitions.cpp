@@ -114,12 +114,10 @@ Operand CreateConstantCompositeTyped(const std::vector<uint32_t>& array,
         const auto constant = CreateConstant(array[0], type, module);
         return module.EmplaceInstruction(OpConstantCompositeReplicateEXT, {typeId, RESID, constant});
     }
-
-    const auto scalarType = CreateDataType(type, module);
+    
     for (const auto val : array)
     {
-        // Create Constant value instruction for scalar value inside the vector e.g the 2 in {2,2}.
-        operands.push_back(module.EmplaceInstruction(OpConstant, {scalarType, RESID, Operand{val}}));
+        operands.push_back(CreateConstant(val, type, module));
     }
     return module.EmplaceInstruction(OpConstantComposite, operands);
 }

@@ -259,6 +259,38 @@ TEST(GraphTests, CreateCreateConstantCompositeDouble)
     CheckConstantComposite(result.m_InstructionPtr, values, DataType::int48_t, DataType::int48_t);
 }
 
+TEST(GraphTests, CreateConstantCompositeTypedBool)
+{
+    const auto sharedModule = CreateModule(TOSAVersion{});
+    ASSERT_TRUE(sharedModule);
+
+    // Construct a bool tensor type to use as the typeId
+    Tensor boolTensor(tosa::DataType::bool_t, {3});
+    const auto typeId = CreateTensor(boolTensor, *sharedModule);
+
+    const std::vector<uint32_t> boolData = {1, 0, 1};
+
+    const auto result = CreateConstantCompositeTyped(boolData, typeId, *sharedModule, tosa::DataType::bool_t);
+
+    ASSERT_EQ(result.m_InstructionPtr->GetOpCode(), spv::OpConstantComposite);
+    ASSERT_EQ(result.m_InstructionPtr->m_Operands.size(), boolData.size() + 2);
+
+    // Verify each element is a bool constant
+    for (size_t i = 0; i < boolData.size(); ++i)
+    {
+        const auto constant = result.m_InstructionPtr->m_Operands[i + 2].m_InstructionPtr;
+        if (boolData[i] == 1)
+        {
+            EXPECT_EQ(constant->GetOpCode(), spv::OpConstantTrue) << "Expected OpConstantTrue for index " << i;
+        }
+        else
+        {
+            EXPECT_EQ(constant->GetOpCode(), spv::OpConstantFalse) << "Expected OpConstantFalse for index " << i;
+        }
+    }
+}
+
+
 TEST(GraphTests, CreateTensor)
 {
     const auto sharedModule = CreateModule(TOSAVersion{});
