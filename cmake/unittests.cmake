@@ -6,19 +6,19 @@
 enable_testing()
 
 file(GLOB_RECURSE TEST_SRCS_CORE CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/test/*.cpp)
-file(GLOB_RECURSE TEST_SRCS_LAYER CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/test/layerTests/*.cpp)
-file(GLOB_RECURSE TEST_UTILS CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/testutils/src/test/*.cpp)
-file(GLOB_RECURSE COMPARISON CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/ModelComparisonTool/src/test/*.cpp)
+file(GLOB_RECURSE TEST_SRCS_OPERATOR CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/test/operatorTests/*.cpp)
+file(GLOB_RECURSE UTILS CONFIGURE_DEPENDS ${TOOLS_PATH}/utils/src/test/*.cpp)
+file(GLOB_RECURSE COMPARISON CONFIGURE_DEPENDS ${TOOLS_PATH}/ModelComparisonTool/src/test/*.cpp)
 
-set(UNITTEST_SRCS ${TEST_SRCS_CORE} ${TEST_SRCS_LAYER} ${TEST_UTILS} ${COMPARISON})
+set(UNITTEST_SRCS ${TEST_SRCS_CORE} ${TEST_SRCS_OPERATOR} ${UTILS} ${COMPARISON})
 
 if (BUILD_TOSA_SERIALIZATION_PARSER)
-  file(GLOB_RECURSE TEST_SRCS_TOSA_PARSER ${CMAKE_SOURCE_DIR}/parsers/test/*.cpp)
+  file(GLOB_RECURSE TEST_SRCS_TOSA_PARSER ${TOOLS_PATH}/parsers/test/*.cpp)
   list(APPEND UNITTEST_SRCS ${TEST_SRCS_TOSA_PARSER})
 endif()
 
 if (BUILD_TOSA_2_SPIRV_GENERATOR AND NOT ANDROID)
-  file(GLOB_RECURSE TEST_SRCS_SPIRV_GEN ${CMAKE_SOURCE_DIR}/generator/test/*.cpp)
+  file(GLOB_RECURSE TEST_SRCS_SPIRV_GEN ${TOOLS_PATH}/generator/test/*.cpp)
   list(APPEND UNITTEST_SRCS ${TEST_SRCS_SPIRV_GEN})
 endif()
 
@@ -27,16 +27,16 @@ add_executable(tosa_for_spirv_tests ${UNITTEST_SRCS})
 target_include_directories(tosa_for_spirv_tests PRIVATE
   ${CMAKE_SOURCE_DIR}/include
   ${CMAKE_SOURCE_DIR}/src
-  ${CMAKE_SOURCE_DIR}/testutils/include
-  ${CMAKE_SOURCE_DIR}/testutils/src
-  ${CMAKE_SOURCE_DIR}/ModelComparisonTool/src)
+  ${TOOLS_PATH}/utils/include
+  ${TOOLS_PATH}/utils/src
+  ${TOOLS_PATH}/ModelComparisonTool/src)
 
 add_subdirectory(${GOOGLETEST_PATH} ${GOOGLETEST_PATH}/build)
 
 target_link_libraries(tosa_for_spirv_tests PRIVATE
   tosa2spirv
   module_comparator
-  testutils
+  utils
   GTest::gtest_main)
 
 find_library(SPIRV_TOOLS_LIBRARY_PATH
@@ -52,9 +52,9 @@ endif()
 
 if (BUILD_TOSA_SERIALIZATION_PARSER)
   target_include_directories(tosa_for_spirv_tests PRIVATE
-    ${CMAKE_SOURCE_DIR}/parsers/include
-    ${CMAKE_SOURCE_DIR}/parsers/src
-    ${CMAKE_SOURCE_DIR}/ModelComparisonTool/include
+    ${TOOLS_PATH}/parsers/include
+    ${TOOLS_PATH}/parsers/src
+    ${TOOLS_PATH}/ModelComparisonTool/include
     ${SERIALIZATION_LIB_SOURCE_PATH}/include
     ${SERIALIZATION_LIB_SOURCE_PATH}/third_party/half/include
     ${FLATBUFFERS_SOURCE_PATH}/include)
@@ -74,7 +74,7 @@ endif()
 
 if (BUILD_TOSA_2_SPIRV_GENERATOR)
   target_include_directories(tosa_for_spirv_tests PRIVATE
-    ${CMAKE_SOURCE_DIR}/vgfwriter/include
+    ${TOOLS_PATH}/vgfwriter/include
     ${VGF_ENCODER_PATH}/include
     ${NLOHMANN_PATH}/single_include
     ${VGF_ENCODER_PATH}/vgf_dump/include)

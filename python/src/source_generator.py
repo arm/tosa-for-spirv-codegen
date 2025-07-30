@@ -23,7 +23,7 @@ class SourceGenerator:
 
         self.graph_header_path = "include/tosa/Graph.hpp"
         self.op_def_path = "src/OperatorDefinitions.cpp"
-        self.parser_utils_path = "parsers/src/ParserUtils.hpp"
+        self.parser_utils_path = "tools/parsers/src/ParserUtils.hpp"
         self.tosa_operator_enum_path = "include/tosa/OperatorEnum.hpp"
         self.spec = tosa.TOSASpec("./external/tosa_specification/tosa.xml")
 

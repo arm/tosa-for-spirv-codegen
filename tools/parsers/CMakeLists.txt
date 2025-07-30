@@ -45,8 +45,8 @@ else()
 endif()
 
 target_include_directories(tosaSerializationParser PRIVATE ${CMAKE_SOURCE_DIR}/include)
-target_include_directories(tosaSerializationParser PRIVATE ${CMAKE_SOURCE_DIR}/parsers/include)
-target_include_directories(tosaSerializationParser PRIVATE ${CMAKE_SOURCE_DIR}/parsers/src)
+target_include_directories(tosaSerializationParser PRIVATE ${TOOLS_PATH}/parsers/include)
+target_include_directories(tosaSerializationParser PRIVATE ${TOOLS_PATH}/parsers/src)
 
 # Include headers for dependencies and sub dependencies of the TOSA Serialization Library
 target_include_directories(tosaSerializationParser PRIVATE ${SERIALIZATION_LIB_SOURCE_PATH}/include)
@@ -57,7 +57,7 @@ target_include_directories(tosa2spirv PUBLIC ${SPIRV_TOOLS_SOURCE_PATH}/include)
 target_link_libraries(tosaSerializationParser PUBLIC tosa2spirv)
 
 # Gather the headers to be installed
-file(GLOB PUBLIC_HEADERS_PARSER ${CMAKE_SOURCE_DIR}/parsers/include/*.hpp)
+file(GLOB PUBLIC_HEADERS_PARSER ${TOOLS_PATH}/parsers/include/*.hpp)
 
 # Set the public headers
 set_target_properties(tosaSerializationParser

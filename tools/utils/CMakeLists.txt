@@ -5,24 +5,24 @@
 
 set(BUILD_SHARED_LIBS OFF)
 
-set(TEST_UTILS_SOURCE
+set(UTILS_SOURCE
     src/AssemblyUtils.cpp
     src/ValidationUtils.cpp
     src/OpTestUtils.cpp
     src/EnumMaps.cpp
     src/StringUtils.cpp
     src/OpGenerator.cpp)
-add_library(testutils ${TEST_UTILS_SOURCE})
+add_library(utils ${UTILS_SOURCE})
 
-target_include_directories(testutils PRIVATE SPIRV_TOOLS_SOURCE_PATH)
-target_include_directories(testutils PUBLIC include)
-target_include_directories(testutils PUBLIC src)
-target_include_directories(testutils PUBLIC ${CMAKE_SOURCE_DIR}/src)
-target_include_directories(testutils PUBLIC ${SPIRV_HEADERS_SOURCE_PATH}/include)
-target_include_directories(testutils PUBLIC ${SPIRV_HEADERS_SOURCE_PATH})
-target_include_directories(testutils PUBLIC ${GOOGLETEST_PATH}/googletest/include)
+target_include_directories(utils PRIVATE SPIRV_TOOLS_SOURCE_PATH)
+target_include_directories(utils PUBLIC include)
+target_include_directories(utils PUBLIC src)
+target_include_directories(utils PUBLIC ${CMAKE_SOURCE_DIR}/src)
+target_include_directories(utils PUBLIC ${SPIRV_HEADERS_SOURCE_PATH}/include)
+target_include_directories(utils PUBLIC ${SPIRV_HEADERS_SOURCE_PATH})
+target_include_directories(utils PUBLIC ${GOOGLETEST_PATH}/googletest/include)
 
-target_link_libraries(testutils PUBLIC tosa2spirv)
+target_link_libraries(utils PUBLIC tosa2spirv)
 
 # Find symbols for spvtools::SpirvTools::IsValid() etc.
 set(SPIRV_TOOLS_LIBRARY libSPIRV-Tools.a)
@@ -44,7 +44,7 @@ if(NOT TOSA_SERIALIZATION_LIBRARY_PATH)
     message(WARNING "TOSA Serialization Library (${TOSA_SERIALIZATION_LIBRARY}) not found.")
 else()
     message(STATUS "TOSA Serialization Library located at: ${TOSA_SERIALIZATION_LIBRARY_PATH}")
-    target_link_libraries(testutils PUBLIC ${TOSA_SERIALIZATION_LIBRARY_PATH})
+    target_link_libraries(utils PUBLIC ${TOSA_SERIALIZATION_LIBRARY_PATH})
 endif()
 
 
@@ -60,11 +60,11 @@ if(NOT FLATBUFFERS_LIBRARY_PATH)
     message(WARNING "Flatbuffers library (${FLATBUFFERS_LIBRARY}) not found.")
 else()
     message(STATUS "Flatbuffers library located at: ${FLATBUFFERS_LIBRARY_PATH}")
-    target_link_libraries(testutils PUBLIC
+    target_link_libraries(utils PUBLIC
             -Wl,--whole-archive ${FLATBUFFERS_LIBRARY_PATH} -Wl,--no-whole-archive)
 endif()
 
-target_link_libraries(testutils PUBLIC
+target_link_libraries(utils PUBLIC
                       -Wl,--whole-archive
                       -Wl,--no-whole-archive)
 
@@ -72,6 +72,6 @@ if(NOT SPIRV_TOOLS_LIBRARY_PATH)
     message(WARNING "SPIRV-Tools library (${SPIRV_TOOLS_LIBRARY}) not found.")
 else()
     message(STATUS "SPIRV-Tools library located at: ${SPIRV_TOOLS_LIBRARY_PATH}")
-    target_link_libraries(testutils PUBLIC ${SPIRV_TOOLS_LIBRARY_PATH})
+    target_link_libraries(utils PUBLIC ${SPIRV_TOOLS_LIBRARY_PATH})
 endif()
 

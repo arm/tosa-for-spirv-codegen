@@ -61,7 +61,7 @@ if __name__ == "__main__":
     for input_name, file in input_template_dict.items():
         input_template_dict[input_name] = input_template_dir + "/" + file
 
-    tosa_serialization_parser_path = "parsers"
+    tosa_serialization_parser_path = "tools/parsers"
     cmake_file_path = "python/ClassFiles.txt"
 
     if int(args.unit_test_enabled) == 1:

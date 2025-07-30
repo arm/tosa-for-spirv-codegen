@@ -12,7 +12,7 @@ add_library(vgfWriter ${VGFWRITER_SOURCE})
 
 # Include headers for tosa2spirv and the vgfwriter.
 target_include_directories(vgfWriter PRIVATE ${CMAKE_SOURCE_DIR}/include)
-target_include_directories(vgfWriter PRIVATE ${CMAKE_SOURCE_DIR}/vgfwriter/include)
+target_include_directories(vgfWriter PRIVATE ${TOOLS_PATH}/vgfwriter/include)
 
 # Include VGF Encoder headers
 target_compile_definitions(vgfWriter PRIVATE VGFLIB_VK_HELPERS)
@@ -43,7 +43,7 @@ else ()
 endif()
 
 # Gather the headers to be installed
-file(GLOB PUBLIC_HEADERS_VGFWRITER ${CMAKE_SOURCE_DIR}/vgfwriter/include/*.hpp)
+file(GLOB PUBLIC_HEADERS_VGFWRITER ${TOOLS_PATH}/vgfwriter/include/*.hpp)
 
 # Set the public headers
 set_target_properties(vgfWriter

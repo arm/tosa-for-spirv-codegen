@@ -42,6 +42,8 @@ set(SERIALIZATION_LIB_BUILD_PATH ${CMAKE_SOURCE_DIR}/external/serialization_lib/
 set(SPIRV_TOOLS_BUILD_PATH ${CMAKE_SOURCE_DIR}/external/SPIRV-Tools/build CACHE PATH "")
 set(NLOHMANN_PATH ${CMAKE_SOURCE_DIR}/external/json CACHE PATH "")
 
+set(TOOLS_PATH ${CMAKE_SOURCE_DIR}/tools CACHE PATH "")
+
 # Parser can be enabled without generator but generator requires parser.
 if(BUILD_TOSA_2_SPIRV_GENERATOR AND NOT BUILD_TOSA_SERIALIZATION_PARSER)
     message(FATAL_ERROR
@@ -89,23 +91,23 @@ target_include_directories(tosa2spirv PRIVATE
 
 # Optional components
 if(BUILD_TOSA_SERIALIZATION_PARSER)
-    add_subdirectory(parsers)
+    add_subdirectory(${TOOLS_PATH}/parsers)
 endif()
 
 if(BUILD_VGF_WRITER)
-    add_subdirectory(vgfwriter)
+    add_subdirectory(${TOOLS_PATH}/vgfwriter)
 endif()
 
 if(BUILD_TOSA_2_SPIRV_GENERATOR)
-    add_subdirectory(generator)
+    add_subdirectory(${TOOLS_PATH}/generator)
 endif()
 if(BUILD_SPIRV_2_TOSA_TOOL)
-    add_subdirectory(spirv2tosatool)
+    add_subdirectory(${TOOLS_PATH}/spirv2tosatool)
 endif()
 
 if(BUILD_UNITTESTS OR BUILD_MODEL_COMPARISON_TOOL)
-    add_subdirectory(testutils)
-    add_subdirectory(ModelComparisonTool)  # comparison functionality needed for testing
+    add_subdirectory(${TOOLS_PATH}/utils)
+    add_subdirectory(${TOOLS_PATH}/ModelComparisonTool)  # comparison functionality needed for testing
 endif()
 
 if(BUILD_UNITTESTS)

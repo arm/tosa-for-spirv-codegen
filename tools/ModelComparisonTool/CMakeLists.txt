@@ -11,25 +11,25 @@ set(MODULE_COMPARATOR_SOURCE
     src/ProblemTree.cpp)
 
 add_library(module_comparator STATIC ${MODULE_COMPARATOR_SOURCE})
-target_include_directories(module_comparator PRIVATE ${CMAKE_SOURCE_DIR}/ModelComparisonTool/include)
-target_include_directories(module_comparator PRIVATE ${CMAKE_SOURCE_DIR}/testutils/include)
+target_include_directories(module_comparator PRIVATE ${TOOLS_PATH}/ModelComparisonTool/include)
+target_include_directories(module_comparator PRIVATE ${TOOLS_PATH}/utils/include)
 target_include_directories(module_comparator PRIVATE ${CMAKE_SOURCE_DIR}/include/spirv)
 target_include_directories(module_comparator PUBLIC ${SPIRV_HEADERS_SOURCE_PATH}/include)
 target_include_directories(module_comparator PUBLIC ${SPIRV_HEADERS_SOURCE_PATH})
 
-target_link_libraries(module_comparator  PRIVATE testutils)
+target_link_libraries(module_comparator  PRIVATE utils)
 if (NOT BUILD_MODEL_COMPARISON_TOOL)
     return()
 endif()
 
 add_executable(ModelComparisonTool src/ModelParsers.cpp src/main.cpp)
 # Include headers for tosa2spirv, the parser and the generatorUtils.
-target_include_directories(ModelComparisonTool PRIVATE ${CMAKE_SOURCE_DIR}/ModelComparisonTool/include)
-target_include_directories(ModelComparisonTool PRIVATE ${CMAKE_SOURCE_DIR}/ModelComparisonTool/src)
+target_include_directories(ModelComparisonTool PRIVATE ${TOOLS_PATH}/ModelComparisonTool/include)
+target_include_directories(ModelComparisonTool PRIVATE ${TOOLS_PATH}/ModelComparisonTool/src)
 target_include_directories(ModelComparisonTool PRIVATE ${CMAKE_SOURCE_DIR}/include)
-target_include_directories(ModelComparisonTool PRIVATE ${CMAKE_SOURCE_DIR}/parsers/include)
-target_include_directories(ModelComparisonTool PRIVATE ${CMAKE_SOURCE_DIR}/testutils/include)
-target_include_directories(ModelComparisonTool PRIVATE ${CMAKE_SOURCE_DIR}/testutils/include)
+target_include_directories(ModelComparisonTool PRIVATE ${TOOLS_PATH}/parsers/include)
+target_include_directories(ModelComparisonTool PRIVATE ${TOOLS_PATH}/utils/include)
+target_include_directories(ModelComparisonTool PRIVATE ${TOOLS_PATH}/utils/include)
 
 # Include argparse headers
 target_include_directories(ModelComparisonTool PRIVATE ${ARGPARSE_SOURCE_PATH}/include/argparse)
@@ -47,7 +47,7 @@ target_link_libraries(ModelComparisonTool PRIVATE module_comparator)
 target_link_libraries(ModelComparisonTool PRIVATE vgfWriter)
 target_link_libraries(ModelComparisonTool PRIVATE tosaSerializationParser)
 target_link_libraries(ModelComparisonTool PRIVATE tosa2spirv)
-target_link_libraries(ModelComparisonTool PRIVATE testutils)
+target_link_libraries(ModelComparisonTool PRIVATE utils)
 
 target_compile_definitions(ModelComparisonTool PRIVATE VGFLIB_VK_HELPERS)
 target_compile_definitions(ModelComparisonTool PRIVATE VGFLIB_FAKE_VULKAN_API)

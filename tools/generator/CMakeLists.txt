@@ -11,8 +11,8 @@ add_executable(tosa2spirvGenerator ${GENERATOR_SOURCE})
 
 # Include headers for tosa2spirv, the parser and the generatorUtils.
 target_include_directories(tosa2spirvGenerator PRIVATE ${CMAKE_SOURCE_DIR}/include)
-target_include_directories(tosa2spirvGenerator PRIVATE ${CMAKE_SOURCE_DIR}/parsers/include)
-target_include_directories(tosa2spirvGenerator PRIVATE ${CMAKE_SOURCE_DIR}/vgfwriter/include)
+target_include_directories(tosa2spirvGenerator PRIVATE ${TOOLS_PATH}/parsers/include)
+target_include_directories(tosa2spirvGenerator PRIVATE ${TOOLS_PATH}/vgfwriter/include)
 
 # Include argparse headers
 target_include_directories(tosa2spirvGenerator PRIVATE ${ARGPARSE_SOURCE_PATH}/include/argparse)

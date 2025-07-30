@@ -312,7 +312,7 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorTestExampleTosaFile)
     {
         std::string file_path = __FILE__;
         std::string dir_path = file_path.substr(0, file_path.rfind("GeneratorTests.cpp"));
-        tosaFile = dir_path + "../../examples/simple_maxpool2d.tosa";
+        tosaFile = dir_path + "../../../examples/simple_maxpool2d.tosa";
     }
 
     // Create a handler from the example file
@@ -361,7 +361,7 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorTestExampleJsonFile)
     {
         std::string file_path = __FILE__;
         std::string dir_path = file_path.substr(0, file_path.rfind("GeneratorTests.cpp"));
-        jsonFile = dir_path + "../../examples/simple_maxpool2d.json";
+        jsonFile = dir_path + "../../../examples/simple_maxpool2d.json";
     }
     std::ifstream fileStream;
     fileStream.open(jsonFile);
@@ -379,7 +379,7 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorTestExampleJsonFile)
     EXPECT_EQ(companion.dump(), expectedJson);
 }
 
-static bool fileExists(const char *filename)
+static bool fileExists(const char* filename)
 {
     const std::ifstream file(filename);
     return file.good();
@@ -513,9 +513,9 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteVgfFile)
 
     // Open spv file
     std::vector<uint32_t> spvData;
-    mlsdk::vgf_dump::getSpirv(vgfName, 0, [&spvData](const uint32_t* data, size_t size) {
-        spvData.assign(data, data + size);
-    });
+    mlsdk::vgf_dump::getSpirv(vgfName,
+                              0,
+                              [&spvData](const uint32_t* data, size_t size) { spvData.assign(data, data + size); });
 
     if (spvData.empty())
     {
@@ -691,9 +691,9 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFiles)
 
     // Open spv file
     std::vector<uint32_t> spvData;
-    mlsdk::vgf_dump::getSpirv(vgfName, 0, [&spvData](const uint32_t* data, size_t size) {
-        spvData.assign(data, data + size);
-    });
+    mlsdk::vgf_dump::getSpirv(vgfName,
+                              0,
+                              [&spvData](const uint32_t* data, size_t size) { spvData.assign(data, data + size); });
 
     if (spvData.empty())
     {
@@ -708,16 +708,18 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFiles)
     const auto diff = testutils::CompareModules(module1, module0);
 
     std::vector<uint8_t> weightData;
-    mlsdk::vgf_dump::getConstant(vgfName, 0, [&weightData](const uint8_t *data, size_t size) {
-        weightData.assign(data, data + size);
-    });
+    mlsdk::vgf_dump::getConstant(vgfName,
+                                 0,
+                                 [&weightData](const uint8_t* data, size_t size)
+                                 { weightData.assign(data, data + size); });
     const std::vector<int8_t> expectedWeightData{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};
     EXPECT_EQ(std::equal(weightData.begin(), weightData.begin() + weightData.size(), expectedWeightData.begin()), 1);
 
     std::vector<uint8_t> biasDataVector;
-    mlsdk::vgf_dump::getConstant(vgfName, 1, [&biasDataVector](const uint8_t *data, size_t size) {
-        biasDataVector.assign(data, data + size);
-    });
+    mlsdk::vgf_dump::getConstant(vgfName,
+                                 1,
+                                 [&biasDataVector](const uint8_t* data, size_t size)
+                                 { biasDataVector.assign(data, data + size); });
     uint8_t biasData = biasDataVector[0];
     // Bias was added as int32 to cast it as such
     auto castBiasData = static_cast<int32_t>(biasData);
@@ -888,9 +890,9 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFilesRescale)
 
     // Open spv file
     std::vector<uint32_t> spvData;
-    mlsdk::vgf_dump::getSpirv(vgfName, 0, [&spvData](const uint32_t* data, size_t size) {
-        spvData.assign(data, data + size);
-    });
+    mlsdk::vgf_dump::getSpirv(vgfName,
+                              0,
+                              [&spvData](const uint32_t* data, size_t size) { spvData.assign(data, data + size); });
 
     if (spvData.empty())
     {
@@ -906,9 +908,9 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFilesRescale)
     const std::vector<int8_t> expectedShiftData{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};
 
     std::vector<uint8_t> multData;
-    mlsdk::vgf_dump::getConstant(vgfName, 0, [&multData](const uint8_t* data, size_t size) {
-        multData.assign(data, data + size);
-    });
+    mlsdk::vgf_dump::getConstant(vgfName,
+                                 0,
+                                 [&multData](const uint8_t* data, size_t size) { multData.assign(data, data + size); });
 
     // Ensure vect is multiple of 4
     EXPECT_EQ(multData.size() % 4, 0);
@@ -927,9 +929,10 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFilesRescale)
         1);
 
     std::vector<uint8_t> shiftData;
-    mlsdk::vgf_dump::getConstant(vgfName, 1, [&shiftData](const uint8_t* data, size_t size) {
-        shiftData.assign(data, data + size);
-    });
+    mlsdk::vgf_dump::getConstant(vgfName,
+                                 1,
+                                 [&shiftData](const uint8_t* data, size_t size)
+                                 { shiftData.assign(data, data + size); });
 
     EXPECT_EQ(std::equal(shiftData.begin(), shiftData.begin() + shiftData.size(), expectedShiftData.begin()), 1);
 
