@@ -47,6 +47,12 @@ class TosaSerializationParser : public IParser
     /// Internal operator parsing methods.
     void ParseOperator(::tosa::TosaSerializationOperator* op, tosa2spirv::tosa::Graph& graph);
 
+    /// Internal constant operator parsing method.
+    void ParseConstantOp(::tosa::TosaSerializationOperator* op, tosa::Graph& graph);
+
+    /// Internal constant tensor parsing method.
+    ResId ParseConstantTensor(const std::string& tensorName, tosa::Graph& graph);
+
     /// TOSA Serialization basic block used for parsing.
     /// The user retains the memory.
     ::tosa::TosaSerializationBasicBlock* m_Block;
@@ -61,8 +67,8 @@ class TosaSerializationParser : public IParser
                               const ConstantData& data,
                               const std::string& constName);
 
-    /// Internal function to create inputs
-    ResId InitializeInputTensor(tosa::Graph& graph, const std::string& inputName);
+    /// Internal function to get input tensor ResId
+    ResId GetInputTensorResId(tosa::Graph& graph, const std::string& inputName);
 
     /// Map of TensorNames to ResIds
     std::map<const std::string, ResId, std::less<>> m_OpNameResIdMap;

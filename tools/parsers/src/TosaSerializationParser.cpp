@@ -21,6 +21,12 @@ TosaSerializationParser::TosaSerializationParser(TosaSerializationHandler* handl
     }
 }
 
+bool IsConstOp(const TosaSerializationOperator* op)
+{
+    return op->GetOp() == Op_CONST || op->GetOp() == Op_CONST_SHAPE;
+}
+
+#ifndef NDEBUG
 bool IsTensorConstant(TosaSerializationBasicBlock* block, const std::string_view tensorName)
 {
     for (const auto& op : block->GetOperators())
@@ -29,12 +35,13 @@ bool IsTensorConstant(TosaSerializationBasicBlock* block, const std::string_view
         {
             if (outputTensorName == tensorName)
             {
-                return op->GetOp() == Op_CONST || op->GetOp() == Op_CONST_SHAPE;
+                return IsConstOp(op.get());
             }
         }
     }
     return false;
 }
+#endif  // NDEBUG
 
 ResId TosaSerializationParser::AddExternalConstant(Graph& graph,
                                                    const Tensor& constTensor,
@@ -47,83 +54,114 @@ ResId TosaSerializationParser::AddExternalConstant(Graph& graph,
     return constantResId;
 }
 
-ResId TosaSerializationParser::InitializeInputTensor(Graph& graph, const std::string& inputName)
+ResId TosaSerializationParser::GetInputTensorResId(Graph& graph, const std::string& inputName)
 {
-    // Attempt to resolve the input
-    if (const auto input = m_OpNameResIdMap.find(inputName); input != m_OpNameResIdMap.end())
-    {
-        return input->second;
-    }
-
-    // If the input is not a constant and is not resolved something has gone wrong
-    if (!IsTensorConstant(m_Block, inputName))
+    const auto it = m_OpNameResIdMap.find(inputName);
+    if (it == m_OpNameResIdMap.end())
     {
         throw std::runtime_error("TosaSerializationParser: input: " + inputName + " not found.");
     }
+    return it->second;
+}
 
-    // Constants are created at this point to maintain order with the VulcanMLBackend
-    bool nameExists = false;
-    for (const auto& tensorPtr : m_Block->GetTensors())
+void TosaSerializationParser::ParseConstantOp(TosaSerializationOperator* op, Graph& graph)
+{
+    assert(op->GetOutputTensorNames().size() == 1 &&
+           "ParseConstantOp: constant op must have exactly one output tensor");
+
+    for (const auto& tensorName : op->GetOutputTensorNames())
     {
-        if (tensorPtr && tensorPtr->GetName() == inputName)
-        {
-            nameExists = true;
-            break;
-        }
+        assert(m_OpNameResIdMap.find(tensorName) == m_OpNameResIdMap.end() &&
+               "ParseConstantOp: tensor name already exists in m_OpNameResIdMap");
+
+        ParseConstantTensor(tensorName, graph);
     }
-    TosaSerializationTensor* constTosaTensor;
-    if (nameExists)
+}
+
+ResId TosaSerializationParser::ParseConstantTensor(const std::string& tensorName, Graph& graph)
+{
+    assert(IsTensorConstant(m_Block, tensorName) && "ParseConstantTensor called on a non-constant tensor");
+
+    TosaSerializationTensor* constTosaTensor = m_Block->GetTensorByName(tensorName);
+    if (!constTosaTensor)
     {
-        constTosaTensor = m_Block->GetTensorByName(inputName);
+        throw std::runtime_error("ParseConstantTensor: m_Block->GetTensorByName() returned null for: " + tensorName);
     }
-    else
-    {
-        throw std::runtime_error("TosaSerializationParser: m_Block->GetTensorByName() returned null for: " + inputName +
-                                 ".");
-    }
-    const auto constTensor =
-        Tensor(GetDataTypeFromDType(constTosaTensor->GetDtype()), ConvertTensorShape(constTosaTensor->GetShape()));
+
+    const Tensor constTensor(
+        GetDataTypeFromDType(constTosaTensor->GetDtype()),
+        ConvertTensorShape(constTosaTensor->GetShape()));
 
     constexpr auto internalConstantLimit = 16u;
     if (constTensor.GetTensorShape().size() > 1 || constTensor.GetNumElements() > internalConstantLimit)
     {
         if (constTensor.GetDataType() == DataType::int48_t)
         {
-            const std::vector<int64_t> vec = ConvertToInt64(constTosaTensor->GetData(), constTensor);
-            return AddExternalConstant(graph, constTensor, vec, inputName);
+            std::vector<int64_t> vec;
+            const auto err = TosaSerializationHandler::ConvertU8toI48(constTosaTensor->GetData(), constTensor.GetNumElements(), vec);
+            if (err != TOSA_OK)
+            {
+                throw std::runtime_error("Failed to convert int48_t tensor: " + tensorName);
+            }
+            return AddExternalConstant(graph, constTensor, vec, tensorName);
         }
         if (constTensor.GetDataType() == DataType::int4_t)
         {
-            const std::vector<uint8_t> vec = UnpackInt4Signed(constTosaTensor->GetData(), constTensor);
-            return AddExternalConstant(graph, constTensor, vec, inputName);
+            std::vector<int8_t> vec;
+            const auto err = TosaSerializationHandler::ConvertU8toI4(constTosaTensor->GetData(), constTensor.GetNumElements(), vec);
+            if (err != TOSA_OK)
+            {
+                throw std::runtime_error("Failed to convert int4_t tensor: " + tensorName);
+            }
+            return AddExternalConstant(graph, constTensor, vec, tensorName);
         }
         const ConstantData constantData{constTosaTensor->GetData()};
-        return AddExternalConstant(graph, constTensor, constantData, inputName);
+        return AddExternalConstant(graph, constTensor, constantData, tensorName);
     }
 
     ResId constantResId;
     if (constTensor.GetDataType() == DataType::int48_t)
     {
-        const std::vector<int64_t> vec = ConvertToInt64(constTosaTensor->GetData(), constTensor);
-        const Attribute constantAttribute{vec, DataType::int48_t, constTensor.GetTensorShape()};
-        constantResId = graph.AddTensorConstant(constantAttribute);
+        std::vector<int64_t> vec;
+        const auto err = TosaSerializationHandler::ConvertU8toI48(constTosaTensor->GetData(), constTensor.GetNumElements(), vec);
+        if (err != TOSA_OK)
+        {
+            throw std::runtime_error("Failed to convert int48_t tensor: " + tensorName);
+        }
+        constantResId = graph.AddTensorConstant(Attribute{vec, DataType::int48_t, constTensor.GetTensorShape()});
     }
     else if (constTensor.GetDataType() == DataType::int4_t)
     {
-        const std::vector<uint8_t> vec = UnpackInt4Signed(constTosaTensor->GetData(), constTensor);
-        const Attribute constantAttribute{vec, constTensor.GetDataType(), constTensor.GetTensorShape()};
+        std::vector<int8_t> vec;
+        const auto err = TosaSerializationHandler::ConvertU8toI4(constTosaTensor->GetData(), constTensor.GetNumElements(), vec);
+        if (err != TOSA_OK)
+        {
+            throw std::runtime_error("Failed to convert int4_t tensor: " + tensorName);
+        }
+        constantResId = graph.AddTensorConstant(Attribute{vec, constTensor.GetDataType(), constTensor.GetTensorShape()});
+    }
+    else if (constTensor.GetDataType() == DataType::bool_t)
+    {
+        std::vector<bool> vec;
+        const auto err = TosaSerializationHandler::ConvertU8toBool(constTosaTensor->GetData(),
+                                                                   constTensor.GetNumElements(), vec);
+        if (err != TOSA_OK)
+        {
+            throw std::runtime_error("Failed to convert bool_t tensor: " + tensorName);
+        }
+        const Attribute constantAttribute{vec, DataType::bool_t, constTensor.GetTensorShape()};
         constantResId = graph.AddTensorConstant(constantAttribute);
     }
     else
     {
         const std::vector<uint32_t> vec = ConvertToUint32(constTosaTensor->GetData(), constTensor);
-        const Attribute constantAttribute{vec, constTensor.GetDataType(), constTensor.GetTensorShape()};
-        constantResId = graph.AddTensorConstant(constantAttribute);
+        constantResId = graph.AddTensorConstant(Attribute{vec, constTensor.GetDataType(), constTensor.GetTensorShape()});
     }
 
-    m_OpNameResIdMap.try_emplace(inputName, constantResId);
+    m_OpNameResIdMap.try_emplace(tensorName, constantResId);
     return constantResId;
 }
+
 
 std::vector<uint32_t> TosaSerializationParser::GenerateSPIRV(std::string graphName)
 {
@@ -137,6 +175,8 @@ std::shared_ptr<spirv::Module> TosaSerializationParser::GenerateSPIRVModule(cons
     auto graph = Graph(module, graphName);
 
     unsigned int bindingId = 0;
+
+    // 1. Handle Inputs
     for (const auto& inputName : m_Block->GetInputs())
     {
         const TosaSerializationTensor* inputTosaTensor = m_Block->GetTensorByName(inputName);
@@ -147,13 +187,25 @@ std::shared_ptr<spirv::Module> TosaSerializationParser::GenerateSPIRVModule(cons
         m_OpNameResIdMap.try_emplace(inputName, inputResId);
     }
 
-    // Loop through all operators and start to build up the SPIRV graph
+    // 2. Constants pass — parses all constant operators
     for (const auto& op : m_Block->GetOperators())
     {
-        ParseOperator(op.get(), graph);
+        if (IsConstOp(op.get()))
+        {
+            ParseConstantOp(op.get(), graph);
+        }
     }
 
-    // Now that we have parsed the graph we can resolve the resIds of the output tensors
+    // 3. Main operator parsing
+    for (const auto& op : m_Block->GetOperators())
+    {
+        if (!IsConstOp(op.get()))
+        {
+            ParseOperator(op.get(), graph);
+        }
+    }
+
+    // 4. Add Outputs to graph
     for (const auto& outputName : m_Block->GetOutputs())
     {
         auto it = m_OpNameResIdMap.find(outputName);
@@ -202,7 +254,7 @@ void TosaSerializationParser::ParseOperator(TosaSerializationOperator* op, Graph
 
     for (const auto& inputName : inputNames)
     {
-        inputTensors.push_back(InitializeInputTensor(graph, inputName));
+        inputTensors.push_back(GetInputTensorResId(graph, inputName));
         const auto inputDataType = m_Block->GetTensorByName(inputName)->GetDtype();
         inputDataTypes.push_back(GetDataTypeFromDType(inputDataType));
     }

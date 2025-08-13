@@ -12,46 +12,6 @@ using namespace ::tosa;
 using namespace tosa2spirv::parsers;
 using namespace tosa2spirv::tosa;
 
-TEST(UnpackInt4Signed, EvenNumberOfElements_PositiveAndNegative)
-{
-    // numElements = 2: one packed byte → two outputs
-    // packed byte: high nibble = 0x1 (→ +1), low nibble = 0xF (→ sign-extended to 0xFF)
-    Tensor t(DataType::uint8_t, {2});
-    std::vector<uint8_t> in = {static_cast<uint8_t>((1 << 4) | 0xF)};
-    auto out = UnpackInt4Signed(in, t);
-
-    ASSERT_EQ(out.size(), 2u);
-    EXPECT_EQ(out[0], uint8_t(0xFF));
-    EXPECT_EQ(out[1], uint8_t(0x01));
-}
-
-TEST(ConvertToInt64, PositiveAndNegative48Bit)
-{
-    // 2 elements of 48-bit:
-    //  1st = 1
-    //  2nd = 0xFF'FF'FF'FF'FF'FF → sign-extended → -1
-    Tensor t(DataType::int48_t, {2});
-    std::vector<uint8_t> in = {// little-endian 48-bit +1
-                               0x01,
-                               0x00,
-                               0x00,
-                               0x00,
-                               0x00,
-                               0x00,
-                               // all ones → -1
-                               0xFF,
-                               0xFF,
-                               0xFF,
-                               0xFF,
-                               0xFF,
-                               0xFF};
-    auto out = ConvertToInt64(in, t);
-
-    ASSERT_EQ(out.size(), 2u);
-    EXPECT_EQ(out[0], int64_t(1));
-    EXPECT_EQ(out[1], int64_t(-1));
-}
-
 TEST(ConvertToUint32, Uint8Type)
 {
     // 4 elements of uint8_t → each padded to 4 bytes yields same values
