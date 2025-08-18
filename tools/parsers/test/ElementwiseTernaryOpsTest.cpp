@@ -19,6 +19,8 @@ TEST(TOSA2SPIRV_PARSER, Select)
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
+    std::vector<std::unique_ptr<TosaSerializationShape>> shapes;
+
     std::string input1Name = "input1";
     std::string input2Name = "input2";
     std::string input3Name = "input3";
@@ -58,7 +60,7 @@ TEST(TOSA2SPIRV_PARSER, Select)
                                       "main",
                                       std::move(ops),
                                       std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
+                                      std::move(shapes),
                                       {input1Name, input2Name, input3Name},
                                       {outputName});
 

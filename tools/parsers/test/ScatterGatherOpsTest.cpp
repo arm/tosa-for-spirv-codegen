@@ -19,6 +19,8 @@ TEST(TOSA2SPIRV_PARSER, Gather)
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
+    std::vector<std::unique_ptr<TosaSerializationShape>> shapes;
+
     std::string valuesName = "values";
     std::string indicesName = "indices";
     std::string outputName = "output";
@@ -54,7 +56,7 @@ TEST(TOSA2SPIRV_PARSER, Gather)
                                       "main",
                                       std::move(ops),
                                       std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
+                                      std::move(shapes),
                                       {valuesName, indicesName},
                                       {outputName});
 
@@ -74,6 +76,8 @@ TEST(TOSA2SPIRV_PARSER, Scatter)
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
+    std::vector<std::unique_ptr<TosaSerializationShape>> shapes;
+
     std::string values_inName = "values_in";
     std::string indicesName = "indices";
     std::string inputName = "input";
@@ -119,7 +123,7 @@ TEST(TOSA2SPIRV_PARSER, Scatter)
                                       "main",
                                       std::move(ops),
                                       std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
+                                      std::move(shapes),
                                       {values_inName, indicesName, inputName},
                                       {values_outName});
 

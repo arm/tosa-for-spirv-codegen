@@ -50,6 +50,9 @@ class TosaSerializationParser : public IParser
     /// Internal constant operator parsing method.
     void ParseConstantOp(::tosa::TosaSerializationOperator* op, tosa::Graph& graph);
 
+    /// Internal constant shape parsing method.
+    ResId ParseConstantShape(const std::string& shapeName, tosa::Graph& graph);
+
     /// Internal constant tensor parsing method.
     ResId ParseConstantTensor(const std::string& tensorName, tosa::Graph& graph);
 

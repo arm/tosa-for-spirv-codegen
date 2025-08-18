@@ -23,57 +23,56 @@ TEST(TOSA2SPIRV_PARSER, Resize)
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
-    std::string inputName = "input";
+    std::vector<std::unique_ptr<TosaSerializationShape>> shapes;
     std::string scaleName = "scale";
-    std::string offsetName = "offset";
-    std::string borderName = "border";
-    std::string outputName = "output";
-
-    std::vector<int32_t> inputShape = {1, 1, 1, 1};
-    std::vector<int32_t> scaleShape = {1, 1, 1, 1};
-    std::vector<int32_t> offsetShape = {1, 1};
-    std::vector<int32_t> borderShape = {1, 1};
-    std::vector<int32_t> outputShape = {1, 1, 1, 1};
-
-    auto inputTensor =
-        std::make_unique<TosaSerializationTensor>(inputName, inputShape, DType::DType_INT8, std::vector<uint8_t>{});
-    tensors.push_back(std::move(inputTensor));
-    auto scaleTensor = std::make_unique<TosaSerializationTensor>(scaleName,
-                                                                 scaleShape,
-                                                                 DType::DType_INT32,
-                                                                 std::vector<uint8_t>{1, 1, 1, 1});
-    tensors.push_back(std::move(scaleTensor));
-    auto scaleOp = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST,
-                                                                     Attribute::Attribute_NONE,
+    std::vector<int64_t> scaleDims = {1, 1, 1, 1};
+    std::vector<uint8_t> scaleBytes;
+    TosaSerializationHandler::ConvertI64toU8(scaleDims, scaleBytes);
+    auto scaleShape = std::make_unique<TosaSerializationShape>(scaleName, static_cast<uint32_t>(4), scaleBytes);
+    shapes.push_back(std::move(scaleShape));
+    auto scaleOp = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST_SHAPE,
+                                                                     Attribute::Attribute_ConstShapeAttribute,
                                                                      nullptr,
                                                                      std::vector<std::string>{},
                                                                      std::vector<std::string>{scaleName},
                                                                      TosaOpLocation{});
     ops.push_back(std::move(scaleOp));
-    auto offsetTensor = std::make_unique<TosaSerializationTensor>(offsetName,
-                                                                  offsetShape,
-                                                                  DType::DType_INT32,
-                                                                  std::vector<uint8_t>{1, 1});
-    tensors.push_back(std::move(offsetTensor));
-    auto offsetOp = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST,
-                                                                      Attribute::Attribute_NONE,
+    std::string offsetName = "offset";
+    std::vector<int64_t> offsetDims = {1, 1};
+    std::vector<uint8_t> offsetBytes;
+    TosaSerializationHandler::ConvertI64toU8(offsetDims, offsetBytes);
+    auto offsetShape = std::make_unique<TosaSerializationShape>(offsetName, static_cast<uint32_t>(2), offsetBytes);
+    shapes.push_back(std::move(offsetShape));
+    auto offsetOp = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST_SHAPE,
+                                                                      Attribute::Attribute_ConstShapeAttribute,
                                                                       nullptr,
                                                                       std::vector<std::string>{},
                                                                       std::vector<std::string>{offsetName},
                                                                       TosaOpLocation{});
     ops.push_back(std::move(offsetOp));
-    auto borderTensor = std::make_unique<TosaSerializationTensor>(borderName,
-                                                                  borderShape,
-                                                                  DType::DType_INT32,
-                                                                  std::vector<uint8_t>{1, 1});
-    tensors.push_back(std::move(borderTensor));
-    auto borderOp = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST,
-                                                                      Attribute::Attribute_NONE,
+    std::string borderName = "border";
+    std::vector<int64_t> borderDims = {1, 1};
+    std::vector<uint8_t> borderBytes;
+    TosaSerializationHandler::ConvertI64toU8(borderDims, borderBytes);
+    auto borderShape = std::make_unique<TosaSerializationShape>(borderName, static_cast<uint32_t>(2), borderBytes);
+    shapes.push_back(std::move(borderShape));
+    auto borderOp = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST_SHAPE,
+                                                                      Attribute::Attribute_ConstShapeAttribute,
                                                                       nullptr,
                                                                       std::vector<std::string>{},
                                                                       std::vector<std::string>{borderName},
                                                                       TosaOpLocation{});
     ops.push_back(std::move(borderOp));
+
+    std::string inputName = "input";
+    std::string outputName = "output";
+
+    std::vector<int32_t> inputShape = {1, 1, 1, 1};
+    std::vector<int32_t> outputShape = {1, 1, 1, 1};
+
+    auto inputTensor =
+        std::make_unique<TosaSerializationTensor>(inputName, inputShape, DType::DType_INT8, std::vector<uint8_t>{});
+    tensors.push_back(std::move(inputTensor));
     auto outputTensor =
         std::make_unique<TosaSerializationTensor>(outputName, outputShape, DType::DType_INT32, std::vector<uint8_t>{});
     tensors.push_back(std::move(outputTensor));
@@ -90,22 +89,19 @@ TEST(TOSA2SPIRV_PARSER, Resize)
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("resize",
-                                      "main",
-                                      std::move(ops),
-                                      std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
-                                      {inputName},
-                                      {outputName});
+    TosaSerializationBasicBlock
+        block("resize", "main", std::move(ops), std::move(tensors), std::move(shapes), {inputName}, {outputName});
 
     TosaSerializationParser parser(&block);
     const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    testutils::CheckModule(
-        spirvModule,
-        TOSARESIZE,
-        {{DataType::int8_t, {1, 1, 1, 1}}},
-        {{DataType::int32_t, {1, 1, 1, 1}}, {DataType::int32_t, {1, 1}}, {DataType::int32_t, {1, 1}}},
-        {{{1}, DataType::int32_t, {1}}},
-        {{DataType::int32_t, {1, 1, 1, 1}}});
+    testutils::CheckModule(spirvModule,
+                           TOSARESIZE,
+                           {{DataType::int8_t, {1, 1, 1, 1}}},
+                           {},
+                           {{{1, 1, 1, 1}, DataType::int32_t, {4}},
+                            {{1, 1}, DataType::int32_t, {2}},
+                            {{1, 1}, DataType::int32_t, {2}},
+                            {{1}, DataType::int32_t, {1}}},
+                           {{DataType::int32_t, {1, 1, 1, 1}}});
 }

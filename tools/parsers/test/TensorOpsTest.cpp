@@ -24,6 +24,8 @@ TEST(TOSA2SPIRV_PARSER, ArgMax)
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
+    std::vector<std::unique_ptr<TosaSerializationShape>> shapes;
+
     std::string inputName = "input";
     std::string outputName = "output";
 
@@ -48,13 +50,8 @@ TEST(TOSA2SPIRV_PARSER, ArgMax)
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("argmax",
-                                      "main",
-                                      std::move(ops),
-                                      std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
-                                      {inputName},
-                                      {outputName});
+    TosaSerializationBasicBlock
+        block("argmax", "main", std::move(ops), std::move(tensors), std::move(shapes), {inputName}, {outputName});
 
     TosaSerializationParser parser(&block);
     const auto& spirvModule = parser.GenerateSPIRVModule("main");
@@ -79,6 +76,8 @@ TEST(TOSA2SPIRV_PARSER, AvgPool2d)
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
+    std::vector<std::unique_ptr<TosaSerializationShape>> shapes;
+
     std::string inputName = "input";
     std::string input_zpName = "input_zp";
     std::string output_zpName = "output_zp";
@@ -132,13 +131,8 @@ TEST(TOSA2SPIRV_PARSER, AvgPool2d)
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("avg_pool2d",
-                                      "main",
-                                      std::move(ops),
-                                      std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
-                                      {inputName},
-                                      {outputName});
+    TosaSerializationBasicBlock
+        block("avg_pool2d", "main", std::move(ops), std::move(tensors), std::move(shapes), {inputName}, {outputName});
 
     TosaSerializationParser parser(&block);
     const auto& spirvModule = parser.GenerateSPIRVModule("main");
@@ -169,6 +163,8 @@ TEST(TOSA2SPIRV_PARSER, Conv2d)
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
+    std::vector<std::unique_ptr<TosaSerializationShape>> shapes;
+
     std::string inputName = "input";
     std::string weightName = "weight";
     std::string biasName = "bias";
@@ -236,7 +232,7 @@ TEST(TOSA2SPIRV_PARSER, Conv2d)
                                       "main",
                                       std::move(ops),
                                       std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
+                                      std::move(shapes),
                                       {inputName, weightName, biasName},
                                       {outputName});
 
@@ -271,6 +267,8 @@ TEST(TOSA2SPIRV_PARSER, Conv3d)
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
+    std::vector<std::unique_ptr<TosaSerializationShape>> shapes;
+
     std::string inputName = "input";
     std::string weightName = "weight";
     std::string biasName = "bias";
@@ -338,7 +336,7 @@ TEST(TOSA2SPIRV_PARSER, Conv3d)
                                       "main",
                                       std::move(ops),
                                       std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
+                                      std::move(shapes),
                                       {inputName, weightName, biasName},
                                       {outputName});
 
@@ -373,6 +371,8 @@ TEST(TOSA2SPIRV_PARSER, DepthwiseConv2d)
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
+    std::vector<std::unique_ptr<TosaSerializationShape>> shapes;
+
     std::string inputName = "input";
     std::string weightName = "weight";
     std::string biasName = "bias";
@@ -440,7 +440,7 @@ TEST(TOSA2SPIRV_PARSER, DepthwiseConv2d)
                                       "main",
                                       std::move(ops),
                                       std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
+                                      std::move(shapes),
                                       {inputName, weightName, biasName},
                                       {outputName});
 
@@ -472,6 +472,8 @@ TEST(TOSA2SPIRV_PARSER, Fft2d)
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
+    std::vector<std::unique_ptr<TosaSerializationShape>> shapes;
+
     std::string input_realName = "input_real";
     std::string input_imagName = "input_imag";
     std::string output_realName = "output_real";
@@ -519,7 +521,7 @@ TEST(TOSA2SPIRV_PARSER, Fft2d)
                                       "main",
                                       std::move(ops),
                                       std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
+                                      std::move(shapes),
                                       {input_realName, input_imagName},
                                       {output_realName, output_imagName});
 
@@ -539,6 +541,8 @@ TEST(TOSA2SPIRV_PARSER, Matmul)
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
+    std::vector<std::unique_ptr<TosaSerializationShape>> shapes;
+
     std::string AName = "A";
     std::string BName = "B";
     std::string A_zpName = "A_zp";
@@ -591,13 +595,8 @@ TEST(TOSA2SPIRV_PARSER, Matmul)
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("matmul",
-                                      "main",
-                                      std::move(ops),
-                                      std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
-                                      {AName, BName},
-                                      {outputName});
+    TosaSerializationBasicBlock
+        block("matmul", "main", std::move(ops), std::move(tensors), std::move(shapes), {AName, BName}, {outputName});
 
     TosaSerializationParser parser(&block);
     const auto& spirvModule = parser.GenerateSPIRVModule("main");
@@ -622,6 +621,8 @@ TEST(TOSA2SPIRV_PARSER, MaxPool2d)
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
+    std::vector<std::unique_ptr<TosaSerializationShape>> shapes;
+
     std::string inputName = "input";
     std::string outputName = "output";
 
@@ -646,13 +647,8 @@ TEST(TOSA2SPIRV_PARSER, MaxPool2d)
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("max_pool2d",
-                                      "main",
-                                      std::move(ops),
-                                      std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
-                                      {inputName},
-                                      {outputName});
+    TosaSerializationBasicBlock
+        block("max_pool2d", "main", std::move(ops), std::move(tensors), std::move(shapes), {inputName}, {outputName});
 
     TosaSerializationParser parser(&block);
     const auto& spirvModule = parser.GenerateSPIRVModule("main");
@@ -677,6 +673,8 @@ TEST(TOSA2SPIRV_PARSER, Rfft2d)
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
+    std::vector<std::unique_ptr<TosaSerializationShape>> shapes;
+
     std::string input_realName = "input_real";
     std::string output_realName = "output_real";
     std::string output_imagName = "output_imag";
@@ -717,7 +715,7 @@ TEST(TOSA2SPIRV_PARSER, Rfft2d)
                                       "main",
                                       std::move(ops),
                                       std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
+                                      std::move(shapes),
                                       {input_realName},
                                       {output_realName, output_imagName});
 
@@ -744,6 +742,8 @@ TEST(TOSA2SPIRV_PARSER, TransposeConv2d)
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
+    std::vector<std::unique_ptr<TosaSerializationShape>> shapes;
+
     std::string inputName = "input";
     std::string weightName = "weight";
     std::string biasName = "bias";
@@ -811,7 +811,7 @@ TEST(TOSA2SPIRV_PARSER, TransposeConv2d)
                                       "main",
                                       std::move(ops),
                                       std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
+                                      std::move(shapes),
                                       {inputName, weightName, biasName},
                                       {outputName});
 

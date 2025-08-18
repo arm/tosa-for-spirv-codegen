@@ -64,19 +64,68 @@ ResId TosaSerializationParser::GetInputTensorResId(Graph& graph, const std::stri
     return it->second;
 }
 
+ResId TosaSerializationParser::ParseConstantShape(const std::string& shapeName, Graph& graph)
+{
+    auto* shapeObj = m_Block->GetShapeByName(shapeName);
+    if (!shapeObj)
+    {
+        throw std::runtime_error("ParseConstantShape: m_Block->GetShapeByName() returned null for: " + shapeName);
+    }
+
+    // Convert raw bytes into a vector of int64 dims
+    std::vector<int64_t> dims;
+    const auto err = TosaSerializationHandler::ConvertShapeValue(shapeObj, dims);
+    if (err != TOSA_OK)
+    {
+        throw std::runtime_error("ParseConstantShape: failed to convert shape data for: " + shapeName);
+    }
+
+    // Build a uint32_t array holding the same values
+    std::vector<uint32_t> data32;
+    data32.reserve(dims.size());
+    for (auto d : dims)
+    {
+        // shape dimensions should fit in 32-bits
+        data32.push_back(static_cast<uint32_t>(d));
+    }
+
+    // Create a 1-D int32 tensor of length == rank(dims.size())
+    Tensor constTensor(DataType::int32_t,
+                       { static_cast<unsigned int>(dims.size()) });
+
+    const Attribute attr{ data32, DataType::int32_t, constTensor.GetTensorShape() };
+    ResId constantResId = graph.AddTensorConstant(attr);
+
+    m_OpNameResIdMap.try_emplace(shapeName, constantResId);
+    return constantResId;
+}
+
 void TosaSerializationParser::ParseConstantOp(TosaSerializationOperator* op, Graph& graph)
 {
-    assert(op->GetOutputTensorNames().size() == 1 &&
-           "ParseConstantOp: constant op must have exactly one output tensor");
-
-    for (const auto& tensorName : op->GetOutputTensorNames())
+    const auto& outs = op->GetOutputTensorNames();
+    if (outs.size() != 1)
     {
-        assert(m_OpNameResIdMap.find(tensorName) == m_OpNameResIdMap.end() &&
-               "ParseConstantOp: tensor name already exists in m_OpNameResIdMap");
+        throw std::runtime_error("ParseConstantOp: constant op must have exactly one output tensor; got " +
+                                 std::to_string(outs.size()) + ".");
+    }
 
+    const auto& tensorName = op->GetOutputTensorNames()[0];
+    if (m_OpNameResIdMap.find(tensorName) != m_OpNameResIdMap.end())
+    {
+        throw std::runtime_error("ParseConstantOp: tensor name already exists in m_OpNameResIdMap: " +
+                                 tensorName);
+    }
+
+    if (op->GetOp() == Op_CONST_SHAPE)
+    {
+        ParseConstantShape(tensorName, graph);
+    }
+    else
+    {
         ParseConstantTensor(tensorName, graph);
     }
 }
+
 
 ResId TosaSerializationParser::ParseConstantTensor(const std::string& tensorName, Graph& graph)
 {
@@ -162,7 +211,6 @@ ResId TosaSerializationParser::ParseConstantTensor(const std::string& tensorName
     return constantResId;
 }
 
-
 std::vector<uint32_t> TosaSerializationParser::GenerateSPIRV(std::string graphName)
 {
     const auto module = GenerateSPIRVModule(graphName);
@@ -247,6 +295,38 @@ void TosaSerializationParser::ParseOperator(TosaSerializationOperator* op, Graph
         return;
     }
 
+    if (flatbufferEnum == Op_RESHAPE)
+    {
+        const auto& inputNames  = op->GetInputTensorNames();
+        const auto& outputNames = op->GetOutputTensorNames();
+
+        // second input _should_ be the shape‐constant name
+        const std::string& shapeName = inputNames[1];
+        auto* shapeObj = m_Block->GetShapeByName(shapeName);
+        if (!shapeObj)
+        {
+            throw std::runtime_error("ParseOperator(RESHAPE): missing shape for " + shapeName);
+        }
+
+        std::vector<int64_t> dims;
+        if (TosaSerializationHandler::ConvertShapeValue(shapeObj, dims) != TOSA_OK)
+        {
+            throw std::runtime_error("ParseOperator(RESHAPE): failed to decode shape for " + shapeName);
+        }
+
+        if (dims.empty())
+        {
+            // rank‐0 reshape is just an identity
+            ResId inId  = GetInputTensorResId(graph, inputNames[0]);
+            ResId outId = inId;
+
+            m_OpNameResIdMap.try_emplace(outputNames[0], outId);
+            return;
+        }
+
+        // otherwise fall through into the normal dynamic‐reshape path…
+    }
+
     std::vector<ResId> inputTensors;
     std::vector<DataType> inputDataTypes;
     std::vector<Tensor> outputTensors;
@@ -255,9 +335,24 @@ void TosaSerializationParser::ParseOperator(TosaSerializationOperator* op, Graph
     for (const auto& inputName : inputNames)
     {
         inputTensors.push_back(GetInputTensorResId(graph, inputName));
-        const auto inputDataType = m_Block->GetTensorByName(inputName)->GetDtype();
-        inputDataTypes.push_back(GetDataTypeFromDType(inputDataType));
-    }
+        //    • if it's a real tensor, grab its flatbuffer DType
+        //    • otherwise it's a shape (CONST_SHAPE), so treat as INT32
+        DType rawDtype;
+        if (auto* tensor = m_Block->GetTensorByName(inputName))
+        {
+            rawDtype = tensor->GetDtype();
+        }
+        else if (m_Block->GetShapeByName(inputName))
+        {
+            rawDtype = DType::DType_INT32;
+        }
+        else
+        {
+            throw std::runtime_error("ParseOperator: input \"" + inputName +
+                                     "\" is neither tensor nor shape");
+        }
+        inputDataTypes.push_back(GetDataTypeFromDType(rawDtype));
+        }
 
     for (const auto& outputName : outputNames)
     {

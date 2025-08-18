@@ -19,6 +19,8 @@ TEST(TOSA2SPIRV_PARSER, Abs)
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
+    std::vector<std::unique_ptr<TosaSerializationShape>> shapes;
+
     std::string input1Name = "input1";
     std::string outputName = "output";
 
@@ -43,13 +45,8 @@ TEST(TOSA2SPIRV_PARSER, Abs)
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("abs",
-                                      "main",
-                                      std::move(ops),
-                                      std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
-                                      {input1Name},
-                                      {outputName});
+    TosaSerializationBasicBlock
+        block("abs", "main", std::move(ops), std::move(tensors), std::move(shapes), {input1Name}, {outputName});
 
     TosaSerializationParser parser(&block);
     const auto& spirvModule = parser.GenerateSPIRVModule("main");
@@ -67,6 +64,8 @@ TEST(TOSA2SPIRV_PARSER, BitwiseNot)
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
+    std::vector<std::unique_ptr<TosaSerializationShape>> shapes;
+
     std::string input1Name = "input1";
     std::string outputName = "output";
 
@@ -91,13 +90,8 @@ TEST(TOSA2SPIRV_PARSER, BitwiseNot)
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("bitwise_not",
-                                      "main",
-                                      std::move(ops),
-                                      std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
-                                      {input1Name},
-                                      {outputName});
+    TosaSerializationBasicBlock
+        block("bitwise_not", "main", std::move(ops), std::move(tensors), std::move(shapes), {input1Name}, {outputName});
 
     TosaSerializationParser parser(&block);
     const auto& spirvModule = parser.GenerateSPIRVModule("main");
@@ -115,6 +109,8 @@ TEST(TOSA2SPIRV_PARSER, Ceil)
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
+    std::vector<std::unique_ptr<TosaSerializationShape>> shapes;
+
     std::string input1Name = "input1";
     std::string outputName = "output";
 
@@ -139,13 +135,8 @@ TEST(TOSA2SPIRV_PARSER, Ceil)
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("ceil",
-                                      "main",
-                                      std::move(ops),
-                                      std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
-                                      {input1Name},
-                                      {outputName});
+    TosaSerializationBasicBlock
+        block("ceil", "main", std::move(ops), std::move(tensors), std::move(shapes), {input1Name}, {outputName});
 
     TosaSerializationParser parser(&block);
     const auto& spirvModule = parser.GenerateSPIRVModule("main");
@@ -163,6 +154,8 @@ TEST(TOSA2SPIRV_PARSER, Clz)
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
+    std::vector<std::unique_ptr<TosaSerializationShape>> shapes;
+
     std::string input1Name = "input1";
     std::string outputName = "output";
 
@@ -187,13 +180,8 @@ TEST(TOSA2SPIRV_PARSER, Clz)
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("clz",
-                                      "main",
-                                      std::move(ops),
-                                      std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
-                                      {input1Name},
-                                      {outputName});
+    TosaSerializationBasicBlock
+        block("clz", "main", std::move(ops), std::move(tensors), std::move(shapes), {input1Name}, {outputName});
 
     TosaSerializationParser parser(&block);
     const auto& spirvModule = parser.GenerateSPIRVModule("main");
@@ -211,6 +199,8 @@ TEST(TOSA2SPIRV_PARSER, Cos)
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
+    std::vector<std::unique_ptr<TosaSerializationShape>> shapes;
+
     std::string input1Name = "input1";
     std::string outputName = "output";
 
@@ -235,13 +225,8 @@ TEST(TOSA2SPIRV_PARSER, Cos)
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("cos",
-                                      "main",
-                                      std::move(ops),
-                                      std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
-                                      {input1Name},
-                                      {outputName});
+    TosaSerializationBasicBlock
+        block("cos", "main", std::move(ops), std::move(tensors), std::move(shapes), {input1Name}, {outputName});
 
     TosaSerializationParser parser(&block);
     const auto& spirvModule = parser.GenerateSPIRVModule("main");
@@ -259,6 +244,8 @@ TEST(TOSA2SPIRV_PARSER, Exp)
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
+    std::vector<std::unique_ptr<TosaSerializationShape>> shapes;
+
     std::string input1Name = "input1";
     std::string outputName = "output";
 
@@ -283,13 +270,8 @@ TEST(TOSA2SPIRV_PARSER, Exp)
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("exp",
-                                      "main",
-                                      std::move(ops),
-                                      std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
-                                      {input1Name},
-                                      {outputName});
+    TosaSerializationBasicBlock
+        block("exp", "main", std::move(ops), std::move(tensors), std::move(shapes), {input1Name}, {outputName});
 
     TosaSerializationParser parser(&block);
     const auto& spirvModule = parser.GenerateSPIRVModule("main");
@@ -307,6 +289,8 @@ TEST(TOSA2SPIRV_PARSER, Floor)
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
+    std::vector<std::unique_ptr<TosaSerializationShape>> shapes;
+
     std::string input1Name = "input1";
     std::string outputName = "output";
 
@@ -331,13 +315,8 @@ TEST(TOSA2SPIRV_PARSER, Floor)
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("floor",
-                                      "main",
-                                      std::move(ops),
-                                      std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
-                                      {input1Name},
-                                      {outputName});
+    TosaSerializationBasicBlock
+        block("floor", "main", std::move(ops), std::move(tensors), std::move(shapes), {input1Name}, {outputName});
 
     TosaSerializationParser parser(&block);
     const auto& spirvModule = parser.GenerateSPIRVModule("main");
@@ -355,6 +334,8 @@ TEST(TOSA2SPIRV_PARSER, Log)
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
+    std::vector<std::unique_ptr<TosaSerializationShape>> shapes;
+
     std::string input1Name = "input1";
     std::string outputName = "output";
 
@@ -379,13 +360,8 @@ TEST(TOSA2SPIRV_PARSER, Log)
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("log",
-                                      "main",
-                                      std::move(ops),
-                                      std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
-                                      {input1Name},
-                                      {outputName});
+    TosaSerializationBasicBlock
+        block("log", "main", std::move(ops), std::move(tensors), std::move(shapes), {input1Name}, {outputName});
 
     TosaSerializationParser parser(&block);
     const auto& spirvModule = parser.GenerateSPIRVModule("main");
@@ -403,6 +379,8 @@ TEST(TOSA2SPIRV_PARSER, LogicalNot)
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
+    std::vector<std::unique_ptr<TosaSerializationShape>> shapes;
+
     std::string input1Name = "input1";
     std::string outputName = "output";
 
@@ -427,13 +405,8 @@ TEST(TOSA2SPIRV_PARSER, LogicalNot)
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("logical_not",
-                                      "main",
-                                      std::move(ops),
-                                      std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
-                                      {input1Name},
-                                      {outputName});
+    TosaSerializationBasicBlock
+        block("logical_not", "main", std::move(ops), std::move(tensors), std::move(shapes), {input1Name}, {outputName});
 
     TosaSerializationParser parser(&block);
     const auto& spirvModule = parser.GenerateSPIRVModule("main");
@@ -451,6 +424,8 @@ TEST(TOSA2SPIRV_PARSER, Negate)
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
+    std::vector<std::unique_ptr<TosaSerializationShape>> shapes;
+
     std::string input1Name = "input1";
     std::string input1_zpName = "input1_zp";
     std::string output_zpName = "output_zp";
@@ -504,13 +479,8 @@ TEST(TOSA2SPIRV_PARSER, Negate)
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("negate",
-                                      "main",
-                                      std::move(ops),
-                                      std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
-                                      {input1Name},
-                                      {outputName});
+    TosaSerializationBasicBlock
+        block("negate", "main", std::move(ops), std::move(tensors), std::move(shapes), {input1Name}, {outputName});
 
     TosaSerializationParser parser(&block);
     const auto& spirvModule = parser.GenerateSPIRVModule("main");
@@ -528,6 +498,8 @@ TEST(TOSA2SPIRV_PARSER, Reciprocal)
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
+    std::vector<std::unique_ptr<TosaSerializationShape>> shapes;
+
     std::string input1Name = "input1";
     std::string outputName = "output";
 
@@ -552,13 +524,8 @@ TEST(TOSA2SPIRV_PARSER, Reciprocal)
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("reciprocal",
-                                      "main",
-                                      std::move(ops),
-                                      std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
-                                      {input1Name},
-                                      {outputName});
+    TosaSerializationBasicBlock
+        block("reciprocal", "main", std::move(ops), std::move(tensors), std::move(shapes), {input1Name}, {outputName});
 
     TosaSerializationParser parser(&block);
     const auto& spirvModule = parser.GenerateSPIRVModule("main");
@@ -576,6 +543,8 @@ TEST(TOSA2SPIRV_PARSER, Rsqrt)
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
+    std::vector<std::unique_ptr<TosaSerializationShape>> shapes;
+
     std::string input1Name = "input1";
     std::string outputName = "output";
 
@@ -600,13 +569,8 @@ TEST(TOSA2SPIRV_PARSER, Rsqrt)
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("rsqrt",
-                                      "main",
-                                      std::move(ops),
-                                      std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
-                                      {input1Name},
-                                      {outputName});
+    TosaSerializationBasicBlock
+        block("rsqrt", "main", std::move(ops), std::move(tensors), std::move(shapes), {input1Name}, {outputName});
 
     TosaSerializationParser parser(&block);
     const auto& spirvModule = parser.GenerateSPIRVModule("main");
@@ -624,6 +588,8 @@ TEST(TOSA2SPIRV_PARSER, Sin)
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
     std::vector<std::unique_ptr<TosaSerializationOperator>> ops;
+    std::vector<std::unique_ptr<TosaSerializationShape>> shapes;
+
     std::string input1Name = "input1";
     std::string outputName = "output";
 
@@ -648,13 +614,8 @@ TEST(TOSA2SPIRV_PARSER, Sin)
 
     // Create a tosa single-op basic block
     // The raw pointers of operators and tensors will be deleted by the destructor of the block
-    TosaSerializationBasicBlock block("sin",
-                                      "main",
-                                      std::move(ops),
-                                      std::move(tensors),
-                                      std::vector<std::unique_ptr<TosaSerializationShape>>{},
-                                      {input1Name},
-                                      {outputName});
+    TosaSerializationBasicBlock
+        block("sin", "main", std::move(ops), std::move(tensors), std::move(shapes), {input1Name}, {outputName});
 
     TosaSerializationParser parser(&block);
     const auto& spirvModule = parser.GenerateSPIRVModule("main");

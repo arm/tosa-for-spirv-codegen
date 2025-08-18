@@ -31,7 +31,7 @@ TOSA_TO_SPV_TYPE_DECL_NAME_MAP = {
     'fp32_t' : 'float32',
     'bf16_t' : 'bfloat16',
     'index_t' : 'int_index_t',
-    'shape_t' : 'int_shape_t',
+    'shape_t' : 'int32',
     'acc_type_t' : 'int32',
 }
 
@@ -149,6 +149,9 @@ class TestGenerator:
         self._operator_list = []
         self._operator_name_list = []
         self.get_operators()
+
+    def is_shape_arg(self, argument):
+        return argument.type == 'shape_t'
 
     def load_tosa_version(self):
         self.tosa_version = "{}.{}.{}".format(
@@ -724,7 +727,11 @@ class TestGenerator:
                     shape = numValues
                 tensorConstStr.append("{{" + values + "}, DataType::" + datatype_str + ", {" + shape + "}}")
             elif self.has_argument_category_name(argument, 'input'):
-                if not self.is_dynamic_input(argument):
+                if self.is_shape_arg(argument):
+                    # Shape inputs are provided via CONST_SHAPE and lowered as tensor constants.
+                    # Expect a 1-D int32 constant with length == numValues.
+                    tensorConstStr.append("{{" + values + "}, DataType::int32_t, {" + str(numValues) + "}}")
+                elif not self.is_dynamic_input(argument):
                     if values == "1":
                         inputTensorConstStr.append("{{1}, DataType::" + datatype_str + ", {1}}")
                     else:
@@ -842,16 +849,33 @@ class TestGenerator:
         file.write("// Create Tensors\n")
         file.write("std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;\n")
         file.write("std::vector<std::unique_ptr<TosaSerializationOperator>> ops;\n")
-        tensor_lines = []
-        # Input tensors
+        file.write("std::vector<std::unique_ptr<TosaSerializationShape>> shapes;\n")
+
+        # Emit shape constants (CONST_SHAPE) for shape_t inputs
         for argument in input_args:
-            tensor_line = self.generate_tensor_arguments(op, argument)
-            tensor_lines.append(tensor_line)
-        # Output tensors
+            if self.is_shape_arg(argument):
+                numValues, values = self.get_num_values_template(argument)
+                file.write(f'std::string {argument.name}Name = "{argument.name}";\n')
+                file.write(f'std::vector<int64_t> {argument.name}Dims = {{ {values} }};\n')
+                file.write(f'std::vector<uint8_t> {argument.name}Bytes; '
+                           f'TosaSerializationHandler::ConvertI64toU8({argument.name}Dims, {argument.name}Bytes);\n')
+                file.write(f'auto {argument.name}Shape = std::make_unique<TosaSerializationShape>('
+                           f'{argument.name}Name, static_cast<uint32_t>({numValues}), {argument.name}Bytes);\n')
+                file.write(f'shapes.push_back(std::move({argument.name}Shape));\n')
+                file.write(f'auto {argument.name}Op = std::make_unique<tosa::TosaSerializationOperator>('
+                           f'Op::Op_CONST_SHAPE, Attribute::Attribute_ConstShapeAttribute, nullptr, '
+                           f'std::vector<std::string>{{}}, std::vector<std::string>{{ {argument.name}Name }}, '
+                           f'TosaOpLocation{{}});\n')
+                file.write(f'ops.push_back(std::move({argument.name}Op));\n')
+        file.append("\n")
+
+        tensor_lines = []
+        for argument in input_args:
+            if self.is_shape_arg(argument):
+                continue  # shapes handled above
+            tensor_lines.append(self.generate_tensor_arguments(op, argument))
         for argument in output_args:
-            tensor_line = self.generate_tensor_arguments(op, argument)
-            tensor_lines.append(tensor_line)
-        # Write lines to the file
+            tensor_lines.append(self.generate_tensor_arguments(op, argument))
         self.print_tensor_arguments(tensor_lines, file)
 
         # Get input tensors and input/output names
@@ -906,7 +930,8 @@ class TestGenerator:
         file.write(first_line + "\"{}\",\n".format(op.name.lower()))
         file.write(' ' * len(first_line) + "\"main\",\n")
         file.write(' ' * len(first_line) + "std::move(ops),\n")
-        file.write(' ' * len(first_line) + "std::move(tensors),std::vector<std::unique_ptr<TosaSerializationShape>>{},\n")
+        file.write(' ' * len(first_line) + "std::move(tensors),\n")
+        file.write(' ' * len(first_line) + "std::move(shapes),\n")
         file.write(' ' * len(first_line) + "{ ")
         for input_name in dynamic_input_names:
             if input_name == dynamic_input_names[-1]:
