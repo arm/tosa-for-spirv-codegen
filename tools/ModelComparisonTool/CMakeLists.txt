@@ -71,5 +71,6 @@ else()
     message(STATUS "VGF library located at: ${VGF_ENCODER_LIBRARY_PATH}")
     target_link_libraries(ModelComparisonTool PRIVATE ${VGF_ENCODER_LIBRARY_PATH})
 endif()
-# Install the generator executable
+
+# Install the ModelComparisonTool executable
 install(TARGETS ModelComparisonTool RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

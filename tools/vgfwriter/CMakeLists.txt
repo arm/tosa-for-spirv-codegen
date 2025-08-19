@@ -4,7 +4,7 @@
 #
 
 set(CMAKE_CXX_STANDARD 17)
-set(VGF_ENCODER_PATH ${CMAKE_SOURCE_DIR}/external/vgf_encoder CACHE PATH "")
+set(VGF_ENCODER_PATH ${TFSC_EXTERNAL_PATH}/vgf_encoder CACHE PATH "")
 set(VGFWRITER_SOURCE src/VgfWriter.cpp)
 
 # Add utility library
@@ -54,4 +54,4 @@ set_target_properties(vgfWriter
 install(TARGETS vgfWriter
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/tosa_for_spirv_codegen/tools/vgfWriter)

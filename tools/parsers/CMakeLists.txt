@@ -25,8 +25,7 @@ else()
     message(WARNING "Flatbuffers library (${FLATBUFFERS_LIBRARY}) not found.")
 endif()
 
-
-target_include_directories(tosaSerializationParser PRIVATE ${FLATBUFFERS_SOURCE_PATH}/include)
+target_include_directories(tosaSerializationParser PUBLIC ${FLATBUFFERS_SOURCE_PATH}/include)
 
 # Find TOSA Serialization Library
 set(TOSA_SERIALIZATION_LIBRARY libtosa_serialization_lib.a)
@@ -67,4 +66,4 @@ set_target_properties(tosaSerializationParser
 # Install the libraries and headers
 install(TARGETS tosaSerializationParser
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/tosa_for_spirv_codegen/tools/parsers)

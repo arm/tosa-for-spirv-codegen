@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <Operand.hpp>
+#include <spirv/Operand.hpp>
 
 #include <cstdint>
 #include <string>

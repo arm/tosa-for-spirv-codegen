@@ -31,18 +31,30 @@ option(BUILD_FOR_COVERAGE "Output .gcno and .gcda files used for Unittest Covera
 # By default build UnitTests
 option(BUILD_UNITTESTS "Build UnitTests for tosa2spirv" ON)
 
-# External paths
-set(ARGPARSE_SOURCE_PATH ${CMAKE_SOURCE_DIR}/external/argparse CACHE PATH "")
-set(SERIALIZATION_LIB_SOURCE_PATH ${CMAKE_SOURCE_DIR}/external/serialization_lib CACHE PATH "")
-set(FLATBUFFERS_SOURCE_PATH ${CMAKE_SOURCE_DIR}/external/flatbuffers CACHE PATH "")
-set(SPIRV_TOOLS_SOURCE_PATH ${CMAKE_SOURCE_DIR}/external/SPIRV-Tools CACHE PATH "")
-set(SPIRV_HEADERS_SOURCE_PATH ${CMAKE_SOURCE_DIR}/external/SPIRV-Headers/include CACHE PATH "")
-set(GOOGLETEST_PATH ${CMAKE_SOURCE_DIR}/external/googletest CACHE PATH "")
-set(SERIALIZATION_LIB_BUILD_PATH ${CMAKE_SOURCE_DIR}/external/serialization_lib/build CACHE PATH "")
-set(SPIRV_TOOLS_BUILD_PATH ${CMAKE_SOURCE_DIR}/external/SPIRV-Tools/build CACHE PATH "")
-set(NLOHMANN_PATH ${CMAKE_SOURCE_DIR}/external/json CACHE PATH "")
+# Root of the TOSA-for-SPIRV-Codegen project
+set(TFSC_ROOT "${CMAKE_CURRENT_LIST_DIR}")
+message(===========${TFSC_ROOT})
 
-set(TOOLS_PATH ${CMAKE_SOURCE_DIR}/tools CACHE PATH "")
+# External dependencies root
+set(TFSC_EXTERNAL_PATH "${TFSC_ROOT}/external")
+
+# Paths to specific external libraries
+set(ARGPARSE_SOURCE_PATH           "${TFSC_EXTERNAL_PATH}/argparse"                 CACHE PATH "")
+set(SERIALIZATION_LIB_SOURCE_PATH "${TFSC_EXTERNAL_PATH}/serialization_lib"        CACHE PATH "")
+set(FLATBUFFERS_SOURCE_PATH       "${TFSC_EXTERNAL_PATH}/flatbuffers"              CACHE PATH "")
+set(SPIRV_TOOLS_SOURCE_PATH       "${TFSC_EXTERNAL_PATH}/SPIRV-Tools"              CACHE PATH "")
+set(SPIRV_HEADERS_SOURCE_PATH     "${TFSC_EXTERNAL_PATH}/SPIRV-Headers/include"    CACHE PATH "")
+set(GOOGLETEST_PATH               "${TFSC_EXTERNAL_PATH}/googletest"               CACHE PATH "")
+set(NLOHMANN_PATH                 "${TFSC_EXTERNAL_PATH}/json"                     CACHE PATH "")
+
+# Build paths for certain dependencies
+set(SERIALIZATION_LIB_BUILD_PATH "${SERIALIZATION_LIB_SOURCE_PATH}/build"          CACHE PATH "")
+set(SPIRV_TOOLS_BUILD_PATH       "${SPIRV_TOOLS_SOURCE_PATH}/build"                CACHE PATH "")
+
+# Tools path (relative to the repo root)
+set(TOOLS_PATH "${TFSC_ROOT}/tools" CACHE PATH "")
+message(===========${TOOLS_PATH})
+
 
 # Parser can be enabled without generator but generator requires parser.
 if(BUILD_TOSA_2_SPIRV_GENERATOR AND NOT BUILD_TOSA_SERIALIZATION_PARSER)
@@ -80,9 +92,9 @@ add_library(tosa2spirv
     src/SPIRVDefinitions.cpp)
 
 target_include_directories(tosa2spirv PUBLIC
-    ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}/include/spirv
-    ${CMAKE_SOURCE_DIR}/include/tosa)
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/spirv
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/tosa)
 
 target_include_directories(tosa2spirv PRIVATE
     src
@@ -111,17 +123,17 @@ if(BUILD_UNITTESTS OR BUILD_MODEL_COMPARISON_TOOL)
 endif()
 
 if(BUILD_UNITTESTS)
-    include(${CMAKE_SOURCE_DIR}/cmake/unittests.cmake)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/unittests.cmake)
 endif()
 
 # install include directories into their respective folders
-install(FILES ${CMAKE_SOURCE_DIR}/include/tosa2spirv.hpp
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/tosa2spirv.hpp
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/tosa_for_spirv_codegen)
 
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/tosa
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/tosa
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/tosa_for_spirv_codegen)
 
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/spirv
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/spirv
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/tosa_for_spirv_codegen)
 
 install(TARGETS tosa2spirv)
