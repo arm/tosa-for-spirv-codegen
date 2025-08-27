@@ -79,21 +79,43 @@ if (BUILD_TOSA_2_SPIRV_GENERATOR)
     ${NLOHMANN_PATH}/single_include
     ${VGF_ENCODER_PATH}/vgf_dump/include)
   set(VGF_DUMP_LIBRARY libstatic_vgf_dump.a)
-  set(VGF_ENCODER_BUILD_PATH "${VGF_ENCODER_PATH}/build/vgf_dump")
+  set(VGF_ENCODER_BUILD_PATH "${VGF_ENCODER_PATH}/build")
 
   find_library(VGF_DUMP_LIBRARY_PATH
                NAMES ${VGF_DUMP_LIBRARY}
-               HINTS ${VGF_ENCODER_BUILD_PATH}
+               HINTS
+                  ${VGF_ENCODER_BUILD_PATH}/vgf_dump
+                  ${VGF_ENCODER_BUILD_PATH}
                NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
+
+  find_library(VGF_UTILS_LIBRARY_PATH
+          NAMES vgf-utils libvgf-utils.a
+          HINTS
+          ${VGF_ENCODER_BUILD_PATH}/utils
+          ${VGF_ENCODER_BUILD_PATH}
+          NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
 
   if (VGF_DUMP_LIBRARY_PATH)
     message(STATUS "VGF dump library located at: ${VGF_DUMP_LIBRARY_PATH}")
-    target_link_libraries(tosa_for_spirv_tests PRIVATE ${VGF_DUMP_LIBRARY_PATH})
+    target_link_libraries(tosa_for_spirv_tests PRIVATE
+            ${VGF_DUMP_LIBRARY_PATH})
   else()
     message(STATUS "VGF dump library not found")
   endif()
 
-  target_link_libraries(tosa_for_spirv_tests PRIVATE ${VGF_ENCODER_LIBRARY_PATH} vgfWriter)
+  if (VGF_UTILS_LIBRARY_PATH)
+    message(STATUS "VGF utils library located at: ${VGF_UTILS_LIBRARY_PATH}")
+    target_link_libraries(tosa_for_spirv_tests PRIVATE
+            ${VGF_UTILS_LIBRARY_PATH})
+  else()
+    message(WARNING "VGF utils library not found")
+  endif()
+
+  target_link_libraries(tosa_for_spirv_tests PRIVATE
+          ${VGF_DUMP_LIBRARY_PATH}
+          ${VGF_UTILS_LIBRARY_PATH}
+          ${VGF_ENCODER_LIBRARY_PATH}
+          vgfWriter)
 endif()
 
 # Don't run unit tests automatically if it is an Android build.
