@@ -16,7 +16,7 @@ rm -rf $VGF_ENCODER_DIR
 rm -rf $FLATBUFFERS_DIR
 
 # Pinned SHA for branch
-VGF_ENCODER_REVISION="bf2de11731b7e60a8f1fe04da47a56fa003a80ed"
+VGF_ENCODER_REVISION="main"
 FLATBUFFERS_REVISION="v23.5.26" # To align with flatbuffer version in the latest serialization lib
 
 echo "+++ Cloning VGF Encoder"
