@@ -11,15 +11,14 @@
 #include <gtest/gtest.h>
 
 using namespace tosa2spirv::tosa;
+using namespace testutils;
 
-// TEST HASH 17146890655786874055
+// TEST HASH 13907955412418932190
 TEST(TOSA2SPIRV_OPERATOR, ResizeOperatorTest0)
 {
 // Operator Definition, separated for reuse in the test fixture
 const OperatorEnum op = OperatorEnum::Resize;
-const std::vector<Tensor> inputs {{DataType::uint8_t, {1, 135, 240, 32}}};
-const std::vector<Tensor> graphConstants {};
-const std::vector<Attribute> tensorConstants {{std::initializer_list<uint32_t>{4, 2, 4, 2}, DataType::uint32_t, {4}}, {std::initializer_list<uint32_t>{4294967295, 4294967295}, DataType::uint32_t, {2}}, {std::initializer_list<uint32_t>{1, 1}, DataType::uint32_t, {2}}};
+const std::vector<Attribute> inputs {{std::initializer_list<uint32_t>{}, DataType::uint8_t, {1, 135, 240, 32}}, {std::initializer_list<uint32_t>{4, 2, 4, 2}, DataType::uint32_t, {4}}, {std::initializer_list<uint32_t>{4294967295, 4294967295}, DataType::uint32_t, {2}}, {std::initializer_list<uint32_t>{1, 1}, DataType::uint32_t, {2}}};
 const std::vector<Tensor> outputs {{DataType::uint8_t, {1, 270, 480, 32}}};
 const std::vector<Attribute> attributes {{std::initializer_list<uint32_t>{1}, DataType::uint32_t, {1}}};
 
@@ -27,19 +26,19 @@ const std::vector<Attribute> attributes {{std::initializer_list<uint32_t>{1}, Da
 std::shared_ptr<tosa2spirv::spirv::Module> module = tosa2spirv::CreateModule(tosa2spirv::TOSAVersion::v1_0);
 Graph graph{module};
 
-const auto& input1 = graph.AddInput(inputs[0], 0);
-const auto& tensorConstInput1 = graph.AddTensorConstant(tensorConstants[0]);
-const auto& tensorConstInput2 = graph.AddTensorConstant(tensorConstants[1]);
-const auto& tensorConstInput3 = graph.AddTensorConstant(tensorConstants[2]);
+const auto& input1 = graph.AddInput(inputs[0].GetTensor(), 0);
+const auto& input2 = graph.AddTensorConstant(inputs[1]);
+const auto& input3 = graph.AddTensorConstant(inputs[2]);
+const auto& input4 = graph.AddTensorConstant(inputs[3]);
 
 const auto& attribute1 = attributes[0];
 
 const auto& output1 = outputs[0];
-const auto& graphRes = graph.AddResizeOperator(input1, tensorConstInput1, tensorConstInput2, tensorConstInput3, attribute1, output1);
+const auto& graphRes = graph.AddResizeOperator(input1, input2, input3, input4, attribute1, output1);
 graph.AddOutput(graphRes, 0);
 graph.FinalizeGraph();
 
 // Validating generated SPIR-V Module
-testutils::CheckModule(module, op, inputs, graphConstants, tensorConstants, outputs, attributes);
+testutils::CheckModule(module, op, inputs, outputs, attributes);
 }
 

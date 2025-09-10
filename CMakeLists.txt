@@ -19,11 +19,8 @@ option(BUILD_TOSA_SERIALIZATION_PARSER
 option(BUILD_TOSA_2_SPIRV_GENERATOR
        "Build the tosa2spirv generator. This command line tool generates SPIRV binary from a TOSA \
         Flatbuffers file." ON)
-option(BUILD_VGF_WRITER
-       "Build the VGF Writer library. A wrapper of the VGF Encoder allowing users to create .vgf files \
-        with tosa2spirv output." ON)
 option(BUILD_MODEL_COMPARISON_TOOL "Build Model comparison tool" ON)
-option(BUILD_SPIRV_2_TOSA_TOOL "Build the spirv2tosa utility tool." ON)
+option(BUILD_SPIRV_2_TOSA "Build the spirv2tosa module." ON)
 option(BUILD_VGF_WRITER "Build the VGF Writer library.
                          A wrapper of the VGF Encoder allowing users to create .vgf files with tosa2spirv output." ON)
 # Option for Unittest Coverage testing
@@ -55,6 +52,8 @@ set(SPIRV_TOOLS_BUILD_PATH       "${SPIRV_TOOLS_SOURCE_PATH}/build"             
 set(TOOLS_PATH "${TFSC_ROOT}/tools" CACHE PATH "")
 message(===========${TOOLS_PATH})
 
+
+set(TOOLS_PATH ${CMAKE_SOURCE_DIR}/tools CACHE PATH "")
 
 # Parser can be enabled without generator but generator requires parser.
 if(BUILD_TOSA_2_SPIRV_GENERATOR AND NOT BUILD_TOSA_SERIALIZATION_PARSER)
@@ -113,8 +112,8 @@ endif()
 if(BUILD_TOSA_2_SPIRV_GENERATOR)
     add_subdirectory(${TOOLS_PATH}/generator)
 endif()
-if(BUILD_SPIRV_2_TOSA_TOOL)
-    add_subdirectory(${TOOLS_PATH}/spirv2tosatool)
+if(BUILD_SPIRV_2_TOSA)
+    add_subdirectory(${TOOLS_PATH}/spirv2tosa)
 endif()
 
 if(BUILD_UNITTESTS OR BUILD_MODEL_COMPARISON_TOOL)

@@ -63,10 +63,10 @@ TEST(TOSA2SPIRV_PARSER, Equal)
 
     testutils::CheckModule(spirvModule,
                            TOSAEQUAL,
-                           {{DataType::int32_t, {1, 1, 1, 1}}, {DataType::int32_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::bool_t, {1, 1, 1, 1}}});
+                           {{std::initializer_list<uint32_t>{}, DataType::int32_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int32_t, {1, 1, 1, 1}}},
+                           {{DataType::bool_t, {1, 1, 1, 1}}},
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, Greater)
@@ -118,10 +118,10 @@ TEST(TOSA2SPIRV_PARSER, Greater)
 
     testutils::CheckModule(spirvModule,
                            TOSAGREATER,
-                           {{DataType::int32_t, {1, 1, 1, 1}}, {DataType::int32_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::bool_t, {1, 1, 1, 1}}});
+                           {{std::initializer_list<uint32_t>{}, DataType::int32_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int32_t, {1, 1, 1, 1}}},
+                           {{DataType::bool_t, {1, 1, 1, 1}}},
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, GreaterEqual)
@@ -173,8 +173,8 @@ TEST(TOSA2SPIRV_PARSER, GreaterEqual)
 
     testutils::CheckModule(spirvModule,
                            TOSAGREATER_EQUAL,
-                           {{DataType::int32_t, {1, 1, 1, 1}}, {DataType::int32_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::bool_t, {1, 1, 1, 1}}});
+                           {{std::initializer_list<uint32_t>{}, DataType::int32_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int32_t, {1, 1, 1, 1}}},
+                           {{DataType::bool_t, {1, 1, 1, 1}}},
+                           {});
 }

@@ -65,10 +65,10 @@ TEST(TOSA2SPIRV_PARSER, Gather)
 
     testutils::CheckModule(spirvModule,
                            TOSAGATHER,
-                           {{DataType::int8_t, {1, 1, 1, 1}}, {DataType::int32_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::int8_t, {1, 1, 1, 1}}});
+                           {{std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int32_t, {1, 1, 1, 1}}},
+                           {{DataType::int8_t, {1, 1, 1, 1}}},
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, Scatter)
@@ -130,11 +130,11 @@ TEST(TOSA2SPIRV_PARSER, Scatter)
     TosaSerializationParser parser(&block);
     const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    testutils::CheckModule(
-        spirvModule,
-        TOSASCATTER,
-        {{DataType::int8_t, {1, 1, 1, 1}}, {DataType::int32_t, {1, 1, 1, 1}}, {DataType::int8_t, {1, 1, 1, 1}}},
-        {},
-        {},
-        {{DataType::int8_t, {1, 1, 1, 1}}});
+    testutils::CheckModule(spirvModule,
+                           TOSASCATTER,
+                           {{std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int32_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}}},
+                           {{DataType::int8_t, {1, 1, 1, 1}}},
+                           {});
 }

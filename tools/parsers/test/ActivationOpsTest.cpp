@@ -61,10 +61,9 @@ TEST(TOSA2SPIRV_PARSER, Clamp)
 
     testutils::CheckModule(spirvModule,
                            TOSACLAMP,
+                           {{std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}}},
                            {{DataType::int8_t, {1, 1, 1, 1}}},
-                           {},
-                           {{{1}, DataType::int8_t, {1}}, {{1}, DataType::int8_t, {1}}, {{1}, DataType::int32_t, {1}}},
-                           {{DataType::int8_t, {1, 1, 1, 1}}});
+                           {{{1}, DataType::int8_t, {1}}, {{1}, DataType::int8_t, {1}}, {{1}, DataType::int32_t, {1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, Erf)
@@ -106,10 +105,9 @@ TEST(TOSA2SPIRV_PARSER, Erf)
 
     testutils::CheckModule(spirvModule,
                            TOSAERF,
+                           {{std::initializer_list<uint32_t>{}, DataType::float16_t, {1, 1, 1, 1}}},
                            {{DataType::float16_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::float16_t, {1, 1, 1, 1}}});
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, Sigmoid)
@@ -151,10 +149,9 @@ TEST(TOSA2SPIRV_PARSER, Sigmoid)
 
     testutils::CheckModule(spirvModule,
                            TOSASIGMOID,
+                           {{std::initializer_list<uint32_t>{}, DataType::float16_t, {1, 1, 1, 1}}},
                            {{DataType::float16_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::float16_t, {1, 1, 1, 1}}});
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, Tanh)
@@ -196,8 +193,7 @@ TEST(TOSA2SPIRV_PARSER, Tanh)
 
     testutils::CheckModule(spirvModule,
                            TOSATANH,
+                           {{std::initializer_list<uint32_t>{}, DataType::float16_t, {1, 1, 1, 1}}},
                            {{DataType::float16_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::float16_t, {1, 1, 1, 1}}});
+                           {});
 }

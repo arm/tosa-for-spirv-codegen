@@ -11,15 +11,14 @@
 #include <gtest/gtest.h>
 
 using namespace tosa2spirv::tosa;
+using namespace testutils;
 
-// TEST HASH 5161346066531117142
+// TEST HASH 3954723616406894370
 TEST(TOSA2SPIRV_OPERATOR, SelectOperatorTest0)
 {
 // Operator Definition, separated for reuse in the test fixture
 const OperatorEnum op = OperatorEnum::Select;
-const std::vector<Tensor> inputs {{DataType::bool_t, {1, 720, 1280, 16}}, {DataType::uint8_t, {1, 720, 1280, 16}}, {DataType::uint8_t, {1, 720, 1280, 16}}};
-const std::vector<Tensor> graphConstants {};
-const std::vector<Attribute> tensorConstants {};
+const std::vector<Attribute> inputs {{std::initializer_list<uint32_t>{}, DataType::bool_t, {1, 720, 1280, 16}}, {std::initializer_list<uint32_t>{}, DataType::uint8_t, {1, 720, 1280, 16}}, {std::initializer_list<uint32_t>{}, DataType::uint8_t, {1, 720, 1280, 16}}};
 const std::vector<Tensor> outputs {{DataType::uint8_t, {1, 720, 1280, 16}}};
 const std::vector<Attribute> attributes {};
 
@@ -27,10 +26,9 @@ const std::vector<Attribute> attributes {};
 std::shared_ptr<tosa2spirv::spirv::Module> module = tosa2spirv::CreateModule(tosa2spirv::TOSAVersion::v1_0);
 Graph graph{module};
 
-const auto& input1 = graph.AddInput(inputs[0], 0);
-const auto& input2 = graph.AddInput(inputs[1], 1);
-const auto& input3 = graph.AddInput(inputs[2], 2);
-
+const auto& input1 = graph.AddInput(inputs[0].GetTensor(), 0);
+const auto& input2 = graph.AddInput(inputs[1].GetTensor(), 1);
+const auto& input3 = graph.AddInput(inputs[2].GetTensor(), 2);
 
 const auto& output1 = outputs[0];
 const auto& graphRes = graph.AddSelectOperator(input1, input2, input3, output1);
@@ -38,6 +36,6 @@ graph.AddOutput(graphRes, 0);
 graph.FinalizeGraph();
 
 // Validating generated SPIR-V Module
-testutils::CheckModule(module, op, inputs, graphConstants, tensorConstants, outputs, attributes);
+testutils::CheckModule(module, op, inputs, outputs, attributes);
 }
 

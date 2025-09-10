@@ -40,6 +40,12 @@ if __name__ == "__main__":
         default=0,
     )
 
+    parser.add_argument(
+        "--serialization_attr_path",
+        help="--serialization_attr_path <path_to_file> to specify a custom .def file for TOSA serialization_lib attributes",
+        default="external/serialization_lib/include/attribute.def"
+    )
+
     args = parser.parse_args()
 
     code_generator = SourceGenerator()
@@ -53,6 +59,8 @@ if __name__ == "__main__":
         code_generator.generate_op_enum_map()
         code_generator.generate_op_definitions()
         code_generator.generate_op_enums()
+        if args.serialization_attr_path:
+            code_generator.generate_serialization_attribute_definitions(args.serialization_attr_path)
 
     xml_path = "./external/tosa_specification/tosa.xml"
     input_template_dir = "python/templates"

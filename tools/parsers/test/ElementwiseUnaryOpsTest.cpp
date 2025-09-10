@@ -53,10 +53,9 @@ TEST(TOSA2SPIRV_PARSER, Abs)
 
     testutils::CheckModule(spirvModule,
                            TOSAABS,
+                           {{std::initializer_list<uint32_t>{}, DataType::int32_t, {1, 1, 1, 1}}},
                            {{DataType::int32_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::int32_t, {1, 1, 1, 1}}});
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, BitwiseNot)
@@ -98,10 +97,9 @@ TEST(TOSA2SPIRV_PARSER, BitwiseNot)
 
     testutils::CheckModule(spirvModule,
                            TOSABITWISE_NOT,
+                           {{std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}}},
                            {{DataType::int8_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::int8_t, {1, 1, 1, 1}}});
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, Ceil)
@@ -143,10 +141,9 @@ TEST(TOSA2SPIRV_PARSER, Ceil)
 
     testutils::CheckModule(spirvModule,
                            TOSACEIL,
+                           {{std::initializer_list<uint32_t>{}, DataType::float16_t, {1, 1, 1, 1}}},
                            {{DataType::float16_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::float16_t, {1, 1, 1, 1}}});
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, Clz)
@@ -188,10 +185,9 @@ TEST(TOSA2SPIRV_PARSER, Clz)
 
     testutils::CheckModule(spirvModule,
                            TOSACLZ,
+                           {{std::initializer_list<uint32_t>{}, DataType::int32_t, {1, 1, 1, 1}}},
                            {{DataType::int32_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::int32_t, {1, 1, 1, 1}}});
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, Cos)
@@ -233,10 +229,9 @@ TEST(TOSA2SPIRV_PARSER, Cos)
 
     testutils::CheckModule(spirvModule,
                            TOSACOS,
+                           {{std::initializer_list<uint32_t>{}, DataType::float16_t, {1, 1, 1, 1}}},
                            {{DataType::float16_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::float16_t, {1, 1, 1, 1}}});
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, Exp)
@@ -278,10 +273,9 @@ TEST(TOSA2SPIRV_PARSER, Exp)
 
     testutils::CheckModule(spirvModule,
                            TOSAEXP,
+                           {{std::initializer_list<uint32_t>{}, DataType::float16_t, {1, 1, 1, 1}}},
                            {{DataType::float16_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::float16_t, {1, 1, 1, 1}}});
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, Floor)
@@ -323,10 +317,9 @@ TEST(TOSA2SPIRV_PARSER, Floor)
 
     testutils::CheckModule(spirvModule,
                            TOSAFLOOR,
+                           {{std::initializer_list<uint32_t>{}, DataType::float16_t, {1, 1, 1, 1}}},
                            {{DataType::float16_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::float16_t, {1, 1, 1, 1}}});
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, Log)
@@ -368,10 +361,9 @@ TEST(TOSA2SPIRV_PARSER, Log)
 
     testutils::CheckModule(spirvModule,
                            TOSALOG,
+                           {{std::initializer_list<uint32_t>{}, DataType::float16_t, {1, 1, 1, 1}}},
                            {{DataType::float16_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::float16_t, {1, 1, 1, 1}}});
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, LogicalNot)
@@ -413,10 +405,9 @@ TEST(TOSA2SPIRV_PARSER, LogicalNot)
 
     testutils::CheckModule(spirvModule,
                            TOSALOGICAL_NOT,
+                           {{std::initializer_list<uint32_t>{}, DataType::bool_t, {1, 1, 1, 1}}},
                            {{DataType::bool_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::bool_t, {1, 1, 1, 1}}});
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, Negate)
@@ -487,10 +478,11 @@ TEST(TOSA2SPIRV_PARSER, Negate)
 
     testutils::CheckModule(spirvModule,
                            TOSANEGATE,
+                           {{std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}},
+                            {{1}, DataType::int8_t, {1}},
+                            {{1}, DataType::int8_t, {1}}},
                            {{DataType::int8_t, {1, 1, 1, 1}}},
-                           {},
-                           {{{1}, DataType::int8_t, {1}}, {{1}, DataType::int8_t, {1}}},
-                           {{DataType::int8_t, {1, 1, 1, 1}}});
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, Reciprocal)
@@ -532,10 +524,9 @@ TEST(TOSA2SPIRV_PARSER, Reciprocal)
 
     testutils::CheckModule(spirvModule,
                            TOSARECIPROCAL,
+                           {{std::initializer_list<uint32_t>{}, DataType::float16_t, {1, 1, 1, 1}}},
                            {{DataType::float16_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::float16_t, {1, 1, 1, 1}}});
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, Rsqrt)
@@ -577,10 +568,9 @@ TEST(TOSA2SPIRV_PARSER, Rsqrt)
 
     testutils::CheckModule(spirvModule,
                            TOSARSQRT,
+                           {{std::initializer_list<uint32_t>{}, DataType::float16_t, {1, 1, 1, 1}}},
                            {{DataType::float16_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::float16_t, {1, 1, 1, 1}}});
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, Sin)
@@ -622,8 +612,7 @@ TEST(TOSA2SPIRV_PARSER, Sin)
 
     testutils::CheckModule(spirvModule,
                            TOSASIN,
+                           {{std::initializer_list<uint32_t>{}, DataType::float16_t, {1, 1, 1, 1}}},
                            {{DataType::float16_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::float16_t, {1, 1, 1, 1}}});
+                           {});
 }

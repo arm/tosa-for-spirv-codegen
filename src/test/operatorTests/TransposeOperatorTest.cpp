@@ -11,15 +11,14 @@
 #include <gtest/gtest.h>
 
 using namespace tosa2spirv::tosa;
+using namespace testutils;
 
-// TEST HASH 17187884799895349677
+// TEST HASH 70394814648372462
 TEST(TOSA2SPIRV_OPERATOR, TransposeOperatorTest0)
 {
 // Operator Definition, separated for reuse in the test fixture
 const OperatorEnum op = OperatorEnum::Transpose;
-const std::vector<Tensor> inputs {{DataType::uint8_t, {1, 197, 3, 64}}};
-const std::vector<Tensor> graphConstants {};
-const std::vector<Attribute> tensorConstants {};
+const std::vector<Attribute> inputs {{std::initializer_list<uint32_t>{}, DataType::uint8_t, {1, 197, 3, 64}}};
 const std::vector<Tensor> outputs {{DataType::uint8_t, {1, 3, 197, 64}}};
 const std::vector<Attribute> attributes {{std::initializer_list<uint32_t>{0, 2, 1, 3}, DataType::uint32_t, {4}}};
 
@@ -27,7 +26,7 @@ const std::vector<Attribute> attributes {{std::initializer_list<uint32_t>{0, 2, 
 std::shared_ptr<tosa2spirv::spirv::Module> module = tosa2spirv::CreateModule(tosa2spirv::TOSAVersion::v1_0);
 Graph graph{module};
 
-const auto& input1 = graph.AddInput(inputs[0], 0);
+const auto& input1 = graph.AddInput(inputs[0].GetTensor(), 0);
 
 const auto& attribute1 = attributes[0];
 
@@ -37,6 +36,6 @@ graph.AddOutput(graphRes, 0);
 graph.FinalizeGraph();
 
 // Validating generated SPIR-V Module
-testutils::CheckModule(module, op, inputs, graphConstants, tensorConstants, outputs, attributes);
+testutils::CheckModule(module, op, inputs, outputs, attributes);
 }
 

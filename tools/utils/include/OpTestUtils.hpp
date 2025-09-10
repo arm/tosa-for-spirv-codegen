@@ -7,7 +7,6 @@
 
 #include <AssemblyUtils.hpp>
 #include <Graph.hpp>
-#include <OpGenerator.hpp>
 #include <Operand.hpp>
 #include <OperatorDefinitions.hpp>
 #include <Tensor.hpp>
@@ -23,33 +22,20 @@ namespace testutils
 {
 
 /// Checks that a given spirv Module instance contains an operator with the given parameters
-void CheckModule(const std::shared_ptr<spirv::Module>& module,
+void CheckModule(const std::shared_ptr<tosa2spirv::spirv::Module>& module,
                  const TOSAInstructions op,
-                 const std::vector<tosa::Tensor>& inputs,
-                 const std::vector<tosa::Tensor>& graphConstants,
-                 const std::vector<tosa::Attribute>& tensorConstants,
-                 const std::vector<tosa::Tensor>& outputs,
-                 const std::vector<tosa::Attribute>& attributes = {});
+                 const std::vector<tosa2spirv::tosa::Attribute>& inputs,
+                 const std::vector<tosa2spirv::tosa::Tensor>& outputs,
+                 const std::vector<tosa2spirv::tosa::Attribute>& attributes = {});
 
 /// CheckModule overload taking an OperatorEnum instead of TOSAInstructions operator
-inline void CheckModule(const std::shared_ptr<spirv::Module>& module,
-                        const tosa::OperatorEnum op,
-                        const std::vector<tosa::Tensor>& inputs,
-                        const std::vector<tosa::Tensor>& graphConstants,
-                        const std::vector<tosa::Attribute>& tensorConstants,
-                        const std::vector<tosa::Tensor>& outputs,
-                        const std::vector<tosa::Attribute>& attributes = {})
+inline void CheckModule(const std::shared_ptr<tosa2spirv::spirv::Module>& module,
+                        const tosa2spirv::tosa::OperatorEnum op,
+                        const std::vector<tosa2spirv::tosa::Attribute>& inputs,
+                        const std::vector<tosa2spirv::tosa::Tensor>& outputs,
+                        const std::vector<tosa2spirv::tosa::Attribute>& attributes = {})
 {
-    CheckModule(module, tosa::GetTOSAInstructions(op), inputs, graphConstants, tensorConstants, outputs, attributes);
+    CheckModule(module, tosa2spirv::tosa::GetTOSAInstructions(op), inputs, outputs, attributes);
 }
-
-/// Operator Test Fixture, attempts to create a new operator using the GraphAPI defined using the given parameters, and
-/// verifies that the produced SPIR-V contains an equivalent operator definition
-bool CheckOperator(const tosa::OperatorEnum op,
-                   const std::vector<tosa::Tensor>& inputs,
-                   const std::vector<tosa::Tensor>& graphConstants,
-                   const std::vector<tosa::Attribute>& tensorConstants,
-                   const std::vector<tosa::Tensor>& outputs,
-                   const std::vector<tosa::Attribute>& attributes);
 
 } // namespace testutils

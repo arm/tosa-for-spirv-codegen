@@ -9,15 +9,21 @@
 #include <map>
 #include <memory>
 #include <sstream>
+#include <stdexcept>
 #include <string>
+#include <utility>
 
 #include <AssemblyUtils.hpp>
+#include <EnumMaps.hpp>
+#include <Graph.hpp>
 #include <Module.hpp>
-#include <OpGenerator.hpp>
-#include <OperatorEnum.hpp>
-#include <stdexcept>
-
 #include <OperatorDefinitions.hpp>
+#include <OperatorEnum.hpp>
+#include <TosaOperator.hpp>
+#include <spirv2tosa.hpp>
+#include <tosa2spirv.hpp>
+
+#include <tosa_serialization_handler.h>
 
 namespace tosa2spirv::spirv2tosatool
 {
@@ -25,7 +31,7 @@ namespace tosa2spirv::spirv2tosatool
 void Usage()
 {
     std::puts("spirv2tosatool usage:");
-    std::puts("./spirv2tosatool <spirv disassembly file> <ops|tests> [options...]");
+    std::puts("./spirv2tosatool <spirv disassembly file> <ops|tests|tosa> [options...]");
     std::puts(" ops ..... generate C/C++ strings for present TOSA Operators");
     std::puts("   options:");
     std::puts("   --unique: only show operators with unique opcodes");
@@ -34,6 +40,9 @@ void Usage()
     std::puts("   --dir <output test files directory>");
     std::puts("   --overwrite: overwrite tests rather than appending to existing files if found");
     std::puts("   --unique: only add a single test case for each opcode");
+    std::puts(" tosa .... generate TOSA Flatbuffer file (.tosa format) from disassembly");
+    std::puts("   options:");
+    std::puts("   --output <output file name>");
 }
 
 std::shared_ptr<spirv::Module> LoadSpirvFile(const std::ifstream& spirvFile)
@@ -66,19 +75,19 @@ std::shared_ptr<spirv::Module> LoadSpirvFile(const std::ifstream& spirvFile)
 
 int Ops(const int argc, char** argv, const std::ifstream& spirvFile)
 {
-    testutils::OperatorComparator opComparator = testutils::defaultOpComparator;
+    spirv2tosa::OperatorComparator opComparator = spirv2tosa::defaultOpComparator;
 
     for (size_t argIdx = 3; argIdx < argc; ++argIdx)
     {
         if (std::strcmp(argv[argIdx], "--unique") == 0)
         {
-            opComparator = [](const testutils::TosaOperator& lhs, const testutils::TosaOperator& rhs) -> bool
+            opComparator = [](const spirv2tosa::TosaOperator& lhs, const spirv2tosa::TosaOperator& rhs) -> bool
             { return lhs.op < rhs.op; };
         }
     }
 
     const auto& module = LoadSpirvFile(spirvFile);
-    const std::vector<std::string> ops = testutils::Spirv2tosa(module, opComparator);
+    const std::vector<std::string> ops = spirv2tosa::Spirv2tosa(module, opComparator);
 
     std::puts("------");
     for (const auto& opString : ops)
@@ -90,39 +99,41 @@ int Ops(const int argc, char** argv, const std::ifstream& spirvFile)
     return 0;
 }
 
-std::string GetTestDefinition(const testutils::TosaOperator op,
+void Tosa(const int argc, char** argv, const std::ifstream& spirvFile)
+{
+    std::string outputFile = "output.tosa";
+    for (size_t argIdx = 3; argIdx < argc; ++argIdx)
+    {
+        if (std::strcmp(argv[argIdx], "--output") == 0)
+        {
+            if (++argIdx < argc)
+            {
+                outputFile = argv[argIdx];
+            }
+        }
+    }
+
+    const auto& module = LoadSpirvFile(spirvFile);
+    auto handler = spirv2tosa::GetTosaSerializationHandler(module);
+    handler->SaveFileTosaFlatbuffer(outputFile.c_str());
+}
+
+std::string GetTestDefinition(const spirv2tosa::TosaOperator op,
                               const std::string& operatorDefinition,
                               const std::string& testHash,
-                              const std::string& testName,
-                              bool verbose = true)
+                              const std::string& testName)
 {
     std::string testDefinition = "// TEST HASH " + testHash + "\nTEST(TOSA2SPIRV_OPERATOR, " + testName + ")\n{\n";
     testDefinition += "// Operator Definition, separated for reuse in the test fixture\n" + operatorDefinition + "\n\n";
 
-    if (verbose)
-    {
-        testDefinition += "// Adding operator using Graph API\n"
-                          "std::shared_ptr<tosa2spirv::spirv::Module> module = "
-                          "tosa2spirv::CreateModule(tosa2spirv::TOSAVersion::v1_0);\n"
-                          "Graph graph{module};\n\n";
-        testDefinition += testutils::OperatorToGraphDefinition(op,
-                                                               "graph",
-                                                               "inputs",
-                                                               "graphConstants",
-                                                               "tensorConstants",
-                                                               "outputs",
-                                                               "attributes");
+    testDefinition += "// Adding operator using Graph API\n"
+                      "std::shared_ptr<tosa2spirv::spirv::Module> module = "
+                      "tosa2spirv::CreateModule(tosa2spirv::TOSAVersion::v1_0);\n"
+                      "Graph graph{module};\n\n";
+    testDefinition += spirv2tosa::OperatorToGraphDefinition(op, "graph", "inputs", "outputs", "attributes");
 
-        testDefinition +=
-            "\n\n// Validating generated SPIR-V Module\n"
-            "testutils::CheckModule(module, op, inputs, graphConstants, tensorConstants, outputs, attributes);\n}\n\n";
-    }
-    else
-    {
-        testDefinition += "// Validating Operator using utility function\n"
-                          "EXPECT_TRUE(testutils::CheckOperator(op, inputs, graphConstants, tensorConstants, "
-                          "outputs, attributes));\n}\n\n";
-    }
+    testDefinition += "\n\n// Validating generated SPIR-V Module\n"
+                      "testutils::CheckModule(module, op, inputs, outputs, attributes);\n}\n\n";
     return testDefinition;
 }
 
@@ -130,7 +141,7 @@ int Tests(const int argc, char** argv, const std::ifstream& spirvFile, std::stri
 {
     std::string outputDir = ".";
     bool overwrite = false;
-    testutils::OperatorComparator opComparator = testutils::defaultOpComparator;
+    spirv2tosa::OperatorComparator opComparator = spirv2tosa::defaultOpComparator;
 
     for (size_t argIdx = 3; argIdx < argc; ++argIdx)
     {
@@ -141,17 +152,19 @@ int Tests(const int argc, char** argv, const std::ifstream& spirvFile, std::stri
         else if (strcmp(argv[argIdx], "--dir") == 0)
         {
             if (++argIdx < argc)
+            {
                 outputDir = argv[argIdx];
+            }
         }
         else if (strcmp(argv[argIdx], "--unique") == 0)
         {
-            opComparator = [](const testutils::TosaOperator& lhs, const testutils::TosaOperator& rhs) -> bool
+            opComparator = [](const spirv2tosa::TosaOperator& lhs, const spirv2tosa::TosaOperator& rhs) -> bool
             { return lhs.op < rhs.op; };
         }
     }
 
     const auto& module = LoadSpirvFile(spirvFile);
-    const std::vector<testutils::TosaOperator> ops = testutils::Spirv2operators(module, opComparator);
+    const std::vector<spirv2tosa::TosaOperator> ops = spirv2tosa::Spirv2operators(module, opComparator);
 
     std::map<tosa::OperatorEnum, std::pair<std::fstream, uint32_t>> opFiles;
     for (const auto& op : ops)
@@ -206,7 +219,7 @@ int Tests(const int argc, char** argv, const std::ifstream& spirvFile, std::stri
             file << testFileHeader;
         }
         // Append test case for the current operator
-        const std::string opDefinition = testutils::OperatorToString(op);
+        const std::string opDefinition = spirv2tosa::OperatorToString(op);
         const std::string testHash = std::to_string(std::hash<std::string>{}(opDefinition));
         const std::string testName = tosa::GetOperatorName(op.op) + "OperatorTest" + std::to_string(lastTestId);
 
@@ -260,8 +273,14 @@ int main(const int argc, char** argv)
                                  "#include <OpTestUtils.hpp>\n"
                                  "#include <tosa2spirv.hpp>\n\n"
                                  "#include <gtest/gtest.h>\n\n"
-                                 "using namespace tosa2spirv::tosa;\n\n";
+                                 "using namespace tosa2spirv::tosa;\n"
+                                 "using namespace testutils;\n"
+                                 "\n";
         result = tosa2spirv::spirv2tosatool::Tests(argc, argv, spirvFile, fileHeader);
+    }
+    else if (strcmp(argv[2], "tosa") == 0)
+    {
+        tosa2spirv::spirv2tosatool::Tosa(argc, argv, spirvFile);
     }
     else
     {

@@ -11,15 +11,14 @@
 #include <gtest/gtest.h>
 
 using namespace tosa2spirv::tosa;
+using namespace testutils;
 
-// TEST HASH 3115931585713259021
+// TEST HASH 15148599771570786194
 TEST(TOSA2SPIRV_OPERATOR, NegateOperatorTest0)
 {
 // Operator Definition, separated for reuse in the test fixture
 const OperatorEnum op = OperatorEnum::Negate;
-const std::vector<Tensor> inputs {{DataType::uint16_t, {1, 8, 8, 8}}};
-const std::vector<Tensor> graphConstants {};
-const std::vector<Attribute> tensorConstants {{std::initializer_list<uint32_t>{0}, DataType::uint16_t, {1}}, {std::initializer_list<uint32_t>{0}, DataType::uint16_t, {1}}};
+const std::vector<Attribute> inputs {{std::initializer_list<uint32_t>{}, DataType::uint16_t, {1, 8, 8, 8}}, {std::initializer_list<uint32_t>{0}, DataType::uint16_t, {1}}, {std::initializer_list<uint32_t>{0}, DataType::uint16_t, {1}}};
 const std::vector<Tensor> outputs {{DataType::uint16_t, {1, 8, 8, 8}}};
 const std::vector<Attribute> attributes {};
 
@@ -27,17 +26,16 @@ const std::vector<Attribute> attributes {};
 std::shared_ptr<tosa2spirv::spirv::Module> module = tosa2spirv::CreateModule(tosa2spirv::TOSAVersion::v1_0);
 Graph graph{module};
 
-const auto& input1 = graph.AddInput(inputs[0], 0);
-const auto& tensorConstInput1 = graph.AddTensorConstant(tensorConstants[0]);
-const auto& tensorConstInput2 = graph.AddTensorConstant(tensorConstants[1]);
-
+const auto& input1 = graph.AddInput(inputs[0].GetTensor(), 0);
+const auto& input2 = graph.AddTensorConstant(inputs[1]);
+const auto& input3 = graph.AddTensorConstant(inputs[2]);
 
 const auto& output1 = outputs[0];
-const auto& graphRes = graph.AddNegateOperator(input1, tensorConstInput1, tensorConstInput2, output1);
+const auto& graphRes = graph.AddNegateOperator(input1, input2, input3, output1);
 graph.AddOutput(graphRes, 0);
 graph.FinalizeGraph();
 
 // Validating generated SPIR-V Module
-testutils::CheckModule(module, op, inputs, graphConstants, tensorConstants, outputs, attributes);
+testutils::CheckModule(module, op, inputs, outputs, attributes);
 }
 

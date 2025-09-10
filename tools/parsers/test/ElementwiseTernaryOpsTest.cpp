@@ -67,11 +67,11 @@ TEST(TOSA2SPIRV_PARSER, Select)
     TosaSerializationParser parser(&block);
     const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    testutils::CheckModule(
-        spirvModule,
-        TOSASELECT,
-        {{DataType::bool_t, {1, 1, 1, 1}}, {DataType::bool_t, {1, 1, 1, 1}}, {DataType::bool_t, {1, 1, 1, 1}}},
-        {},
-        {},
-        {{DataType::bool_t, {1, 1, 1, 1}}});
+    testutils::CheckModule(spirvModule,
+                           TOSASELECT,
+                           {{std::initializer_list<uint32_t>{}, DataType::bool_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::bool_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::bool_t, {1, 1, 1, 1}}},
+                           {{DataType::bool_t, {1, 1, 1, 1}}},
+                           {});
 }

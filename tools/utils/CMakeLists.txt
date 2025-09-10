@@ -10,8 +10,7 @@ set(UTILS_SOURCE
     src/ValidationUtils.cpp
     src/OpTestUtils.cpp
     src/EnumMaps.cpp
-    src/StringUtils.cpp
-    src/OpGenerator.cpp)
+    src/StringUtils.cpp)
 add_library(utils ${UTILS_SOURCE})
 
 target_include_directories(utils PRIVATE SPIRV_TOOLS_SOURCE_PATH)

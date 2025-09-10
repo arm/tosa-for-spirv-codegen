@@ -63,10 +63,10 @@ TEST(TOSA2SPIRV_PARSER, Add)
 
     testutils::CheckModule(spirvModule,
                            TOSAADD,
-                           {{DataType::int32_t, {1, 1, 1, 1}}, {DataType::int32_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::int32_t, {1, 1, 1, 1}}});
+                           {{std::initializer_list<uint32_t>{}, DataType::int32_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int32_t, {1, 1, 1, 1}}},
+                           {{DataType::int32_t, {1, 1, 1, 1}}},
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, ArithmeticRightShift)
@@ -122,10 +122,10 @@ TEST(TOSA2SPIRV_PARSER, ArithmeticRightShift)
 
     testutils::CheckModule(spirvModule,
                            TOSAARITHMETIC_RIGHT_SHIFT,
-                           {{DataType::int8_t, {1, 1, 1, 1}}, {DataType::int8_t, {1, 1, 1, 1}}},
-                           {},
-                           {{{1}, DataType::bool_t, {1}}},
-                           {{DataType::int8_t, {1, 1, 1, 1}}});
+                           {{std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}}},
+                           {{DataType::int8_t, {1, 1, 1, 1}}},
+                           {{{1}, DataType::bool_t, {1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, BitwiseAnd)
@@ -177,10 +177,10 @@ TEST(TOSA2SPIRV_PARSER, BitwiseAnd)
 
     testutils::CheckModule(spirvModule,
                            TOSABITWISE_AND,
-                           {{DataType::int8_t, {1, 1, 1, 1}}, {DataType::int8_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::int8_t, {1, 1, 1, 1}}});
+                           {{std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}}},
+                           {{DataType::int8_t, {1, 1, 1, 1}}},
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, BitwiseOr)
@@ -232,10 +232,10 @@ TEST(TOSA2SPIRV_PARSER, BitwiseOr)
 
     testutils::CheckModule(spirvModule,
                            TOSABITWISE_OR,
-                           {{DataType::int8_t, {1, 1, 1, 1}}, {DataType::int8_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::int8_t, {1, 1, 1, 1}}});
+                           {{std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}}},
+                           {{DataType::int8_t, {1, 1, 1, 1}}},
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, BitwiseXor)
@@ -287,10 +287,10 @@ TEST(TOSA2SPIRV_PARSER, BitwiseXor)
 
     testutils::CheckModule(spirvModule,
                            TOSABITWISE_XOR,
-                           {{DataType::int8_t, {1, 1, 1, 1}}, {DataType::int8_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::int8_t, {1, 1, 1, 1}}});
+                           {{std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}}},
+                           {{DataType::int8_t, {1, 1, 1, 1}}},
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, IntDiv)
@@ -342,10 +342,10 @@ TEST(TOSA2SPIRV_PARSER, IntDiv)
 
     testutils::CheckModule(spirvModule,
                            TOSAINTDIV,
-                           {{DataType::int32_t, {1, 1, 1, 1}}, {DataType::int32_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::int32_t, {1, 1, 1, 1}}});
+                           {{std::initializer_list<uint32_t>{}, DataType::int32_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int32_t, {1, 1, 1, 1}}},
+                           {{DataType::int32_t, {1, 1, 1, 1}}},
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, LogicalAnd)
@@ -397,10 +397,10 @@ TEST(TOSA2SPIRV_PARSER, LogicalAnd)
 
     testutils::CheckModule(spirvModule,
                            TOSALOGICAL_AND,
-                           {{DataType::bool_t, {1, 1, 1, 1}}, {DataType::bool_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::bool_t, {1, 1, 1, 1}}});
+                           {{std::initializer_list<uint32_t>{}, DataType::bool_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::bool_t, {1, 1, 1, 1}}},
+                           {{DataType::bool_t, {1, 1, 1, 1}}},
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, LogicalLeftShift)
@@ -452,10 +452,10 @@ TEST(TOSA2SPIRV_PARSER, LogicalLeftShift)
 
     testutils::CheckModule(spirvModule,
                            TOSALOGICAL_LEFT_SHIFT,
-                           {{DataType::int8_t, {1, 1, 1, 1}}, {DataType::int8_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::int8_t, {1, 1, 1, 1}}});
+                           {{std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}}},
+                           {{DataType::int8_t, {1, 1, 1, 1}}},
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, LogicalRightShift)
@@ -507,10 +507,10 @@ TEST(TOSA2SPIRV_PARSER, LogicalRightShift)
 
     testutils::CheckModule(spirvModule,
                            TOSALOGICAL_RIGHT_SHIFT,
-                           {{DataType::int8_t, {1, 1, 1, 1}}, {DataType::int8_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::int8_t, {1, 1, 1, 1}}});
+                           {{std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}}},
+                           {{DataType::int8_t, {1, 1, 1, 1}}},
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, LogicalOr)
@@ -562,10 +562,10 @@ TEST(TOSA2SPIRV_PARSER, LogicalOr)
 
     testutils::CheckModule(spirvModule,
                            TOSALOGICAL_OR,
-                           {{DataType::bool_t, {1, 1, 1, 1}}, {DataType::bool_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::bool_t, {1, 1, 1, 1}}});
+                           {{std::initializer_list<uint32_t>{}, DataType::bool_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::bool_t, {1, 1, 1, 1}}},
+                           {{DataType::bool_t, {1, 1, 1, 1}}},
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, LogicalXor)
@@ -617,10 +617,10 @@ TEST(TOSA2SPIRV_PARSER, LogicalXor)
 
     testutils::CheckModule(spirvModule,
                            TOSALOGICAL_XOR,
-                           {{DataType::bool_t, {1, 1, 1, 1}}, {DataType::bool_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::bool_t, {1, 1, 1, 1}}});
+                           {{std::initializer_list<uint32_t>{}, DataType::bool_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::bool_t, {1, 1, 1, 1}}},
+                           {{DataType::bool_t, {1, 1, 1, 1}}},
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, Maximum)
@@ -676,10 +676,10 @@ TEST(TOSA2SPIRV_PARSER, Maximum)
 
     testutils::CheckModule(spirvModule,
                            TOSAMAXIMUM,
-                           {{DataType::int32_t, {1, 1, 1, 1}}, {DataType::int32_t, {1, 1, 1, 1}}},
-                           {},
-                           {{{1}, DataType::int32_t, {1}}},
-                           {{DataType::int32_t, {1, 1, 1, 1}}});
+                           {{std::initializer_list<uint32_t>{}, DataType::int32_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int32_t, {1, 1, 1, 1}}},
+                           {{DataType::int32_t, {1, 1, 1, 1}}},
+                           {{{1}, DataType::int32_t, {1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, Minimum)
@@ -735,10 +735,10 @@ TEST(TOSA2SPIRV_PARSER, Minimum)
 
     testutils::CheckModule(spirvModule,
                            TOSAMINIMUM,
-                           {{DataType::int32_t, {1, 1, 1, 1}}, {DataType::int32_t, {1, 1, 1, 1}}},
-                           {},
-                           {{{1}, DataType::int32_t, {1}}},
-                           {{DataType::int32_t, {1, 1, 1, 1}}});
+                           {{std::initializer_list<uint32_t>{}, DataType::int32_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int32_t, {1, 1, 1, 1}}},
+                           {{DataType::int32_t, {1, 1, 1, 1}}},
+                           {{{1}, DataType::int32_t, {1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, Mul)
@@ -803,10 +803,11 @@ TEST(TOSA2SPIRV_PARSER, Mul)
 
     testutils::CheckModule(spirvModule,
                            TOSAMUL,
-                           {{DataType::int8_t, {1, 1, 1, 1}}, {DataType::int8_t, {1, 1, 1, 1}}},
-                           {},
-                           {{{1}, DataType::int8_t, {1}}},
-                           {{DataType::int32_t, {1, 1, 1, 1}}});
+                           {{std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}},
+                            {{1}, DataType::int8_t, {1}}},
+                           {{DataType::int32_t, {1, 1, 1, 1}}},
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, Pow)
@@ -858,10 +859,10 @@ TEST(TOSA2SPIRV_PARSER, Pow)
 
     testutils::CheckModule(spirvModule,
                            TOSAPOW,
-                           {{DataType::float16_t, {1, 1, 1, 1}}, {DataType::float16_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::float16_t, {1, 1, 1, 1}}});
+                           {{std::initializer_list<uint32_t>{}, DataType::float16_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::float16_t, {1, 1, 1, 1}}},
+                           {{DataType::float16_t, {1, 1, 1, 1}}},
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, Sub)
@@ -913,10 +914,10 @@ TEST(TOSA2SPIRV_PARSER, Sub)
 
     testutils::CheckModule(spirvModule,
                            TOSASUB,
-                           {{DataType::int32_t, {1, 1, 1, 1}}, {DataType::int32_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::int32_t, {1, 1, 1, 1}}});
+                           {{std::initializer_list<uint32_t>{}, DataType::int32_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int32_t, {1, 1, 1, 1}}},
+                           {{DataType::int32_t, {1, 1, 1, 1}}},
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, Table)
@@ -968,10 +969,10 @@ TEST(TOSA2SPIRV_PARSER, Table)
     TosaSerializationParser parser(&block);
     const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    testutils::CheckModule(spirvModule,
-                           TOSATABLE,
-                           {{DataType::int8_t, {1, 1, 1, 1}}},
-                           {},
-                           {{{1}, DataType::int8_t, {1}}},
-                           {{DataType::int8_t, {1, 1, 1, 1}}});
+    testutils::CheckModule(
+        spirvModule,
+        TOSATABLE,
+        {{std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}}, {{1}, DataType::int8_t, {1}}},
+        {{DataType::int8_t, {1, 1, 1, 1}}},
+        {});
 }

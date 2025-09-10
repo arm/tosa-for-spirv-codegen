@@ -57,10 +57,9 @@ TEST(TOSA2SPIRV_PARSER, Concat)
 
     testutils::CheckModule(spirvModule,
                            TOSACONCAT,
+                           {{std::initializer_list<uint32_t>{}, DataType::bool_t, {1, 1, 1, 1}}},
                            {{DataType::bool_t, {1, 1, 1, 1}}},
-                           {},
-                           {{{1}, DataType::int32_t, {1}}},
-                           {{DataType::bool_t, {1, 1, 1, 1}}});
+                           {{{1}, DataType::int32_t, {1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, Pad)
@@ -130,10 +129,11 @@ TEST(TOSA2SPIRV_PARSER, Pad)
 
     testutils::CheckModule(spirvModule,
                            TOSAPAD,
+                           {{std::initializer_list<uint32_t>{}, DataType::bool_t, {1, 1, 1, 1}},
+                            {{1, 1, 1, 1}, DataType::int32_t, {4}},
+                            {{1}, DataType::bool_t, {1}}},
                            {{DataType::bool_t, {1, 1, 1, 1}}},
-                           {},
-                           {{{1, 1, 1, 1}, DataType::int32_t, {4}}, {{1}, DataType::bool_t, {1}}},
-                           {{DataType::bool_t, {1, 1, 1, 1}}});
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, Reshape)
@@ -186,12 +186,12 @@ TEST(TOSA2SPIRV_PARSER, Reshape)
     TosaSerializationParser parser(&block);
     const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    testutils::CheckModule(spirvModule,
-                           TOSARESHAPE,
-                           {{DataType::bool_t, {1, 1, 1, 1}}},
-                           {},
-                           {{{1, 1, 1, 1}, DataType::int32_t, {4}}},
-                           {{DataType::bool_t, {1, 1, 1, 1}}});
+    testutils::CheckModule(
+        spirvModule,
+        TOSARESHAPE,
+        {{std::initializer_list<uint32_t>{}, DataType::bool_t, {1, 1, 1, 1}}, {{1, 1, 1, 1}, DataType::int32_t, {4}}},
+        {{DataType::bool_t, {1, 1, 1, 1}}},
+        {});
 }
 
 TEST(TOSA2SPIRV_PARSER, Reverse)
@@ -237,10 +237,9 @@ TEST(TOSA2SPIRV_PARSER, Reverse)
 
     testutils::CheckModule(spirvModule,
                            TOSAREVERSE,
+                           {{std::initializer_list<uint32_t>{}, DataType::bool_t, {1, 1, 1, 1}}},
                            {{DataType::bool_t, {1, 1, 1, 1}}},
-                           {},
-                           {{{1}, DataType::int32_t, {1}}},
-                           {{DataType::bool_t, {1, 1, 1, 1}}});
+                           {{{1}, DataType::int32_t, {1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, Slice)
@@ -309,10 +308,11 @@ TEST(TOSA2SPIRV_PARSER, Slice)
 
     testutils::CheckModule(spirvModule,
                            TOSASLICE,
+                           {{std::initializer_list<uint32_t>{}, DataType::bool_t, {1, 1, 1, 1}},
+                            {{1, 1, 1, 1}, DataType::int32_t, {4}},
+                            {{1, 1, 1, 1}, DataType::int32_t, {4}}},
                            {{DataType::bool_t, {1, 1, 1, 1}}},
-                           {},
-                           {{{1, 1, 1, 1}, DataType::int32_t, {4}}, {{1, 1, 1, 1}, DataType::int32_t, {4}}},
-                           {{DataType::bool_t, {1, 1, 1, 1}}});
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, Tile)
@@ -366,12 +366,12 @@ TEST(TOSA2SPIRV_PARSER, Tile)
     TosaSerializationParser parser(&block);
     const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    testutils::CheckModule(spirvModule,
-                           TOSATILE,
-                           {{DataType::bool_t, {1, 1, 1, 1}}},
-                           {},
-                           {{{1, 1, 1, 1}, DataType::int32_t, {4}}},
-                           {{DataType::bool_t, {1, 1, 1, 1}}});
+    testutils::CheckModule(
+        spirvModule,
+        TOSATILE,
+        {{std::initializer_list<uint32_t>{}, DataType::bool_t, {1, 1, 1, 1}}, {{1, 1, 1, 1}, DataType::int32_t, {4}}},
+        {{DataType::bool_t, {1, 1, 1, 1}}},
+        {});
 }
 
 TEST(TOSA2SPIRV_PARSER, Transpose)
@@ -417,8 +417,7 @@ TEST(TOSA2SPIRV_PARSER, Transpose)
 
     testutils::CheckModule(spirvModule,
                            TOSATRANSPOSE,
+                           {{std::initializer_list<uint32_t>{}, DataType::bool_t, {1, 1, 1, 1}}},
                            {{DataType::bool_t, {1, 1, 1, 1}}},
-                           {},
-                           {{{1, 1, 1, 1}, DataType::int32_t, {4}}},
-                           {{DataType::bool_t, {1, 1, 1, 1}}});
+                           {{{1, 1, 1, 1}, DataType::int32_t, {4}}});
 }

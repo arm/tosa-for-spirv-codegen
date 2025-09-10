@@ -25,6 +25,7 @@ class SourceGenerator:
         self.op_def_path = "src/OperatorDefinitions.cpp"
         self.parser_utils_path = "tools/parsers/src/ParserUtils.hpp"
         self.tosa_operator_enum_path = "include/tosa/OperatorEnum.hpp"
+        self.serialization_attr_path = "tools/spirv2tosa/src/spirv2tosa.cpp"
         self.spec = tosa.TOSASpec("./external/tosa_specification/tosa.xml")
 
         self.tosa_version = "{}.{}.{}".format(self.spec.version_major, self.spec.version_minor, self.spec.version_patch)
@@ -114,6 +115,28 @@ class SourceGenerator:
             file.write(definition)
             file.end_block()
             file.write("}\n")
+
+    def generate_serialization_attribute_definitions(self, attr_file_path):
+        with open(attr_file_path, "r") as attr_file:
+            file = FileWriter(self.serialization_attr_path, "GET TOSA ATTRIBUTE CODE GENERATION BEGIN", "GET TOSA ATTRIBUTE CODE GENERATION END")
+
+            argument_map = {}
+            for op in self._operator_list:
+                operator_name = operator_name_to_pascal_case(op.name)
+                if operator_name == "Fft2d":
+                    operator_name = "FFT2d"
+                elif operator_name == "Rfft2d":
+                    operator_name = "RFFT2d"
+                elif operator_name == "Matmul":
+                    operator_name = "MatMul"
+                argument_map[operator_name] = op.arguments
+
+            file.start_block()
+            attr_case = generate_attribute_case(attr_file, argument_map, "Const")
+            while attr_case:
+                file.write(attr_case)
+                attr_case = generate_attribute_case(attr_file, argument_map, "Const")
+            file.end_block()
 
 
 def generate_operator_definition(op):
@@ -274,3 +297,62 @@ def generate_add_operator_declare(op, file):
             file.append(")\n")
 
     file.write("{\n")
+
+# Looks for next `DEF_ATTRIBUTE(` line
+def generate_attribute_case(attributes_file, argument_map, first_unsupported = ""):
+    line = attributes_file.readline()
+    while not line.startswith("DEF_ATTRIBUTE("):
+        if line == "":
+            return False
+        line = attributes_file.readline()
+
+    attr_params = line[14:].strip(", )\n").split(",")
+    attr_name = attr_params[0].strip()
+    arg_count = int(attr_params[1].strip())
+
+    if attr_name == first_unsupported:
+        return False
+
+    # Getting argument names/positions from TOSA spec instead of attributes_file
+    # to ensure correct order of attributes from params
+    spec_args = argument_map[attr_name]
+    spec_attr_names = []
+    for arg in spec_args:
+        if has_argument_category_name(arg, "attribute"):
+            spec_attr_names.append(arg.name)
+
+    result = "case tosa2spirv::tosa::OperatorEnum::"
+    if attr_name == "FFT2d":
+        result += "Fft2d"
+    elif attr_name == "RFFT2d":
+        result += "Rfft2d"
+    elif attr_name == "MatMul":
+        result += "Matmul"
+    else:
+        result += attr_name
+    result += ":\n"
+
+    if arg_count > 0:
+        result += "{\n"
+        last_line = "return std::make_unique<Tosa{}Attribute>(".format(attr_name)
+        for i in range(arg_count):
+            line = attributes_file.readline()
+            arg = line.strip(", )\n").split(",")
+            arg_type = arg[0].strip()
+            arg_name = arg[2].strip()
+            arg_idx = spec_attr_names.index(arg_name)
+            if arg[1].strip() == "V":
+                result += "std::vector<{dtype}> {name} = {{attributes[{idx}].GetData().begin(), attributes[{idx}].GetData().end()}};\n".format(dtype = arg_type, name = arg_name, idx = arg_idx)
+            else:
+                if arg_type == "DType":
+                    result += "DType {name} = GetTosaAccType(attributes[{idx}].GetData()[0]);".format(name = arg_name, idx = arg_idx)
+                else:
+                    result += "{dtype} {name} = static_cast<{dtype}>(attributes[{idx}].GetData()[0]);\n".format(dtype = arg_type, name = arg_name, idx = arg_idx)
+            last_line += arg_name + ", "
+        result += last_line.rstrip(", ") + ");\n"
+        result += "}\n"
+    else:
+        result += "return std::make_unique<::tosa::Tosa{}Attribute>();\n".format(attr_name)
+
+    return result
+

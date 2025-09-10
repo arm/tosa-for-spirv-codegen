@@ -902,17 +902,17 @@ TEST(TOSA2SPIRV_PARSER, IdentityConv2dIdentity)
 
     testutils::CheckModule(spirvModule,
                            TOSACONV2D,
-                           {{DataType::int8_t, {1, 7, 7, 1}}},
-                           {{DataType::int8_t, {1, 3, 3, 1}}},
+                           {{std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 7, 7, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 3, 3, 1}},
+                            {{0}, DataType::int32_t, {1}},
+                            {{1}, DataType::int8_t, {1}},
+                            {{1}, DataType::int8_t, {1}}},
+                           {{DataType::int32_t, {1, 3, 3, 1}}},
                            {{{1, 1, 1, 1}, DataType::int32_t, {1}},
                             {{2, 2}, DataType::int32_t, {1}},
                             {{1, 1}, DataType::int32_t, {1}},
                             {{1}, DataType::int32_t, {1}},
-                            {{1}, DataType::bool_t, {1}},
-                            {{0}, DataType::int32_t, {1}},
-                            {{1}, DataType::int8_t, {1}},
-                            {{1}, DataType::int8_t, {1}}},
-                           {{DataType::int32_t, {1, 3, 3, 1}}});
+                            {{1}, DataType::bool_t, {1}}});
 }
 
 // Multi Layer CONV2D - IDENTITY - RESCALE - CONV2D reusing the weight and bias GraphConstantId

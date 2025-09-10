@@ -53,10 +53,9 @@ TEST(TOSA2SPIRV_PARSER, Cast)
 
     testutils::CheckModule(spirvModule,
                            TOSACAST,
-                           {{DataType::bool_t, {1, 1, 1, 1}}},
-                           {},
-                           {},
-                           {{DataType::int8_t, {1, 1, 1, 1}}});
+                           {{std::initializer_list<uint32_t>{}, DataType::bool_t, {1, 1, 1, 1}}},
+                           {{DataType::int8_t, {1, 1, 1, 1}}},
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, Rescale)
@@ -165,16 +164,15 @@ TEST(TOSA2SPIRV_PARSER, Rescale)
 
     testutils::CheckModule(spirvModule,
                            TOSARESCALE,
-                           {{DataType::int8_t, {1, 1, 1, 1}}},
-                           {},
-                           {{{1}, DataType::bool_t, {1}},
-                            {{1}, DataType::int32_t, {1}},
-                            {{1}, DataType::bool_t, {1}},
-                            {{1}, DataType::bool_t, {1}},
-                            {{1}, DataType::bool_t, {1}},
+                           {{std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}},
                             {{1}, DataType::int32_t, {1}},
                             {{1}, DataType::int8_t, {1}},
                             {{1}, DataType::int8_t, {1}},
                             {{1}, DataType::int8_t, {1}}},
-                           {{DataType::int8_t, {1, 1, 1, 1}}});
+                           {{DataType::int8_t, {1, 1, 1, 1}}},
+                           {{{1}, DataType::bool_t, {1}},
+                            {{1}, DataType::int32_t, {1}},
+                            {{1}, DataType::bool_t, {1}},
+                            {{1}, DataType::bool_t, {1}},
+                            {{1}, DataType::bool_t, {1}}});
 }

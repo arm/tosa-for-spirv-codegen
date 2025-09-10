@@ -97,11 +97,10 @@ TEST(TOSA2SPIRV_PARSER, Resize)
 
     testutils::CheckModule(spirvModule,
                            TOSARESIZE,
-                           {{DataType::int8_t, {1, 1, 1, 1}}},
-                           {},
-                           {{{1, 1, 1, 1}, DataType::int32_t, {4}},
+                           {{std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}},
+                            {{1, 1, 1, 1}, DataType::int32_t, {4}},
                             {{1, 1}, DataType::int32_t, {2}},
-                            {{1, 1}, DataType::int32_t, {2}},
-                            {{1}, DataType::int32_t, {1}}},
-                           {{DataType::int32_t, {1, 1, 1, 1}}});
+                            {{1, 1}, DataType::int32_t, {2}}},
+                           {{DataType::int32_t, {1, 1, 1, 1}}},
+                           {{{1}, DataType::int32_t, {1}}});
 }

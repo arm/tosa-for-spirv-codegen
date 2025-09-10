@@ -22,6 +22,11 @@ if (BUILD_TOSA_2_SPIRV_GENERATOR AND NOT ANDROID)
   list(APPEND UNITTEST_SRCS ${TEST_SRCS_SPIRV_GEN})
 endif()
 
+if (BUILD_SPIRV_2_TOSA)
+    file(GLOB_RECURSE SPIRV2TOSA CONFIGURE_DEPENDS ${TOOLS_PATH}/spirv2tosa/src/test/*.cpp)
+    list(APPEND UNITTEST_SRCS ${SPIRV2TOSA})
+endif()
+
 add_executable(tosa_for_spirv_tests ${UNITTEST_SRCS})
 
 target_include_directories(tosa_for_spirv_tests PRIVATE
@@ -116,6 +121,11 @@ if (BUILD_TOSA_2_SPIRV_GENERATOR)
           ${VGF_UTILS_LIBRARY_PATH}
           ${VGF_ENCODER_LIBRARY_PATH}
           vgfWriter)
+endif()
+
+if (BUILD_SPIRV_2_TOSA)
+    target_include_directories(tosa_for_spirv_tests PRIVATE ${TOOLS_PATH}/spirv2tosa/include)
+    target_link_libraries(tosa_for_spirv_tests PRIVATE spirv2tosa)
 endif()
 
 # Don't run unit tests automatically if it is an Android build.

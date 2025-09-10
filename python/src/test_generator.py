@@ -701,9 +701,7 @@ class TestGenerator:
 
         inputStr = []
         outputStr = []
-        graphConstStr = []
-        tensorConstStr = []
-        inputTensorConstStr = []
+        attributeStr = []
 
         for argument in op.arguments:
             # Number of values for the shape
@@ -725,29 +723,27 @@ class TestGenerator:
                         datatype_str = "bool_t"
                 else:
                     shape = numValues
-                tensorConstStr.append("{{" + values + "}, DataType::" + datatype_str + ", {" + shape + "}}")
+                attributeStr.append("{{" + values + "}, DataType::" + datatype_str + ", {" + shape + "}}")
             elif self.has_argument_category_name(argument, 'input'):
                 if self.is_shape_arg(argument):
                     # Shape inputs are provided via CONST_SHAPE and lowered as tensor constants.
                     # Expect a 1-D int32 constant with length == numValues.
-                    tensorConstStr.append("{{" + values + "}, DataType::int32_t, {" + str(numValues) + "}}")
+                    inputStr.append("{{" + values + "}, DataType::int32_t, {" + str(numValues) + "}}")
                 elif not self.is_dynamic_input(argument):
                     if values == "1":
-                        inputTensorConstStr.append("{{1}, DataType::" + datatype_str + ", {1}}")
+                        inputStr.append("{{1}, DataType::" + datatype_str + ", {1}}")
                     else:
-                        graphConstStr.append("{DataType::" + datatype_str + ", {" + values + "}}")
+                        inputStr.append("{std::initializer_list<uint32_t>{}, DataType::" + datatype_str + ", {" + values + "}}")
                 else:
-                    inputStr.append("{DataType::" + datatype_str + ", {" + values + "}}")
+                    inputStr.append("{std::initializer_list<uint32_t>{}, DataType::" + datatype_str + ", {" + values + "}}")
             elif self.has_argument_category_name(argument, 'output'):
                 outputStr.append("{DataType::" + datatype_str + ", {" + values + "}}")
-        tensorConstStr += inputTensorConstStr
 
         output =  "testutils::CheckModule(spirvModule,\n"
         output += "                       TOSA" + op.name + ",\n"
         output += "                       {" + ",".join(inputStr) + "},\n"
-        output += "                       {" + ",".join(graphConstStr) + "},\n"
-        output += "                       {" + ",".join(tensorConstStr) + "},\n"
-        output += "                       {" + ",".join(outputStr) + "});\n"
+        output += "                       {" + ",".join(outputStr) + "},\n"
+        output += "                       {" + ",".join(attributeStr) + "});\n"
 
         return output
 

@@ -57,10 +57,9 @@ TEST(TOSA2SPIRV_PARSER, ReduceAll)
 
     testutils::CheckModule(spirvModule,
                            TOSAREDUCE_ALL,
+                           {{std::initializer_list<uint32_t>{}, DataType::bool_t, {1, 1, 1, 1}}},
                            {{DataType::bool_t, {1, 1, 1, 1}}},
-                           {},
-                           {{{1}, DataType::int32_t, {1}}},
-                           {{DataType::bool_t, {1, 1, 1, 1}}});
+                           {{{1}, DataType::int32_t, {1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, ReduceAny)
@@ -106,10 +105,9 @@ TEST(TOSA2SPIRV_PARSER, ReduceAny)
 
     testutils::CheckModule(spirvModule,
                            TOSAREDUCE_ANY,
+                           {{std::initializer_list<uint32_t>{}, DataType::bool_t, {1, 1, 1, 1}}},
                            {{DataType::bool_t, {1, 1, 1, 1}}},
-                           {},
-                           {{{1}, DataType::int32_t, {1}}},
-                           {{DataType::bool_t, {1, 1, 1, 1}}});
+                           {{{1}, DataType::int32_t, {1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, ReduceMax)
@@ -156,10 +154,9 @@ TEST(TOSA2SPIRV_PARSER, ReduceMax)
 
     testutils::CheckModule(spirvModule,
                            TOSAREDUCE_MAX,
+                           {{std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}}},
                            {{DataType::int8_t, {1, 1, 1, 1}}},
-                           {},
-                           {{{1}, DataType::int32_t, {1}}, {{1}, DataType::int32_t, {1}}},
-                           {{DataType::int8_t, {1, 1, 1, 1}}});
+                           {{{1}, DataType::int32_t, {1}}, {{1}, DataType::int32_t, {1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, ReduceMin)
@@ -206,10 +203,9 @@ TEST(TOSA2SPIRV_PARSER, ReduceMin)
 
     testutils::CheckModule(spirvModule,
                            TOSAREDUCE_MIN,
+                           {{std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}}},
                            {{DataType::int8_t, {1, 1, 1, 1}}},
-                           {},
-                           {{{1}, DataType::int32_t, {1}}, {{1}, DataType::int32_t, {1}}},
-                           {{DataType::int8_t, {1, 1, 1, 1}}});
+                           {{{1}, DataType::int32_t, {1}}, {{1}, DataType::int32_t, {1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, ReduceProduct)
@@ -260,10 +256,9 @@ TEST(TOSA2SPIRV_PARSER, ReduceProduct)
 
     testutils::CheckModule(spirvModule,
                            TOSAREDUCE_PRODUCT,
+                           {{std::initializer_list<uint32_t>{}, DataType::float16_t, {1, 1, 1, 1}}},
                            {{DataType::float16_t, {1, 1, 1, 1}}},
-                           {},
-                           {{{1}, DataType::int32_t, {1}}},
-                           {{DataType::float16_t, {1, 1, 1, 1}}});
+                           {{{1}, DataType::int32_t, {1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, ReduceSum)
@@ -309,8 +304,7 @@ TEST(TOSA2SPIRV_PARSER, ReduceSum)
 
     testutils::CheckModule(spirvModule,
                            TOSAREDUCE_SUM,
+                           {{std::initializer_list<uint32_t>{}, DataType::int32_t, {1, 1, 1, 1}}},
                            {{DataType::int32_t, {1, 1, 1, 1}}},
-                           {},
-                           {{{1}, DataType::int32_t, {1}}},
-                           {{DataType::int32_t, {1, 1, 1, 1}}});
+                           {{{1}, DataType::int32_t, {1}}});
 }

@@ -58,10 +58,9 @@ TEST(TOSA2SPIRV_PARSER, ArgMax)
 
     testutils::CheckModule(spirvModule,
                            TOSAARGMAX,
-                           {{DataType::int8_t, {1, 1, 1, 1}}},
-                           {},
-                           {{{1}, DataType::int32_t, {1}}, {{1}, DataType::int32_t, {1}}},
-                           {{DataType::int32_t, {1, 1, 1, 1}}});
+                           {{std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}}},
+                           {{DataType::int32_t, {1, 1, 1, 1}}},
+                           {{{1}, DataType::int32_t, {1}}, {{1}, DataType::int32_t, {1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, AvgPool2d)
@@ -139,15 +138,14 @@ TEST(TOSA2SPIRV_PARSER, AvgPool2d)
 
     testutils::CheckModule(spirvModule,
                            TOSAAVG_POOL2D,
+                           {{std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}},
+                            {{1}, DataType::int8_t, {1}},
+                            {{1}, DataType::int8_t, {1}}},
                            {{DataType::int8_t, {1, 1, 1, 1}}},
-                           {},
                            {{{1, 1}, DataType::int32_t, {2}},
                             {{1, 1}, DataType::int32_t, {2}},
                             {{1, 1, 1, 1}, DataType::int32_t, {4}},
-                            {{1}, DataType::int32_t, {1}},
-                            {{1}, DataType::int8_t, {1}},
-                            {{1}, DataType::int8_t, {1}}},
-                           {{DataType::int8_t, {1, 1, 1, 1}}});
+                            {{1}, DataType::int32_t, {1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, Conv2d)
@@ -239,19 +237,19 @@ TEST(TOSA2SPIRV_PARSER, Conv2d)
     TosaSerializationParser parser(&block);
     const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    testutils::CheckModule(
-        spirvModule,
-        TOSACONV2D,
-        {{DataType::int8_t, {1, 1, 1, 1}}, {DataType::int8_t, {1, 1, 1, 1}}, {DataType::int32_t, {1, 1, 1, 1}}},
-        {},
-        {{{1, 1, 1, 1}, DataType::int32_t, {4}},
-         {{1, 1}, DataType::int32_t, {2}},
-         {{1, 1}, DataType::int32_t, {2}},
-         {{1}, DataType::int32_t, {1}},
-         {{1}, DataType::bool_t, {1}},
-         {{1}, DataType::int8_t, {1}},
-         {{1}, DataType::int8_t, {1}}},
-        {{DataType::int32_t, {1, 1, 1, 1}}});
+    testutils::CheckModule(spirvModule,
+                           TOSACONV2D,
+                           {{std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int32_t, {1, 1, 1, 1}},
+                            {{1}, DataType::int8_t, {1}},
+                            {{1}, DataType::int8_t, {1}}},
+                           {{DataType::int32_t, {1, 1, 1, 1}}},
+                           {{{1, 1, 1, 1}, DataType::int32_t, {4}},
+                            {{1, 1}, DataType::int32_t, {2}},
+                            {{1, 1}, DataType::int32_t, {2}},
+                            {{1}, DataType::int32_t, {1}},
+                            {{1}, DataType::bool_t, {1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, Conv3d)
@@ -343,19 +341,19 @@ TEST(TOSA2SPIRV_PARSER, Conv3d)
     TosaSerializationParser parser(&block);
     const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    testutils::CheckModule(
-        spirvModule,
-        TOSACONV3D,
-        {{DataType::int8_t, {1, 1, 1, 1}}, {DataType::int8_t, {1, 1, 1, 1}}, {DataType::int32_t, {1, 1, 1, 1}}},
-        {},
-        {{{1, 1, 1, 1, 1, 1}, DataType::int32_t, {6}},
-         {{1, 1, 1}, DataType::int32_t, {3}},
-         {{1, 1, 1}, DataType::int32_t, {3}},
-         {{1}, DataType::int32_t, {1}},
-         {{1}, DataType::bool_t, {1}},
-         {{1}, DataType::int8_t, {1}},
-         {{1}, DataType::int8_t, {1}}},
-        {{DataType::int32_t, {1, 1, 1, 1}}});
+    testutils::CheckModule(spirvModule,
+                           TOSACONV3D,
+                           {{std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int32_t, {1, 1, 1, 1}},
+                            {{1}, DataType::int8_t, {1}},
+                            {{1}, DataType::int8_t, {1}}},
+                           {{DataType::int32_t, {1, 1, 1, 1}}},
+                           {{{1, 1, 1, 1, 1, 1}, DataType::int32_t, {6}},
+                            {{1, 1, 1}, DataType::int32_t, {3}},
+                            {{1, 1, 1}, DataType::int32_t, {3}},
+                            {{1}, DataType::int32_t, {1}},
+                            {{1}, DataType::bool_t, {1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, DepthwiseConv2d)
@@ -447,19 +445,19 @@ TEST(TOSA2SPIRV_PARSER, DepthwiseConv2d)
     TosaSerializationParser parser(&block);
     const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    testutils::CheckModule(
-        spirvModule,
-        TOSADEPTHWISE_CONV2D,
-        {{DataType::int8_t, {1, 1, 1, 1}}, {DataType::int8_t, {1, 1, 1, 1}}, {DataType::int32_t, {1, 1, 1, 1}}},
-        {},
-        {{{1, 1, 1, 1}, DataType::int32_t, {4}},
-         {{1, 1}, DataType::int32_t, {2}},
-         {{1, 1}, DataType::int32_t, {2}},
-         {{1}, DataType::int32_t, {1}},
-         {{1}, DataType::bool_t, {1}},
-         {{1}, DataType::int8_t, {1}},
-         {{1}, DataType::int8_t, {1}}},
-        {{DataType::int32_t, {1, 1, 1, 1}}});
+    testutils::CheckModule(spirvModule,
+                           TOSADEPTHWISE_CONV2D,
+                           {{std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int32_t, {1, 1, 1, 1}},
+                            {{1}, DataType::int8_t, {1}},
+                            {{1}, DataType::int8_t, {1}}},
+                           {{DataType::int32_t, {1, 1, 1, 1}}},
+                           {{{1, 1, 1, 1}, DataType::int32_t, {4}},
+                            {{1, 1}, DataType::int32_t, {2}},
+                            {{1, 1}, DataType::int32_t, {2}},
+                            {{1}, DataType::int32_t, {1}},
+                            {{1}, DataType::bool_t, {1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, Fft2d)
@@ -530,10 +528,10 @@ TEST(TOSA2SPIRV_PARSER, Fft2d)
 
     testutils::CheckModule(spirvModule,
                            TOSAFFT2D,
+                           {{std::initializer_list<uint32_t>{}, DataType::float32_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::float32_t, {1, 1, 1, 1}}},
                            {{DataType::float32_t, {1, 1, 1, 1}}, {DataType::float32_t, {1, 1, 1, 1}}},
-                           {},
-                           {{{1}, DataType::bool_t, {1}}, {{1}, DataType::bool_t, {1}}},
-                           {{DataType::float32_t, {1, 1, 1, 1}}, {DataType::float32_t, {1, 1, 1, 1}}});
+                           {{{1}, DataType::bool_t, {1}}, {{1}, DataType::bool_t, {1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, Matmul)
@@ -603,10 +601,12 @@ TEST(TOSA2SPIRV_PARSER, Matmul)
 
     testutils::CheckModule(spirvModule,
                            TOSAMATMUL,
-                           {{DataType::int8_t, {1, 1, 1, 1}}, {DataType::int8_t, {1, 1, 1, 1}}},
-                           {},
-                           {{{1}, DataType::int8_t, {1}}, {{1}, DataType::int8_t, {1}}},
-                           {{DataType::int32_t, {1, 1, 1, 1}}});
+                           {{std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}},
+                            {{1}, DataType::int8_t, {1}},
+                            {{1}, DataType::int8_t, {1}}},
+                           {{DataType::int32_t, {1, 1, 1, 1}}},
+                           {});
 }
 
 TEST(TOSA2SPIRV_PARSER, MaxPool2d)
@@ -655,13 +655,12 @@ TEST(TOSA2SPIRV_PARSER, MaxPool2d)
 
     testutils::CheckModule(spirvModule,
                            TOSAMAX_POOL2D,
+                           {{std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}}},
                            {{DataType::int8_t, {1, 1, 1, 1}}},
-                           {},
                            {{{1, 1}, DataType::int32_t, {2}},
                             {{1, 1}, DataType::int32_t, {2}},
                             {{1, 1, 1, 1}, DataType::int32_t, {4}},
-                            {{1}, DataType::int32_t, {1}}},
-                           {{DataType::int8_t, {1, 1, 1, 1}}});
+                            {{1}, DataType::int32_t, {1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, Rfft2d)
@@ -724,10 +723,9 @@ TEST(TOSA2SPIRV_PARSER, Rfft2d)
 
     testutils::CheckModule(spirvModule,
                            TOSARFFT2D,
-                           {{DataType::float32_t, {1, 1, 1, 1}}},
-                           {},
-                           {{{0}, DataType::bool_t, {1}}},
-                           {{DataType::float32_t, {1, 1, 1, 1}}, {DataType::float32_t, {1, 1, 1, 1}}});
+                           {{std::initializer_list<uint32_t>{}, DataType::float32_t, {1, 1, 1, 1}}},
+                           {{DataType::float32_t, {1, 1, 1, 1}}, {DataType::float32_t, {1, 1, 1, 1}}},
+                           {{{0}, DataType::bool_t, {1}}});
 }
 
 TEST(TOSA2SPIRV_PARSER, TransposeConv2d)
@@ -818,16 +816,16 @@ TEST(TOSA2SPIRV_PARSER, TransposeConv2d)
     TosaSerializationParser parser(&block);
     const auto& spirvModule = parser.GenerateSPIRVModule("main");
 
-    testutils::CheckModule(
-        spirvModule,
-        TOSATRANSPOSE_CONV2D,
-        {{DataType::int8_t, {1, 1, 1, 1}}, {DataType::int8_t, {1, 1, 1, 1}}, {DataType::int32_t, {1, 1, 1, 1}}},
-        {},
-        {{{1, 1, 1, 1}, DataType::int32_t, {4}},
-         {{1, 1}, DataType::int32_t, {2}},
-         {{1}, DataType::int32_t, {1}},
-         {{1}, DataType::bool_t, {1}},
-         {{1}, DataType::int8_t, {1}},
-         {{1}, DataType::int8_t, {1}}},
-        {{DataType::int32_t, {1, 1, 1, 1}}});
+    testutils::CheckModule(spirvModule,
+                           TOSATRANSPOSE_CONV2D,
+                           {{std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int8_t, {1, 1, 1, 1}},
+                            {std::initializer_list<uint32_t>{}, DataType::int32_t, {1, 1, 1, 1}},
+                            {{1}, DataType::int8_t, {1}},
+                            {{1}, DataType::int8_t, {1}}},
+                           {{DataType::int32_t, {1, 1, 1, 1}}},
+                           {{{1, 1, 1, 1}, DataType::int32_t, {4}},
+                            {{1, 1}, DataType::int32_t, {2}},
+                            {{1}, DataType::int32_t, {1}},
+                            {{1}, DataType::bool_t, {1}}});
 }
