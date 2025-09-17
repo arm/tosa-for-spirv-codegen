@@ -8,7 +8,7 @@
 #include <ProblemTree.hpp>
 #include <gtest/gtest.h>
 
-using namespace tosa2spirv::spirv;
+using namespace tfsc::spirv;
 using namespace testutils;
 
 // Test InstructionPair equality and ordering

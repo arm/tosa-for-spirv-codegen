@@ -20,7 +20,7 @@ std::string
 DiffSPIRV(const std::vector<uint32_t> &rhsBinary, const std::vector<uint32_t> &lhsBinary, bool runValidation = true);
 std::string DisassembleSPIRV(const std::vector<uint32_t> &binary, bool runValidation = true);
 
-std::shared_ptr<tosa2spirv::spirv::Module> LoadSPIRVDisassembly(const std::string &text);
+std::shared_ptr<tfsc::spirv::Module> LoadSPIRVDisassembly(const std::string &text);
 
 inline unsigned int GetInstructionCount(const std::string &spirvString)
 {

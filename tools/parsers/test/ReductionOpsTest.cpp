@@ -13,8 +13,8 @@
 #include <gtest/gtest.h>
 
 using namespace tosa;
-using namespace tosa2spirv::parsers;
-TEST(TOSA2SPIRV_PARSER, ReduceAll)
+using namespace tfsc::parsers;
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, ReduceAll)
 {
     int32_t axis = 1;
     // Create Attribute
@@ -62,7 +62,7 @@ TEST(TOSA2SPIRV_PARSER, ReduceAll)
                            {{{1}, DataType::int32_t, {1}}});
 }
 
-TEST(TOSA2SPIRV_PARSER, ReduceAny)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, ReduceAny)
 {
     int32_t axis = 1;
     // Create Attribute
@@ -110,7 +110,7 @@ TEST(TOSA2SPIRV_PARSER, ReduceAny)
                            {{{1}, DataType::int32_t, {1}}});
 }
 
-TEST(TOSA2SPIRV_PARSER, ReduceMax)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, ReduceMax)
 {
     int32_t axis = 1;
     int32_t nan_mode = 1;
@@ -159,7 +159,7 @@ TEST(TOSA2SPIRV_PARSER, ReduceMax)
                            {{{1}, DataType::int32_t, {1}}, {{1}, DataType::int32_t, {1}}});
 }
 
-TEST(TOSA2SPIRV_PARSER, ReduceMin)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, ReduceMin)
 {
     int32_t axis = 1;
     int32_t nan_mode = 1;
@@ -208,7 +208,7 @@ TEST(TOSA2SPIRV_PARSER, ReduceMin)
                            {{{1}, DataType::int32_t, {1}}, {{1}, DataType::int32_t, {1}}});
 }
 
-TEST(TOSA2SPIRV_PARSER, ReduceProduct)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, ReduceProduct)
 {
     int32_t axis = 1;
     // Create Attribute
@@ -261,7 +261,7 @@ TEST(TOSA2SPIRV_PARSER, ReduceProduct)
                            {{{1}, DataType::int32_t, {1}}});
 }
 
-TEST(TOSA2SPIRV_PARSER, ReduceSum)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, ReduceSum)
 {
     int32_t axis = 1;
     // Create Attribute

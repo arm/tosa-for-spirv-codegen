@@ -11,12 +11,13 @@
 #include <memory>
 #include <string>
 
-namespace tosa2spirv::spirv
+// tosa-for-spirv-codegen's shorthand namespace
+namespace tfsc::spirv
 {
 class Module;
 }
 
-namespace tosa2spirv::tosa
+namespace tfsc::tosa
 {
 
 /// Class which encapsulates the concept of a graph containing layers.
@@ -32,7 +33,7 @@ class Graph
     /// @param[in] input Tensor describing the input
     /// @param[in] bindingId binding id
     /// @return ResId of input
-    /// Most state in tosa2spirv is represented as SPIRV instructions and operands
+    /// Most state in tosa_for_spirv_codegen is represented as SPIRV instructions and operands
     /// ResIds are pointers to the SPIRV instructions representing inputs, outputs, operators and constants
     ResId AddInput(const Tensor& input, unsigned int bindingId);
 
@@ -76,7 +77,7 @@ class Graph
     /// After being called no more changes may be made to this graph.
     void FinalizeGraph();
 
-    // See tosa2spirv/python/source_generator.py and README
+    // See tosa_for_spirv_codegen/python/source_generator.py and README
     // THIS SECTION IS GENERATED WITH TOSA 1.0. DO NOT EDIT!
     // GRAPH OPERATOR HELPER FUNCTION BEGIN
     /// Function used to add a ArgMax operator to the Graph
@@ -843,4 +844,4 @@ class Graph
     uint32_t m_GraphConstantId = 0;
 };
 
-} // namespace tosa2spirv::tosa
+} // namespace tfsc::tosa

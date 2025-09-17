@@ -13,8 +13,8 @@
 #include <gtest/gtest.h>
 
 using namespace tosa;
-using namespace tosa2spirv::parsers;
-TEST(TOSA2SPIRV_PARSER, Concat)
+using namespace tfsc::parsers;
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Concat)
 {
     int32_t axis = 1;
     // Create Attribute
@@ -62,7 +62,7 @@ TEST(TOSA2SPIRV_PARSER, Concat)
                            {{{1}, DataType::int32_t, {1}}});
 }
 
-TEST(TOSA2SPIRV_PARSER, Pad)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Pad)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
@@ -136,7 +136,7 @@ TEST(TOSA2SPIRV_PARSER, Pad)
                            {});
 }
 
-TEST(TOSA2SPIRV_PARSER, Reshape)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Reshape)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
@@ -194,7 +194,7 @@ TEST(TOSA2SPIRV_PARSER, Reshape)
         {});
 }
 
-TEST(TOSA2SPIRV_PARSER, Reverse)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Reverse)
 {
     int32_t axis = 1;
     // Create Attribute
@@ -242,7 +242,7 @@ TEST(TOSA2SPIRV_PARSER, Reverse)
                            {{{1}, DataType::int32_t, {1}}});
 }
 
-TEST(TOSA2SPIRV_PARSER, Slice)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Slice)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
@@ -315,7 +315,7 @@ TEST(TOSA2SPIRV_PARSER, Slice)
                            {});
 }
 
-TEST(TOSA2SPIRV_PARSER, Tile)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Tile)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
@@ -374,7 +374,7 @@ TEST(TOSA2SPIRV_PARSER, Tile)
         {});
 }
 
-TEST(TOSA2SPIRV_PARSER, Transpose)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Transpose)
 {
     std::vector<int32_t> perms = {1, 1, 1, 1};
     // Create Attribute

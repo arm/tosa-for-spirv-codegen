@@ -8,13 +8,13 @@
 #include <Module.hpp>
 #include <SPIRVDefinitions.hpp>
 #include <ValidationUtils.hpp>
-#include <tosa2spirv.hpp>
+#include <TosaForSpirvCodegen.hpp>
 
 #include <gtest/gtest.h>
 #include <spirv-tools/libspirv.hpp>
 #include <spirvmodels/Header.hpp>
 
-using namespace tosa2spirv;
+using namespace tfsc;
 using namespace spv;
 using namespace tosa;
 
@@ -35,7 +35,7 @@ static void CheckHeader(const std::vector<uint32_t>& binary, const uint32_t boun
 }
 
 // Demonstrate some basic assertions.
-TEST(TOSA2SPIRV, BasicAssertions)
+TEST(TOSA_FOR_SPIRV_CODEGEN, BasicAssertions)
 {
     // Expect two strings not to be equal.
     EXPECT_STRNE("hello", "world");
@@ -43,20 +43,20 @@ TEST(TOSA2SPIRV, BasicAssertions)
     EXPECT_EQ(7 * 6, 42);
 }
 
-TEST(TOSA2SPIRV, ModuleCreate)
+TEST(TOSA_FOR_SPIRV_CODEGEN, ModuleCreate)
 {
     auto module = CreateModule(TOSAVersion{});
     EXPECT_TRUE(module);
 }
 
-TEST(TOSA2SPIRV, InitialiseSpirvTools)
+TEST(TOSA_FOR_SPIRV_CODEGEN, InitialiseSpirvTools)
 {
     // Test that we can initialise the SpirvTools correctly.
     const spvtools::SpirvTools tools{SPV_ENV_UNIVERSAL_1_6};
     GTEST_EXPECT_TRUE(tools.IsValid());
 }
 
-TEST(TOSA2SPIRV, TestModuleInitialization)
+TEST(TOSA_FOR_SPIRV_CODEGEN, TestModuleInitialization)
 {
     const auto module = CreateModule(TOSAVersion::v1_0);
     EXPECT_TRUE(module);
@@ -87,7 +87,7 @@ std::vector<int64_t> ExtractShapeFromTensor(const spirv::Instruction* tensorInst
     return shapeVector;
 }
 
-TEST(TOSA2SPIRV, TestInputOutputOrder)
+TEST(TOSA_FOR_SPIRV_CODEGEN, TestInputOutputOrder)
 {
     const auto module = CreateModule(TOSAVersion{});
     EXPECT_TRUE(module);

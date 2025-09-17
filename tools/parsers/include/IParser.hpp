@@ -7,12 +7,12 @@
 
 #include "ConstantData.hpp"
 
-#include <tosa2spirv.hpp>
+#include <TosaForSpirvCodegen.hpp>
 
 #include <memory>
 #include <vector>
 
-namespace tosa2spirv::parsers
+namespace tfsc::parsers
 {
 
 /// Abstract IParser class to be subclassed by concrete parser classes.
@@ -46,4 +46,4 @@ class IParser
     std::vector<ConstantData> m_ConstantData;
 };
 
-} // namespace tosa2spirv::parsers
+} // namespace tfsc::parsers

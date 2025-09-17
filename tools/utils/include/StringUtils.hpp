@@ -13,7 +13,7 @@
 
 namespace testutils
 {
-using namespace tosa2spirv::spirv;
+using namespace tfsc::spirv;
 
 struct HighlightCtx
 {
@@ -29,9 +29,9 @@ const std::string boundaryLight(boundaryWidth, '-');
 
 std::size_t GetVisibleLength(const std::string& s);
 
-std::string ResIdToString(const tosa2spirv::spirv::Instruction& instruction);
-std::string OperandToString(const tosa2spirv::spirv::Operand& operand);
-std::string InstructionToString(const tosa2spirv::spirv::Instruction& instruction);
+std::string ResIdToString(const tfsc::spirv::Instruction& instruction);
+std::string OperandToString(const tfsc::spirv::Operand& operand);
+std::string InstructionToString(const tfsc::spirv::Instruction& instruction);
 std::string HighlightResIds(std::string inst, const std::string resId, const std::string& pre, const std::string& post);
 
 std::string ConcatStringLines(std::string_view lhs, std::string_view rhs, size_t pad = 4);

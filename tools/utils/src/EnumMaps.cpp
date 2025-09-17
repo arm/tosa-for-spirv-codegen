@@ -326,77 +326,77 @@ TOSAInstructions GetTosaOpEnum(const std::string& instruction)
     throw std::invalid_argument("Unsupported instruction: " + instruction);
 }
 
-tosa2spirv::tosa::OperatorEnum GetOperatorEnum(TOSAInstructions instructionType)
+tfsc::tosa::OperatorEnum GetOperatorEnum(TOSAInstructions instructionType)
 {
     // OPERATOR ENUM MAP SECTION BEGIN
     switch (instructionType)
     {
-        case TOSAARGMAX: return tosa2spirv::tosa::OperatorEnum::ArgMax;
-        case TOSAAVG_POOL2D: return tosa2spirv::tosa::OperatorEnum::AvgPool2d;
-        case TOSACONV2D: return tosa2spirv::tosa::OperatorEnum::Conv2d;
-        case TOSACONV3D: return tosa2spirv::tosa::OperatorEnum::Conv3d;
-        case TOSADEPTHWISE_CONV2D: return tosa2spirv::tosa::OperatorEnum::DepthwiseConv2d;
-        case TOSAFFT2D: return tosa2spirv::tosa::OperatorEnum::Fft2d;
-        case TOSAMATMUL: return tosa2spirv::tosa::OperatorEnum::Matmul;
-        case TOSAMAX_POOL2D: return tosa2spirv::tosa::OperatorEnum::MaxPool2d;
-        case TOSARFFT2D: return tosa2spirv::tosa::OperatorEnum::Rfft2d;
-        case TOSATRANSPOSE_CONV2D: return tosa2spirv::tosa::OperatorEnum::TransposeConv2d;
-        case TOSACLAMP: return tosa2spirv::tosa::OperatorEnum::Clamp;
-        case TOSAERF: return tosa2spirv::tosa::OperatorEnum::Erf;
-        case TOSASIGMOID: return tosa2spirv::tosa::OperatorEnum::Sigmoid;
-        case TOSATANH: return tosa2spirv::tosa::OperatorEnum::Tanh;
-        case TOSAADD: return tosa2spirv::tosa::OperatorEnum::Add;
-        case TOSAARITHMETIC_RIGHT_SHIFT: return tosa2spirv::tosa::OperatorEnum::ArithmeticRightShift;
-        case TOSABITWISE_AND: return tosa2spirv::tosa::OperatorEnum::BitwiseAnd;
-        case TOSABITWISE_OR: return tosa2spirv::tosa::OperatorEnum::BitwiseOr;
-        case TOSABITWISE_XOR: return tosa2spirv::tosa::OperatorEnum::BitwiseXor;
-        case TOSAINTDIV: return tosa2spirv::tosa::OperatorEnum::IntDiv;
-        case TOSALOGICAL_AND: return tosa2spirv::tosa::OperatorEnum::LogicalAnd;
-        case TOSALOGICAL_LEFT_SHIFT: return tosa2spirv::tosa::OperatorEnum::LogicalLeftShift;
-        case TOSALOGICAL_RIGHT_SHIFT: return tosa2spirv::tosa::OperatorEnum::LogicalRightShift;
-        case TOSALOGICAL_OR: return tosa2spirv::tosa::OperatorEnum::LogicalOr;
-        case TOSALOGICAL_XOR: return tosa2spirv::tosa::OperatorEnum::LogicalXor;
-        case TOSAMAXIMUM: return tosa2spirv::tosa::OperatorEnum::Maximum;
-        case TOSAMINIMUM: return tosa2spirv::tosa::OperatorEnum::Minimum;
-        case TOSAMUL: return tosa2spirv::tosa::OperatorEnum::Mul;
-        case TOSAPOW: return tosa2spirv::tosa::OperatorEnum::Pow;
-        case TOSASUB: return tosa2spirv::tosa::OperatorEnum::Sub;
-        case TOSATABLE: return tosa2spirv::tosa::OperatorEnum::Table;
-        case TOSAABS: return tosa2spirv::tosa::OperatorEnum::Abs;
-        case TOSABITWISE_NOT: return tosa2spirv::tosa::OperatorEnum::BitwiseNot;
-        case TOSACEIL: return tosa2spirv::tosa::OperatorEnum::Ceil;
-        case TOSACLZ: return tosa2spirv::tosa::OperatorEnum::Clz;
-        case TOSACOS: return tosa2spirv::tosa::OperatorEnum::Cos;
-        case TOSAEXP: return tosa2spirv::tosa::OperatorEnum::Exp;
-        case TOSAFLOOR: return tosa2spirv::tosa::OperatorEnum::Floor;
-        case TOSALOG: return tosa2spirv::tosa::OperatorEnum::Log;
-        case TOSALOGICAL_NOT: return tosa2spirv::tosa::OperatorEnum::LogicalNot;
-        case TOSANEGATE: return tosa2spirv::tosa::OperatorEnum::Negate;
-        case TOSARECIPROCAL: return tosa2spirv::tosa::OperatorEnum::Reciprocal;
-        case TOSARSQRT: return tosa2spirv::tosa::OperatorEnum::Rsqrt;
-        case TOSASIN: return tosa2spirv::tosa::OperatorEnum::Sin;
-        case TOSASELECT: return tosa2spirv::tosa::OperatorEnum::Select;
-        case TOSAEQUAL: return tosa2spirv::tosa::OperatorEnum::Equal;
-        case TOSAGREATER: return tosa2spirv::tosa::OperatorEnum::Greater;
-        case TOSAGREATER_EQUAL: return tosa2spirv::tosa::OperatorEnum::GreaterEqual;
-        case TOSAREDUCE_ALL: return tosa2spirv::tosa::OperatorEnum::ReduceAll;
-        case TOSAREDUCE_ANY: return tosa2spirv::tosa::OperatorEnum::ReduceAny;
-        case TOSAREDUCE_MAX: return tosa2spirv::tosa::OperatorEnum::ReduceMax;
-        case TOSAREDUCE_MIN: return tosa2spirv::tosa::OperatorEnum::ReduceMin;
-        case TOSAREDUCE_PRODUCT: return tosa2spirv::tosa::OperatorEnum::ReduceProduct;
-        case TOSAREDUCE_SUM: return tosa2spirv::tosa::OperatorEnum::ReduceSum;
-        case TOSACONCAT: return tosa2spirv::tosa::OperatorEnum::Concat;
-        case TOSAPAD: return tosa2spirv::tosa::OperatorEnum::Pad;
-        case TOSARESHAPE: return tosa2spirv::tosa::OperatorEnum::Reshape;
-        case TOSAREVERSE: return tosa2spirv::tosa::OperatorEnum::Reverse;
-        case TOSASLICE: return tosa2spirv::tosa::OperatorEnum::Slice;
-        case TOSATILE: return tosa2spirv::tosa::OperatorEnum::Tile;
-        case TOSATRANSPOSE: return tosa2spirv::tosa::OperatorEnum::Transpose;
-        case TOSAGATHER: return tosa2spirv::tosa::OperatorEnum::Gather;
-        case TOSASCATTER: return tosa2spirv::tosa::OperatorEnum::Scatter;
-        case TOSARESIZE: return tosa2spirv::tosa::OperatorEnum::Resize;
-        case TOSACAST: return tosa2spirv::tosa::OperatorEnum::Cast;
-        case TOSARESCALE: return tosa2spirv::tosa::OperatorEnum::Rescale;
+        case TOSAARGMAX: return tfsc::tosa::OperatorEnum::ArgMax;
+        case TOSAAVG_POOL2D: return tfsc::tosa::OperatorEnum::AvgPool2d;
+        case TOSACONV2D: return tfsc::tosa::OperatorEnum::Conv2d;
+        case TOSACONV3D: return tfsc::tosa::OperatorEnum::Conv3d;
+        case TOSADEPTHWISE_CONV2D: return tfsc::tosa::OperatorEnum::DepthwiseConv2d;
+        case TOSAFFT2D: return tfsc::tosa::OperatorEnum::Fft2d;
+        case TOSAMATMUL: return tfsc::tosa::OperatorEnum::Matmul;
+        case TOSAMAX_POOL2D: return tfsc::tosa::OperatorEnum::MaxPool2d;
+        case TOSARFFT2D: return tfsc::tosa::OperatorEnum::Rfft2d;
+        case TOSATRANSPOSE_CONV2D: return tfsc::tosa::OperatorEnum::TransposeConv2d;
+        case TOSACLAMP: return tfsc::tosa::OperatorEnum::Clamp;
+        case TOSAERF: return tfsc::tosa::OperatorEnum::Erf;
+        case TOSASIGMOID: return tfsc::tosa::OperatorEnum::Sigmoid;
+        case TOSATANH: return tfsc::tosa::OperatorEnum::Tanh;
+        case TOSAADD: return tfsc::tosa::OperatorEnum::Add;
+        case TOSAARITHMETIC_RIGHT_SHIFT: return tfsc::tosa::OperatorEnum::ArithmeticRightShift;
+        case TOSABITWISE_AND: return tfsc::tosa::OperatorEnum::BitwiseAnd;
+        case TOSABITWISE_OR: return tfsc::tosa::OperatorEnum::BitwiseOr;
+        case TOSABITWISE_XOR: return tfsc::tosa::OperatorEnum::BitwiseXor;
+        case TOSAINTDIV: return tfsc::tosa::OperatorEnum::IntDiv;
+        case TOSALOGICAL_AND: return tfsc::tosa::OperatorEnum::LogicalAnd;
+        case TOSALOGICAL_LEFT_SHIFT: return tfsc::tosa::OperatorEnum::LogicalLeftShift;
+        case TOSALOGICAL_RIGHT_SHIFT: return tfsc::tosa::OperatorEnum::LogicalRightShift;
+        case TOSALOGICAL_OR: return tfsc::tosa::OperatorEnum::LogicalOr;
+        case TOSALOGICAL_XOR: return tfsc::tosa::OperatorEnum::LogicalXor;
+        case TOSAMAXIMUM: return tfsc::tosa::OperatorEnum::Maximum;
+        case TOSAMINIMUM: return tfsc::tosa::OperatorEnum::Minimum;
+        case TOSAMUL: return tfsc::tosa::OperatorEnum::Mul;
+        case TOSAPOW: return tfsc::tosa::OperatorEnum::Pow;
+        case TOSASUB: return tfsc::tosa::OperatorEnum::Sub;
+        case TOSATABLE: return tfsc::tosa::OperatorEnum::Table;
+        case TOSAABS: return tfsc::tosa::OperatorEnum::Abs;
+        case TOSABITWISE_NOT: return tfsc::tosa::OperatorEnum::BitwiseNot;
+        case TOSACEIL: return tfsc::tosa::OperatorEnum::Ceil;
+        case TOSACLZ: return tfsc::tosa::OperatorEnum::Clz;
+        case TOSACOS: return tfsc::tosa::OperatorEnum::Cos;
+        case TOSAEXP: return tfsc::tosa::OperatorEnum::Exp;
+        case TOSAFLOOR: return tfsc::tosa::OperatorEnum::Floor;
+        case TOSALOG: return tfsc::tosa::OperatorEnum::Log;
+        case TOSALOGICAL_NOT: return tfsc::tosa::OperatorEnum::LogicalNot;
+        case TOSANEGATE: return tfsc::tosa::OperatorEnum::Negate;
+        case TOSARECIPROCAL: return tfsc::tosa::OperatorEnum::Reciprocal;
+        case TOSARSQRT: return tfsc::tosa::OperatorEnum::Rsqrt;
+        case TOSASIN: return tfsc::tosa::OperatorEnum::Sin;
+        case TOSASELECT: return tfsc::tosa::OperatorEnum::Select;
+        case TOSAEQUAL: return tfsc::tosa::OperatorEnum::Equal;
+        case TOSAGREATER: return tfsc::tosa::OperatorEnum::Greater;
+        case TOSAGREATER_EQUAL: return tfsc::tosa::OperatorEnum::GreaterEqual;
+        case TOSAREDUCE_ALL: return tfsc::tosa::OperatorEnum::ReduceAll;
+        case TOSAREDUCE_ANY: return tfsc::tosa::OperatorEnum::ReduceAny;
+        case TOSAREDUCE_MAX: return tfsc::tosa::OperatorEnum::ReduceMax;
+        case TOSAREDUCE_MIN: return tfsc::tosa::OperatorEnum::ReduceMin;
+        case TOSAREDUCE_PRODUCT: return tfsc::tosa::OperatorEnum::ReduceProduct;
+        case TOSAREDUCE_SUM: return tfsc::tosa::OperatorEnum::ReduceSum;
+        case TOSACONCAT: return tfsc::tosa::OperatorEnum::Concat;
+        case TOSAPAD: return tfsc::tosa::OperatorEnum::Pad;
+        case TOSARESHAPE: return tfsc::tosa::OperatorEnum::Reshape;
+        case TOSAREVERSE: return tfsc::tosa::OperatorEnum::Reverse;
+        case TOSASLICE: return tfsc::tosa::OperatorEnum::Slice;
+        case TOSATILE: return tfsc::tosa::OperatorEnum::Tile;
+        case TOSATRANSPOSE: return tfsc::tosa::OperatorEnum::Transpose;
+        case TOSAGATHER: return tfsc::tosa::OperatorEnum::Gather;
+        case TOSASCATTER: return tfsc::tosa::OperatorEnum::Scatter;
+        case TOSARESIZE: return tfsc::tosa::OperatorEnum::Resize;
+        case TOSACAST: return tfsc::tosa::OperatorEnum::Cast;
+        case TOSARESCALE: return tfsc::tosa::OperatorEnum::Rescale;
         // OPERATOR ENUM MAP SECTION END
         default: throw std::invalid_argument("Invalid TOSAInstruction");
     }
@@ -525,11 +525,11 @@ std::string OpToString(const spv::Op op)
     throw std::invalid_argument("Unsupported op enum value");
 }
 
-unsigned int GetResId(const tosa2spirv::spirv::Instruction& instruction)
+unsigned int GetResId(const tfsc::spirv::Instruction& instruction)
 {
     for (const auto& operand : instruction.m_Operands)
     {
-        if (operand.m_Type == tosa2spirv::spirv::RES_ID)
+        if (operand.m_Type == tfsc::spirv::RES_ID)
         {
             return operand.m_LiteralWord;
         }

@@ -15,12 +15,12 @@ namespace testutils
 
 struct AdjacencyMatrix
 {
-    explicit AdjacencyMatrix(const tosa2spirv::spirv::Module &module);
-    std::vector<tosa2spirv::spirv::Instruction> GetConnectedInstructions(unsigned int index) const;
+    explicit AdjacencyMatrix(const tfsc::spirv::Module &module);
+    std::vector<tfsc::spirv::Instruction> GetConnectedInstructions(unsigned int index) const;
 
-    std::vector<tosa2spirv::spirv::Instruction> m_Instructions;
+    std::vector<tfsc::spirv::Instruction> m_Instructions;
     std::vector<std::vector<unsigned int>> m_AdjacencyMatrix;
-    std::unordered_map<const tosa2spirv::spirv::Instruction *, unsigned int> m_InstructionToIndex;
+    std::unordered_map<const tfsc::spirv::Instruction *, unsigned int> m_InstructionToIndex;
     std::vector<unsigned int> m_InputIndexes;
     std::vector<unsigned int> m_OutputIndexes;
     std::vector<unsigned int> m_GraphConstants;

@@ -7,7 +7,7 @@
 #include <ModuleComparator.hpp>
 #include <TosaSerializationParser.hpp>
 #include <VgfWriter.hpp>
-#include <tosa2spirv.hpp>
+#include <TosaForSpirvCodegen.hpp>
 
 #include <gtest/gtest.h>
 #include <spirvmodels/Conv2d.hpp>
@@ -298,7 +298,7 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorSimpleRescaleModel()
     return std::move(block);
 }
 
-TEST(TOSA2SPIRV_GENERATOR, GeneratorTestExampleTosaFile)
+TEST(TOSA_FOR_SPIRV_CODEGEN_GENERATOR, GeneratorTestExampleTosaFile)
 {
     // Check that the example file is accessible.
     // It may not be if the test executable has been moved to a different device or the source files removed.
@@ -332,19 +332,19 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorTestExampleTosaFile)
     }
 
     // Initialize TosaSerializationParser with main block.
-    auto parser = tosa2spirv::parsers::TosaSerializationParser(mainBlock);
+    auto parser = tfsc::parsers::TosaSerializationParser(mainBlock);
 
     // Create SPIRV
     const auto module1 = parser.GenerateSPIRVModule("main");
 
-    std::vector<uint32_t> spirv = tosa2spirv::WriteToBinary(module1);
+    std::vector<uint32_t> spirv = tfsc::WriteToBinary(module1);
     std::string outputStr(testutils::DisassembleSPIRV(spirv, true));
     // Check expected spirv and actual spirv
     const auto diff = testutils::CompareModules(module1, spirvmodels::SimpleMaxpool2dGenerator);
     EXPECT_TRUE(diff.empty());
 }
 
-TEST(TOSA2SPIRV_GENERATOR, GeneratorTestExampleJsonFile)
+TEST(TOSA_FOR_SPIRV_CODEGEN_GENERATOR, GeneratorTestExampleJsonFile)
 {
     // Check that the example file is accessible.
     // It may not be if the test executable has been moved to a different device or the source files removed.
@@ -385,12 +385,12 @@ static bool fileExists(const char* filename)
     return file.good();
 }
 
-TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteVgfFile)
+TEST(TOSA_FOR_SPIRV_CODEGEN_GENERATOR, GeneratorWriteVgfFile)
 {
     auto block = GeneratorSimpleMaxpool2dModel();
 
     // Construct TosaSerializationParser object using TosaSerializationBlock or TosaSerializationHandler
-    tosa2spirv::parsers::TosaSerializationParser parser(block.get());
+    tfsc::parsers::TosaSerializationParser parser(block.get());
 
     std::string modelName = "quantized_max_pool_single_layer";
     std::string vgfDir = std::getenv("VGF_OUTPUT_PATH") ? std::getenv("VGF_OUTPUT_PATH") : ".";
@@ -398,11 +398,11 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteVgfFile)
 
     //  Write the vgf file.
     auto module = parser.GenerateSPIRVModule("main");
-    auto spirv = tosa2spirv::WriteToBinary(module);
+    auto spirv = tfsc::WriteToBinary(module);
     auto constants = parser.GetExternalConstants();
 
-    tosa2spirv::vgfwriter::WriteVGF(module,
-                                    tosa2spirv::parsers::ConvertConstantDataToVoid(std::move(constants)),
+    tfsc::vgfwriter::WriteVGF(module,
+                                    tfsc::parsers::ConvertConstantDataToVoid(std::move(constants)),
                                     modelName,
                                     vgfDir,
                                     vgfName);
@@ -535,13 +535,13 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteVgfFile)
     }
 }
 
-TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFiles)
+TEST(TOSA_FOR_SPIRV_CODEGEN_GENERATOR, GeneratorWriteNpyFiles)
 {
     // Create a simple MaxPool2d model block.
     auto block = GeneratorSimpleConv2dModel();
 
     // Construct TosaSerializationParser object using TosaSerializationBlock or TosaSerializationHandler
-    tosa2spirv::parsers::TosaSerializationParser parser(block.get());
+    tfsc::parsers::TosaSerializationParser parser(block.get());
 
     std::string modelName = "quantized_conv2d_single_layer";
     std::string vgfDir = std::getenv("VGF_OUTPUT_PATH") ? std::getenv("VGF_OUTPUT_PATH") : ".";
@@ -549,11 +549,11 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFiles)
 
     //  Write the vgf file.
     auto module = parser.GenerateSPIRVModule("main");
-    auto spirv = tosa2spirv::WriteToBinary(module);
+    auto spirv = tfsc::WriteToBinary(module);
     auto constants = parser.GetExternalConstants();
 
-    tosa2spirv::vgfwriter::WriteVGF(module,
-                                    tosa2spirv::parsers::ConvertConstantDataToVoid(std::move(constants)),
+    tfsc::vgfwriter::WriteVGF(module,
+                                    tfsc::parsers::ConvertConstantDataToVoid(std::move(constants)),
                                     modelName,
                                     ".",
                                     vgfName);
@@ -733,13 +733,13 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFiles)
     }
 }
 
-TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFilesRescale)
+TEST(TOSA_FOR_SPIRV_CODEGEN_GENERATOR, GeneratorWriteNpyFilesRescale)
 {
     // Create a simple MaxPool2d model block.
     auto block = GeneratorSimpleRescaleModel();
 
     // Construct TosaSerializationParser object using TosaSerializationBlock or TosaSerializationHandler
-    tosa2spirv::parsers::TosaSerializationParser parser(block.get());
+    tfsc::parsers::TosaSerializationParser parser(block.get());
 
     std::string modelName = "quantized_rescale_single_layer";
     std::string vgfDir = std::getenv("VGF_OUTPUT_PATH") ? std::getenv("VGF_OUTPUT_PATH") : ".";
@@ -747,13 +747,13 @@ TEST(TOSA2SPIRV_GENERATOR, GeneratorWriteNpyFilesRescale)
 
     //  Write the vgf file.
     auto module = parser.GenerateSPIRVModule("main");
-    auto spirv = tosa2spirv::WriteToBinary(module);
+    auto spirv = tfsc::WriteToBinary(module);
     EXPECT_FALSE(spirv.empty());
 
     auto constants = parser.GetExternalConstants();
 
-    tosa2spirv::vgfwriter::WriteVGF(module,
-                                    tosa2spirv::parsers::ConvertConstantDataToVoid(std::move(constants)),
+    tfsc::vgfwriter::WriteVGF(module,
+                                    tfsc::parsers::ConvertConstantDataToVoid(std::move(constants)),
                                     modelName,
                                     ".",
                                     vgfName);

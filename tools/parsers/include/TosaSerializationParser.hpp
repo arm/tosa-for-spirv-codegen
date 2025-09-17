@@ -14,9 +14,9 @@
 
 #include <memory>
 
-using tosa2spirv::tosa::ResId;
+using tfsc::tosa::ResId;
 
-namespace tosa2spirv::parsers
+namespace tfsc::parsers
 {
 /// Class which can parse a TOSA Serialization structure and generate SPIR-V.
 class TosaSerializationParser : public IParser
@@ -45,7 +45,7 @@ class TosaSerializationParser : public IParser
 
     private:
     /// Internal operator parsing methods.
-    void ParseOperator(::tosa::TosaSerializationOperator* op, tosa2spirv::tosa::Graph& graph);
+    void ParseOperator(::tosa::TosaSerializationOperator* op, tfsc::tosa::Graph& graph);
 
     /// Internal constant operator parsing method.
     void ParseConstantOp(::tosa::TosaSerializationOperator* op, tosa::Graph& graph);
@@ -78,4 +78,4 @@ class TosaSerializationParser : public IParser
     std::map<ResId, tosa::Tensor> m_ResIdTensorMap;
 };
 
-} // namespace tosa2spirv::parsers
+} // namespace tfsc::parsers

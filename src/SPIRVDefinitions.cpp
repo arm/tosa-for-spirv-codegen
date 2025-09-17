@@ -8,11 +8,11 @@
 #include <algorithm>
 #include <stdexcept>
 
-namespace tosa2spirv::spirv
+namespace tfsc::spirv
 {
 
 using namespace spv;
-using namespace tosa2spirv::tosa;
+using namespace tfsc::tosa;
 
 Operand CreateDataType(const DataType datatype, Module& module)
 {
@@ -143,4 +143,4 @@ Operand CreateAttribute(const Attribute& attribute, Module& module)
     return CreateConstantCompositeTyped(attribute.GetData(), tensor, module, attribute.GetTensor().GetDataType());
 }
 
-} // namespace tosa2spirv::spirv
+} // namespace tfsc::spirv

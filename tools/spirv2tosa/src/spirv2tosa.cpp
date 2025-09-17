@@ -7,29 +7,29 @@
 
 namespace spirv2tosa
 {
-using namespace tosa2spirv;
+using namespace tfsc;
 using namespace ::tosa;
 
-DType GetTosaSerializationType(tosa2spirv::tosa::DataType type)
+DType GetTosaSerializationType(tfsc::tosa::DataType type)
 {
     switch (type)
     {
-        case tosa2spirv::tosa::DataType::int4_t: return DType::DType_INT4;
-        case tosa2spirv::tosa::DataType::uint8_t:
-        case tosa2spirv::tosa::DataType::int8_t: return DType::DType_INT8;
-        case tosa2spirv::tosa::DataType::uint16_t:
-        case tosa2spirv::tosa::DataType::int16_t: return DType::DType_INT16;
-        case tosa2spirv::tosa::DataType::uint32_t:
-        case tosa2spirv::tosa::DataType::int32_t: return DType::DType_INT32;
-        case tosa2spirv::tosa::DataType::int48_t: return DType::DType_INT48;
-        case tosa2spirv::tosa::DataType::float16_t: return DType::DType_FP16;
-        case tosa2spirv::tosa::DataType::float32_t: return DType::DType_FP32;
-        case tosa2spirv::tosa::DataType::bfloat16_t: return DType::DType_BF16;
-        case tosa2spirv::tosa::DataType::bool_t: return DType::DType_BOOL;
+        case tfsc::tosa::DataType::int4_t: return DType::DType_INT4;
+        case tfsc::tosa::DataType::uint8_t:
+        case tfsc::tosa::DataType::int8_t: return DType::DType_INT8;
+        case tfsc::tosa::DataType::uint16_t:
+        case tfsc::tosa::DataType::int16_t: return DType::DType_INT16;
+        case tfsc::tosa::DataType::uint32_t:
+        case tfsc::tosa::DataType::int32_t: return DType::DType_INT32;
+        case tfsc::tosa::DataType::int48_t: return DType::DType_INT48;
+        case tfsc::tosa::DataType::float16_t: return DType::DType_FP16;
+        case tfsc::tosa::DataType::float32_t: return DType::DType_FP32;
+        case tfsc::tosa::DataType::bfloat16_t: return DType::DType_BF16;
+        case tfsc::tosa::DataType::bool_t: return DType::DType_BOOL;
 
         // Unsupported types
-        case tosa2spirv::tosa::DataType::int64_t:
-        case tosa2spirv::tosa::DataType::null_t:
+        case tfsc::tosa::DataType::int64_t:
+        case tfsc::tosa::DataType::null_t:
         default: return DType::DType_UNKNOWN;
     }
 }
@@ -46,19 +46,19 @@ DType GetTosaAccType(uint32_t idx)
     return DType::DType_UNKNOWN;
 }
 
-std::unique_ptr<TosaAttributeBase> GetTosaAttribute(tosa2spirv::tosa::OperatorEnum op,
-                                                    std::vector<tosa2spirv::tosa::Attribute> attributes)
+std::unique_ptr<TosaAttributeBase> GetTosaAttribute(tfsc::tosa::OperatorEnum op,
+                                                    std::vector<tfsc::tosa::Attribute> attributes)
 {
     switch (op)
     {
             // GET TOSA ATTRIBUTE CODE GENERATION BEGIN
-        case tosa2spirv::tosa::OperatorEnum::ArgMax:
+        case tfsc::tosa::OperatorEnum::ArgMax:
         {
             int32_t axis = static_cast<int32_t>(attributes[0].GetData()[0]);
             NanPropagationMode nan_mode = static_cast<NanPropagationMode>(attributes[1].GetData()[0]);
             return std::make_unique<TosaArgMaxAttribute>(axis, nan_mode);
         }
-        case tosa2spirv::tosa::OperatorEnum::AvgPool2d:
+        case tfsc::tosa::OperatorEnum::AvgPool2d:
         {
             std::vector<int32_t> kernel = {attributes[0].GetData().begin(), attributes[0].GetData().end()};
             std::vector<int32_t> stride = {attributes[1].GetData().begin(), attributes[1].GetData().end()};
@@ -66,7 +66,7 @@ std::unique_ptr<TosaAttributeBase> GetTosaAttribute(tosa2spirv::tosa::OperatorEn
             DType acc_type = GetTosaAccType(attributes[3].GetData()[0]);
             return std::make_unique<TosaAvgPool2dAttribute>(kernel, stride, pad, acc_type);
         }
-        case tosa2spirv::tosa::OperatorEnum::Conv2d:
+        case tfsc::tosa::OperatorEnum::Conv2d:
         {
             std::vector<int32_t> pad = {attributes[0].GetData().begin(), attributes[0].GetData().end()};
             std::vector<int32_t> stride = {attributes[1].GetData().begin(), attributes[1].GetData().end()};
@@ -75,7 +75,7 @@ std::unique_ptr<TosaAttributeBase> GetTosaAttribute(tosa2spirv::tosa::OperatorEn
             DType acc_type = GetTosaAccType(attributes[3].GetData()[0]);
             return std::make_unique<TosaConv2dAttribute>(pad, stride, dilation, local_bound, acc_type);
         }
-        case tosa2spirv::tosa::OperatorEnum::Conv3d:
+        case tfsc::tosa::OperatorEnum::Conv3d:
         {
             std::vector<int32_t> pad = {attributes[0].GetData().begin(), attributes[0].GetData().end()};
             std::vector<int32_t> stride = {attributes[1].GetData().begin(), attributes[1].GetData().end()};
@@ -84,7 +84,7 @@ std::unique_ptr<TosaAttributeBase> GetTosaAttribute(tosa2spirv::tosa::OperatorEn
             DType acc_type = GetTosaAccType(attributes[3].GetData()[0]);
             return std::make_unique<TosaConv3dAttribute>(pad, stride, dilation, local_bound, acc_type);
         }
-        case tosa2spirv::tosa::OperatorEnum::DepthwiseConv2d:
+        case tfsc::tosa::OperatorEnum::DepthwiseConv2d:
         {
             std::vector<int32_t> pad = {attributes[0].GetData().begin(), attributes[0].GetData().end()};
             std::vector<int32_t> stride = {attributes[1].GetData().begin(), attributes[1].GetData().end()};
@@ -93,14 +93,14 @@ std::unique_ptr<TosaAttributeBase> GetTosaAttribute(tosa2spirv::tosa::OperatorEn
             DType acc_type = GetTosaAccType(attributes[3].GetData()[0]);
             return std::make_unique<TosaDepthwiseConv2dAttribute>(pad, stride, dilation, local_bound, acc_type);
         }
-        case tosa2spirv::tosa::OperatorEnum::Fft2d:
+        case tfsc::tosa::OperatorEnum::Fft2d:
         {
             bool inverse = static_cast<bool>(attributes[0].GetData()[0]);
             bool local_bound = static_cast<bool>(attributes[1].GetData()[0]);
             return std::make_unique<TosaFFT2dAttribute>(inverse, local_bound);
         }
-        case tosa2spirv::tosa::OperatorEnum::Matmul: return std::make_unique<::tosa::TosaMatMulAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::MaxPool2d:
+        case tfsc::tosa::OperatorEnum::Matmul: return std::make_unique<::tosa::TosaMatMulAttribute>();
+        case tfsc::tosa::OperatorEnum::MaxPool2d:
         {
             std::vector<int32_t> kernel = {attributes[0].GetData().begin(), attributes[0].GetData().end()};
             std::vector<int32_t> stride = {attributes[1].GetData().begin(), attributes[1].GetData().end()};
@@ -108,12 +108,12 @@ std::unique_ptr<TosaAttributeBase> GetTosaAttribute(tosa2spirv::tosa::OperatorEn
             NanPropagationMode nan_mode = static_cast<NanPropagationMode>(attributes[3].GetData()[0]);
             return std::make_unique<TosaMaxPool2dAttribute>(kernel, stride, pad, nan_mode);
         }
-        case tosa2spirv::tosa::OperatorEnum::Rfft2d:
+        case tfsc::tosa::OperatorEnum::Rfft2d:
         {
             bool local_bound = static_cast<bool>(attributes[0].GetData()[0]);
             return std::make_unique<TosaRFFT2dAttribute>(local_bound);
         }
-        case tosa2spirv::tosa::OperatorEnum::TransposeConv2d:
+        case tfsc::tosa::OperatorEnum::TransposeConv2d:
         {
             std::vector<int32_t> out_pad = {attributes[0].GetData().begin(), attributes[0].GetData().end()};
             std::vector<int32_t> stride = {attributes[1].GetData().begin(), attributes[1].GetData().end()};
@@ -121,124 +121,124 @@ std::unique_ptr<TosaAttributeBase> GetTosaAttribute(tosa2spirv::tosa::OperatorEn
             DType acc_type = GetTosaAccType(attributes[2].GetData()[0]);
             return std::make_unique<TosaTransposeConv2dAttribute>(out_pad, stride, local_bound, acc_type);
         }
-        case tosa2spirv::tosa::OperatorEnum::Clamp:
+        case tfsc::tosa::OperatorEnum::Clamp:
         {
             std::vector<uint8_t> min_val = {attributes[0].GetData().begin(), attributes[0].GetData().end()};
             std::vector<uint8_t> max_val = {attributes[1].GetData().begin(), attributes[1].GetData().end()};
             NanPropagationMode nan_mode = static_cast<NanPropagationMode>(attributes[2].GetData()[0]);
             return std::make_unique<TosaClampAttribute>(min_val, max_val, nan_mode);
         }
-        case tosa2spirv::tosa::OperatorEnum::Erf: return std::make_unique<::tosa::TosaErfAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Sigmoid: return std::make_unique<::tosa::TosaSigmoidAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Tanh: return std::make_unique<::tosa::TosaTanhAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Add: return std::make_unique<::tosa::TosaAddAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::ArithmeticRightShift:
+        case tfsc::tosa::OperatorEnum::Erf: return std::make_unique<::tosa::TosaErfAttribute>();
+        case tfsc::tosa::OperatorEnum::Sigmoid: return std::make_unique<::tosa::TosaSigmoidAttribute>();
+        case tfsc::tosa::OperatorEnum::Tanh: return std::make_unique<::tosa::TosaTanhAttribute>();
+        case tfsc::tosa::OperatorEnum::Add: return std::make_unique<::tosa::TosaAddAttribute>();
+        case tfsc::tosa::OperatorEnum::ArithmeticRightShift:
         {
             bool round = static_cast<bool>(attributes[0].GetData()[0]);
             return std::make_unique<TosaArithmeticRightShiftAttribute>(round);
         }
-        case tosa2spirv::tosa::OperatorEnum::BitwiseAnd: return std::make_unique<::tosa::TosaBitwiseAndAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::BitwiseOr: return std::make_unique<::tosa::TosaBitwiseOrAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::BitwiseXor: return std::make_unique<::tosa::TosaBitwiseXorAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::IntDiv: return std::make_unique<::tosa::TosaIntDivAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::LogicalAnd: return std::make_unique<::tosa::TosaLogicalAndAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::LogicalLeftShift:
+        case tfsc::tosa::OperatorEnum::BitwiseAnd: return std::make_unique<::tosa::TosaBitwiseAndAttribute>();
+        case tfsc::tosa::OperatorEnum::BitwiseOr: return std::make_unique<::tosa::TosaBitwiseOrAttribute>();
+        case tfsc::tosa::OperatorEnum::BitwiseXor: return std::make_unique<::tosa::TosaBitwiseXorAttribute>();
+        case tfsc::tosa::OperatorEnum::IntDiv: return std::make_unique<::tosa::TosaIntDivAttribute>();
+        case tfsc::tosa::OperatorEnum::LogicalAnd: return std::make_unique<::tosa::TosaLogicalAndAttribute>();
+        case tfsc::tosa::OperatorEnum::LogicalLeftShift:
             return std::make_unique<::tosa::TosaLogicalLeftShiftAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::LogicalRightShift:
+        case tfsc::tosa::OperatorEnum::LogicalRightShift:
             return std::make_unique<::tosa::TosaLogicalRightShiftAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::LogicalOr: return std::make_unique<::tosa::TosaLogicalOrAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::LogicalXor: return std::make_unique<::tosa::TosaLogicalXorAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Maximum:
+        case tfsc::tosa::OperatorEnum::LogicalOr: return std::make_unique<::tosa::TosaLogicalOrAttribute>();
+        case tfsc::tosa::OperatorEnum::LogicalXor: return std::make_unique<::tosa::TosaLogicalXorAttribute>();
+        case tfsc::tosa::OperatorEnum::Maximum:
         {
             NanPropagationMode nan_mode = static_cast<NanPropagationMode>(attributes[0].GetData()[0]);
             return std::make_unique<TosaMaximumAttribute>(nan_mode);
         }
-        case tosa2spirv::tosa::OperatorEnum::Minimum:
+        case tfsc::tosa::OperatorEnum::Minimum:
         {
             NanPropagationMode nan_mode = static_cast<NanPropagationMode>(attributes[0].GetData()[0]);
             return std::make_unique<TosaMinimumAttribute>(nan_mode);
         }
-        case tosa2spirv::tosa::OperatorEnum::Mul: return std::make_unique<::tosa::TosaMulAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Pow: return std::make_unique<::tosa::TosaPowAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Sub: return std::make_unique<::tosa::TosaSubAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Table: return std::make_unique<::tosa::TosaTableAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Abs: return std::make_unique<::tosa::TosaAbsAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::BitwiseNot: return std::make_unique<::tosa::TosaBitwiseNotAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Ceil: return std::make_unique<::tosa::TosaCeilAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Clz: return std::make_unique<::tosa::TosaClzAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Cos: return std::make_unique<::tosa::TosaCosAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Exp: return std::make_unique<::tosa::TosaExpAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Floor: return std::make_unique<::tosa::TosaFloorAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Log: return std::make_unique<::tosa::TosaLogAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::LogicalNot: return std::make_unique<::tosa::TosaLogicalNotAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Negate: return std::make_unique<::tosa::TosaNegateAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Reciprocal: return std::make_unique<::tosa::TosaReciprocalAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Rsqrt: return std::make_unique<::tosa::TosaRsqrtAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Sin: return std::make_unique<::tosa::TosaSinAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Select: return std::make_unique<::tosa::TosaSelectAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Equal: return std::make_unique<::tosa::TosaEqualAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Greater: return std::make_unique<::tosa::TosaGreaterAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::GreaterEqual: return std::make_unique<::tosa::TosaGreaterEqualAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::ReduceAll:
+        case tfsc::tosa::OperatorEnum::Mul: return std::make_unique<::tosa::TosaMulAttribute>();
+        case tfsc::tosa::OperatorEnum::Pow: return std::make_unique<::tosa::TosaPowAttribute>();
+        case tfsc::tosa::OperatorEnum::Sub: return std::make_unique<::tosa::TosaSubAttribute>();
+        case tfsc::tosa::OperatorEnum::Table: return std::make_unique<::tosa::TosaTableAttribute>();
+        case tfsc::tosa::OperatorEnum::Abs: return std::make_unique<::tosa::TosaAbsAttribute>();
+        case tfsc::tosa::OperatorEnum::BitwiseNot: return std::make_unique<::tosa::TosaBitwiseNotAttribute>();
+        case tfsc::tosa::OperatorEnum::Ceil: return std::make_unique<::tosa::TosaCeilAttribute>();
+        case tfsc::tosa::OperatorEnum::Clz: return std::make_unique<::tosa::TosaClzAttribute>();
+        case tfsc::tosa::OperatorEnum::Cos: return std::make_unique<::tosa::TosaCosAttribute>();
+        case tfsc::tosa::OperatorEnum::Exp: return std::make_unique<::tosa::TosaExpAttribute>();
+        case tfsc::tosa::OperatorEnum::Floor: return std::make_unique<::tosa::TosaFloorAttribute>();
+        case tfsc::tosa::OperatorEnum::Log: return std::make_unique<::tosa::TosaLogAttribute>();
+        case tfsc::tosa::OperatorEnum::LogicalNot: return std::make_unique<::tosa::TosaLogicalNotAttribute>();
+        case tfsc::tosa::OperatorEnum::Negate: return std::make_unique<::tosa::TosaNegateAttribute>();
+        case tfsc::tosa::OperatorEnum::Reciprocal: return std::make_unique<::tosa::TosaReciprocalAttribute>();
+        case tfsc::tosa::OperatorEnum::Rsqrt: return std::make_unique<::tosa::TosaRsqrtAttribute>();
+        case tfsc::tosa::OperatorEnum::Sin: return std::make_unique<::tosa::TosaSinAttribute>();
+        case tfsc::tosa::OperatorEnum::Select: return std::make_unique<::tosa::TosaSelectAttribute>();
+        case tfsc::tosa::OperatorEnum::Equal: return std::make_unique<::tosa::TosaEqualAttribute>();
+        case tfsc::tosa::OperatorEnum::Greater: return std::make_unique<::tosa::TosaGreaterAttribute>();
+        case tfsc::tosa::OperatorEnum::GreaterEqual: return std::make_unique<::tosa::TosaGreaterEqualAttribute>();
+        case tfsc::tosa::OperatorEnum::ReduceAll:
         {
             int32_t axis = static_cast<int32_t>(attributes[0].GetData()[0]);
             return std::make_unique<TosaReduceAllAttribute>(axis);
         }
-        case tosa2spirv::tosa::OperatorEnum::ReduceAny:
+        case tfsc::tosa::OperatorEnum::ReduceAny:
         {
             int32_t axis = static_cast<int32_t>(attributes[0].GetData()[0]);
             return std::make_unique<TosaReduceAnyAttribute>(axis);
         }
-        case tosa2spirv::tosa::OperatorEnum::ReduceMax:
+        case tfsc::tosa::OperatorEnum::ReduceMax:
         {
             int32_t axis = static_cast<int32_t>(attributes[0].GetData()[0]);
             NanPropagationMode nan_mode = static_cast<NanPropagationMode>(attributes[1].GetData()[0]);
             return std::make_unique<TosaReduceMaxAttribute>(axis, nan_mode);
         }
-        case tosa2spirv::tosa::OperatorEnum::ReduceMin:
+        case tfsc::tosa::OperatorEnum::ReduceMin:
         {
             int32_t axis = static_cast<int32_t>(attributes[0].GetData()[0]);
             NanPropagationMode nan_mode = static_cast<NanPropagationMode>(attributes[1].GetData()[0]);
             return std::make_unique<TosaReduceMinAttribute>(axis, nan_mode);
         }
-        case tosa2spirv::tosa::OperatorEnum::ReduceProduct:
+        case tfsc::tosa::OperatorEnum::ReduceProduct:
         {
             int32_t axis = static_cast<int32_t>(attributes[0].GetData()[0]);
             return std::make_unique<TosaReduceProductAttribute>(axis);
         }
-        case tosa2spirv::tosa::OperatorEnum::ReduceSum:
+        case tfsc::tosa::OperatorEnum::ReduceSum:
         {
             int32_t axis = static_cast<int32_t>(attributes[0].GetData()[0]);
             return std::make_unique<TosaReduceSumAttribute>(axis);
         }
-        case tosa2spirv::tosa::OperatorEnum::Concat:
+        case tfsc::tosa::OperatorEnum::Concat:
         {
             int32_t axis = static_cast<int32_t>(attributes[0].GetData()[0]);
             return std::make_unique<TosaConcatAttribute>(axis);
         }
-        case tosa2spirv::tosa::OperatorEnum::Pad: return std::make_unique<::tosa::TosaPadAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Reshape: return std::make_unique<::tosa::TosaReshapeAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Reverse:
+        case tfsc::tosa::OperatorEnum::Pad: return std::make_unique<::tosa::TosaPadAttribute>();
+        case tfsc::tosa::OperatorEnum::Reshape: return std::make_unique<::tosa::TosaReshapeAttribute>();
+        case tfsc::tosa::OperatorEnum::Reverse:
         {
             int32_t axis = static_cast<int32_t>(attributes[0].GetData()[0]);
             return std::make_unique<TosaReverseAttribute>(axis);
         }
-        case tosa2spirv::tosa::OperatorEnum::Slice: return std::make_unique<::tosa::TosaSliceAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Tile: return std::make_unique<::tosa::TosaTileAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Transpose:
+        case tfsc::tosa::OperatorEnum::Slice: return std::make_unique<::tosa::TosaSliceAttribute>();
+        case tfsc::tosa::OperatorEnum::Tile: return std::make_unique<::tosa::TosaTileAttribute>();
+        case tfsc::tosa::OperatorEnum::Transpose:
         {
             std::vector<int32_t> perms = {attributes[0].GetData().begin(), attributes[0].GetData().end()};
             return std::make_unique<TosaTransposeAttribute>(perms);
         }
-        case tosa2spirv::tosa::OperatorEnum::Gather: return std::make_unique<::tosa::TosaGatherAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Scatter: return std::make_unique<::tosa::TosaScatterAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Resize:
+        case tfsc::tosa::OperatorEnum::Gather: return std::make_unique<::tosa::TosaGatherAttribute>();
+        case tfsc::tosa::OperatorEnum::Scatter: return std::make_unique<::tosa::TosaScatterAttribute>();
+        case tfsc::tosa::OperatorEnum::Resize:
         {
             ResizeMode mode = static_cast<ResizeMode>(attributes[0].GetData()[0]);
             return std::make_unique<TosaResizeAttribute>(mode);
         }
-        case tosa2spirv::tosa::OperatorEnum::Cast: return std::make_unique<::tosa::TosaCastAttribute>();
-        case tosa2spirv::tosa::OperatorEnum::Rescale:
+        case tfsc::tosa::OperatorEnum::Cast: return std::make_unique<::tosa::TosaCastAttribute>();
+        case tfsc::tosa::OperatorEnum::Rescale:
         {
             bool scale32 = static_cast<bool>(attributes[0].GetData()[0]);
             RoundingMode rounding_mode = static_cast<RoundingMode>(attributes[1].GetData()[0]);
@@ -271,9 +271,8 @@ std::string GetTosaSerializationTensorName(const uint32_t& tensorId,
     }
 }
 
-std::unique_ptr<TosaSerializationTensor> GetTosaSerializationTensor(const tosa2spirv::tosa::Tensor& tensor,
-                                                                    const std::string& name,
-                                                                    const std::vector<uint32_t>& data)
+std::unique_ptr<TosaSerializationTensor>
+GetTosaSerializationTensor(const tfsc::tosa::Tensor& tensor, const std::string& name, const std::vector<uint32_t>& data)
 {
     std::vector<int32_t> shape;
     std::vector<int32_t> dataInt32;
@@ -464,7 +463,7 @@ void GetTosaSerializationOperator(const TosaOperator& op,
 }
 
 std::unique_ptr<TosaSerializationHandler>
-GetTosaSerializationHandler(const std::shared_ptr<tosa2spirv::spirv::Module>& module,
+GetTosaSerializationHandler(const std::shared_ptr<tfsc::spirv::Module>& module,
                             const std::vector<std::vector<uint32_t>>& graphConstants,
                             const std::map<uint32_t, std::string>& tensorNameMap)
 {

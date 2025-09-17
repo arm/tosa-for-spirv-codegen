@@ -13,7 +13,7 @@
 
 namespace testutils
 {
-using namespace tosa2spirv::spirv;
+using namespace tfsc::spirv;
 
 enum class ModelView
 {

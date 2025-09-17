@@ -17,14 +17,14 @@
 
 namespace testutils
 {
-using namespace tosa2spirv::spirv;
+using namespace tfsc::spirv;
 
-std::string ResIdToString(const tosa2spirv::spirv::Instruction& instruction)
+std::string ResIdToString(const tfsc::spirv::Instruction& instruction)
 {
     std::string resId{};
     for (const auto& operand : instruction.m_Operands)
     {
-        if (operand.m_Type == tosa2spirv::spirv::RES_ID)
+        if (operand.m_Type == tfsc::spirv::RES_ID)
         {
             resId = "%" + std::to_string(operand.m_LiteralWord);
             break;
@@ -33,21 +33,21 @@ std::string ResIdToString(const tosa2spirv::spirv::Instruction& instruction)
     return resId;
 }
 
-std::string OperandToString(const tosa2spirv::spirv::Operand& operand)
+std::string OperandToString(const tfsc::spirv::Operand& operand)
 {
     std::string operandString;
     switch (operand.m_Type)
     {
-        case tosa2spirv::spirv::INSTRUCTION_POINTER: operandString = ResIdToString(*operand.m_InstructionPtr); break;
-        case tosa2spirv::spirv::RES_ID: break;
-        case tosa2spirv::spirv::LITERAL_WORD: operandString = std::to_string(operand.m_LiteralWord); break;
-        case tosa2spirv::spirv::LITERAL_STRING: operandString = *operand.m_LiteralStr; break;
+        case tfsc::spirv::INSTRUCTION_POINTER: operandString = ResIdToString(*operand.m_InstructionPtr); break;
+        case tfsc::spirv::RES_ID: break;
+        case tfsc::spirv::LITERAL_WORD: operandString = std::to_string(operand.m_LiteralWord); break;
+        case tfsc::spirv::LITERAL_STRING: operandString = *operand.m_LiteralStr; break;
         default: throw std::runtime_error("Invalid operand type");
     }
     return operandString;
 }
 
-std::string InstructionToString(const tosa2spirv::spirv::Instruction& instruction)
+std::string InstructionToString(const tfsc::spirv::Instruction& instruction)
 {
     std::string instructionString;
 

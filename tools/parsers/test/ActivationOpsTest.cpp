@@ -13,8 +13,8 @@
 #include <gtest/gtest.h>
 
 using namespace tosa;
-using namespace tosa2spirv::parsers;
-TEST(TOSA2SPIRV_PARSER, Clamp)
+using namespace tfsc::parsers;
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Clamp)
 {
     int32_t min_val = 1;
     int32_t max_val = 1;
@@ -66,7 +66,7 @@ TEST(TOSA2SPIRV_PARSER, Clamp)
                            {{{1}, DataType::int8_t, {1}}, {{1}, DataType::int8_t, {1}}, {{1}, DataType::int32_t, {1}}});
 }
 
-TEST(TOSA2SPIRV_PARSER, Erf)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Erf)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
@@ -110,7 +110,7 @@ TEST(TOSA2SPIRV_PARSER, Erf)
                            {});
 }
 
-TEST(TOSA2SPIRV_PARSER, Sigmoid)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Sigmoid)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
@@ -154,7 +154,7 @@ TEST(TOSA2SPIRV_PARSER, Sigmoid)
                            {});
 }
 
-TEST(TOSA2SPIRV_PARSER, Tanh)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Tanh)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;

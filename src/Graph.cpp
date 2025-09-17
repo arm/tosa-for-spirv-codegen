@@ -9,12 +9,12 @@
 
 #include <algorithm>
 
-namespace tosa2spirv::tosa
+namespace tfsc::tosa
 {
 
 using namespace spirv;
 using namespace spv;
-using namespace tosa2spirv::spirv;
+using namespace tfsc::spirv;
 
 Graph::Graph(std::shared_ptr<Module> module, std::string name)
     : m_Name(std::move(name))
@@ -279,4 +279,4 @@ static Operand ChainConcat(Module& spirvModule,
     return previousConcat;
 }
 
-} // namespace tosa2spirv::tosa
+} // namespace tfsc::tosa

@@ -6,15 +6,15 @@
 // Generated automatically by Spirv2tosaTool for TOSA 1.0
 
 #include <OpTestUtils.hpp>
-#include <tosa2spirv.hpp>
+#include <TosaForSpirvCodegen.hpp>
 
 #include <gtest/gtest.h>
 
-using namespace tosa2spirv::tosa;
+using namespace tfsc::tosa;
 using namespace testutils;
 
 // TEST HASH 14220290559297498621
-TEST(TOSA2SPIRV_OPERATOR, GreaterOperatorTest0)
+TEST(TOSA_FOR_SPIRV_CODEGEN_OPERATOR, GreaterOperatorTest0)
 {
 // Operator Definition, separated for reuse in the test fixture
 const OperatorEnum op = OperatorEnum::Greater;
@@ -23,7 +23,7 @@ const std::vector<Tensor> outputs {{DataType::bool_t, {1, 2, 2, 32}}};
 const std::vector<Attribute> attributes {};
 
 // Adding operator using Graph API
-std::shared_ptr<tosa2spirv::spirv::Module> module = tosa2spirv::CreateModule(tosa2spirv::TOSAVersion::v1_0);
+std::shared_ptr<tfsc::spirv::Module> module = tfsc::CreateModule(tfsc::TOSAVersion::v1_0);
 Graph graph{module};
 
 const auto& input1 = graph.AddInput(inputs[0].GetTensor(), 0);

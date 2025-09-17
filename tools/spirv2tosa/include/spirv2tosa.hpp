@@ -30,21 +30,21 @@ namespace spirv2tosa
 
 /// Generates an std::vector of C/C++ strings describing all operators found in the given Module instance, using
 /// parameters that the TosaOperator structure consists of
-std::vector<std::string> Spirv2tosa(const std::shared_ptr<tosa2spirv::spirv::Module>& module,
+std::vector<std::string> Spirv2tosa(const std::shared_ptr<tfsc::spirv::Module>& module,
                                     OperatorComparator filter);
 
 /// Generates an std::vector of TosaOperator instances describing all operators found in the given Module instance
-std::vector<TosaOperator> Spirv2operators(const std::shared_ptr<tosa2spirv::spirv::Module>& module,
+std::vector<TosaOperator> Spirv2operators(const std::shared_ptr<tfsc::spirv::Module>& module,
                                           OperatorComparator filter);
 
-/// Returns the actual ResId number from a tosa2spirv::tosa::ResId instance (masked spirv::Instruction pointer)
-inline uint32_t GetResIdNumber(const tosa2spirv::tosa::ResId& resId)
+/// Returns the actual ResId number from a tfsc::tosa::ResId instance (masked spirv::Instruction pointer)
+inline uint32_t GetResIdNumber(const tfsc::tosa::ResId& resId)
 {
-    if (resId->m_Operands.size() > 0 && resId->m_Operands[0].m_Type == tosa2spirv::spirv::RES_ID)
+    if (resId->m_Operands.size() > 0 && resId->m_Operands[0].m_Type == tfsc::spirv::RES_ID)
     {
         return resId->m_Operands[0].m_LiteralWord;
     }
-    if (resId->m_Operands.size() > 1 && resId->m_Operands[1].m_Type == tosa2spirv::spirv::RES_ID)
+    if (resId->m_Operands.size() > 1 && resId->m_Operands[1].m_Type == tfsc::spirv::RES_ID)
     {
         return resId->m_Operands[1].m_LiteralWord;
     }
@@ -70,7 +70,7 @@ void GetTosaSerializationOperator(const TosaOperator& op,
 /// coresponds to the graph constant ID. The tensorNameMap option allows users to explicitly name specific tensors in
 /// the resulting Handler, with a key of the ResId number of the tensor instruction.
 std::unique_ptr<tosa::TosaSerializationHandler>
-GetTosaSerializationHandler(const std::shared_ptr<tosa2spirv::spirv::Module>& module,
+GetTosaSerializationHandler(const std::shared_ptr<tfsc::spirv::Module>& module,
                             const std::vector<std::vector<uint32_t>>& graphConstants = {},
                             const std::map<uint32_t, std::string>& tensorNameMap = {});
 

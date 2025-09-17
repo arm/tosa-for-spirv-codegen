@@ -52,8 +52,8 @@ target_include_directories(tosaSerializationParser PRIVATE ${SERIALIZATION_LIB_S
 target_include_directories(tosaSerializationParser PRIVATE ${SERIALIZATION_LIB_SOURCE_PATH}/third_party/half/include)
 
 # Include SPIR-V headers
-target_include_directories(tosa2spirv PUBLIC ${SPIRV_TOOLS_SOURCE_PATH}/include)
-target_link_libraries(tosaSerializationParser PUBLIC tosa2spirv)
+target_include_directories(tosa_for_spirv_codegen PUBLIC ${SPIRV_TOOLS_SOURCE_PATH}/include)
+target_link_libraries(tosaSerializationParser PUBLIC tosa_for_spirv_codegen)
 
 # Gather the headers to be installed
 file(GLOB PUBLIC_HEADERS_PARSER ${TOOLS_PATH}/parsers/include/*.hpp)

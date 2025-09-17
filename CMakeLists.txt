@@ -4,31 +4,31 @@
 #
 
 cmake_minimum_required(VERSION 3.7.0)
-project(tosa2spirv)
+project(tosa_for_spirv_codegen)
 
 include(GNUInstallDirs)  # Ensure standard install directory variables are defined
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# By default tosa2spirv is a static library.
+# By default tosa_for_spirv_codegen is a static library.
 option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
 option(BUILD_TOSA_SERIALIZATION_PARSER
        "Build the TOSA Serialization Parser. This library can parse a TOSA Serialization structure and \
         generate SPIRV." ON)
-option(BUILD_TOSA_2_SPIRV_GENERATOR
-       "Build the tosa2spirv generator. This command line tool generates SPIRV binary from a TOSA \
+option(BUILD_TOSA_FOR_SPIRV_CODEGEN_GENERATOR
+       "Build the tosa-for-spirv-codegen generator. This command line tool generates SPIRV binary from a TOSA \
         Flatbuffers file." ON)
 option(BUILD_MODEL_COMPARISON_TOOL "Build Model comparison tool" ON)
 option(BUILD_SPIRV_2_TOSA "Build the spirv2tosa module." ON)
 option(BUILD_VGF_WRITER "Build the VGF Writer library.
-                         A wrapper of the VGF Encoder allowing users to create .vgf files with tosa2spirv output." ON)
+                         A wrapper of the VGF Encoder allowing users to create .vgf files with tosa_for_spirv_codegen output." ON)
 # Option for Unittest Coverage testing
 option(BUILD_FOR_COVERAGE "Output .gcno and .gcda files used for Unittest Coverage checking." OFF)
 # By default build UnitTests
-option(BUILD_UNITTESTS "Build UnitTests for tosa2spirv" ON)
+option(BUILD_UNITTESTS "Build UnitTests for tosa_for_spirv_codegen" ON)
 
-# Root of the TOSA-for-SPIRV-Codegen project
+# Root of the tosa_for_spirv_codegen project
 set(TFSC_ROOT "${CMAKE_CURRENT_LIST_DIR}")
 message(===========${TFSC_ROOT})
 
@@ -56,14 +56,14 @@ message(===========${TOOLS_PATH})
 set(TOOLS_PATH ${CMAKE_SOURCE_DIR}/tools CACHE PATH "")
 
 # Parser can be enabled without generator but generator requires parser.
-if(BUILD_TOSA_2_SPIRV_GENERATOR AND NOT BUILD_TOSA_SERIALIZATION_PARSER)
+if(BUILD_TOSA_FOR_SPIRV_CODEGEN_GENERATOR AND NOT BUILD_TOSA_SERIALIZATION_PARSER)
     message(FATAL_ERROR
-        "TOSA Serialization Parser is required to build the tosa2spirv generator.")
+        "TOSA Serialization Parser is required to build the tosa_for_spirv_codegen generator.")
 endif()
 
-if(BUILD_TOSA_2_SPIRV_GENERATOR AND NOT BUILD_VGF_WRITER)
+if(BUILD_TOSA_FOR_SPIRV_CODEGEN_GENERATOR AND NOT BUILD_VGF_WRITER)
     message(FATAL_ERROR
-        "VGFWriter is required to build the tosa2spirv generator.\nEnable BUILD_VGF_WRITER and try again.")
+        "VGFWriter is required to build the tosa_for_spirv_codegen generator.\nEnable BUILD_VGF_WRITER and try again.")
 endif()
 
 # Coverage setup
@@ -81,21 +81,21 @@ if(BUILD_FOR_COVERAGE)
 endif()
 
 # Core library
-add_library(tosa2spirv
+add_library(tosa_for_spirv_codegen
     src/Graph.cpp
     src/Instruction.cpp
     src/Module.cpp
-    src/tosa2spirv.cpp
+    src/TosaForSpirvCodegen.cpp
     src/OperatorDefinitions.cpp
     src/Operand.cpp
     src/SPIRVDefinitions.cpp)
 
-target_include_directories(tosa2spirv PUBLIC
+target_include_directories(tosa_for_spirv_codegen PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/include/spirv
     ${CMAKE_CURRENT_SOURCE_DIR}/include/tosa)
 
-target_include_directories(tosa2spirv PRIVATE
+target_include_directories(tosa_for_spirv_codegen PRIVATE
     src
     ${SPIRV_HEADERS_SOURCE_PATH}/include
     ${SPIRV_HEADERS_SOURCE_PATH})
@@ -109,7 +109,7 @@ if(BUILD_VGF_WRITER)
     add_subdirectory(${TOOLS_PATH}/vgfwriter)
 endif()
 
-if(BUILD_TOSA_2_SPIRV_GENERATOR)
+if(BUILD_TOSA_FOR_SPIRV_CODEGEN_GENERATOR)
     add_subdirectory(${TOOLS_PATH}/generator)
 endif()
 if(BUILD_SPIRV_2_TOSA)
@@ -118,7 +118,7 @@ endif()
 
 if(BUILD_UNITTESTS OR BUILD_MODEL_COMPARISON_TOOL)
     add_subdirectory(${TOOLS_PATH}/utils)
-    add_subdirectory(${TOOLS_PATH}/ModelComparisonTool)  # comparison functionality needed for testing
+    add_subdirectory(${TOOLS_PATH}/model-comparison)  # comparison functionality needed for testing
 endif()
 
 if(BUILD_UNITTESTS)
@@ -126,7 +126,7 @@ if(BUILD_UNITTESTS)
 endif()
 
 # install include directories into their respective folders
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/tosa2spirv.hpp
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/TosaForSpirvCodegen.hpp
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/tosa_for_spirv_codegen)
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/tosa
@@ -135,4 +135,4 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/tosa
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/spirv
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/tosa_for_spirv_codegen)
 
-install(TARGETS tosa2spirv)
+install(TARGETS tosa_for_spirv_codegen)

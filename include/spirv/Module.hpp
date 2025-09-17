@@ -10,9 +10,10 @@
 #include <algorithm>
 #include <set>
 
-namespace tosa2spirv::spirv
+// tosa-for-spirv-codegen's shorthand namespace
+namespace tfsc::spirv
 {
-/// tosa2spirv's implementation of SPIR-V module.
+/// tosa-for-spirv-codegen's implementation of SPIR-V module.
 class Module
 {
     public:
@@ -73,4 +74,4 @@ class Module
 /// Operand Instance used to specify the position of an Instructions ResId
 static const auto RESID = Operand{0u, RES_ID};
 
-} // namespace tosa2spirv::spirv
+} // namespace tfsc::spirv

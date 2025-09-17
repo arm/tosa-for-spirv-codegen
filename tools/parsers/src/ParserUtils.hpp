@@ -11,10 +11,10 @@
 #include <TosaSerializationParser.hpp>
 #include <iostream>
 
-namespace tosa2spirv::parsers
+namespace tfsc::parsers
 {
 using namespace ::tosa;
-using namespace tosa2spirv::tosa;
+using namespace tfsc::tosa;
 
 inline DataType GetDataTypeFromDType(const DType dType)
 {
@@ -204,4 +204,4 @@ inline OperatorEnum OperatorEnumMap(const Op op)
             throw std::exception();
     }
 }
-} // namespace tosa2spirv::parsers
+} // namespace tfsc::parsers

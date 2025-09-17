@@ -13,8 +13,8 @@
 #include <gtest/gtest.h>
 
 using namespace tosa;
-using namespace tosa2spirv::parsers;
-TEST(TOSA2SPIRV_PARSER, Cast)
+using namespace tfsc::parsers;
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Cast)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
@@ -58,7 +58,7 @@ TEST(TOSA2SPIRV_PARSER, Cast)
                            {});
 }
 
-TEST(TOSA2SPIRV_PARSER, Rescale)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Rescale)
 {
     bool scale32 = true;
     int32_t rounding_mode = 1;

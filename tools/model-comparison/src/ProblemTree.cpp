@@ -5,7 +5,7 @@
 
 #include "ProblemTree.hpp"
 #include <StringUtils.hpp>
-#include <tosa2spirv.hpp>
+#include <TosaForSpirvCodegen.hpp>
 
 #include <optional>
 #include <sstream>
@@ -13,7 +13,7 @@
 
 namespace testutils
 {
-using namespace tosa2spirv::spirv;
+using namespace tfsc::spirv;
 
 std::optional<ProblemTree> CollectAndSeperateProblems(const ProblemTree& tree, std::vector<ProblemTree>& tree2)
 {

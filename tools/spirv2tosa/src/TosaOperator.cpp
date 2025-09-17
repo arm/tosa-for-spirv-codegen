@@ -7,7 +7,7 @@
 
 namespace spirv2tosa
 {
-using namespace tosa2spirv;
+using namespace tfsc;
 
 bool operator<(const tosa::Tensor& lhs, const tosa::Tensor& rhs)
 {

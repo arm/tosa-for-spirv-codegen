@@ -321,7 +321,7 @@ def generate_attribute_case(attributes_file, argument_map, first_unsupported = "
         if has_argument_category_name(arg, "attribute"):
             spec_attr_names.append(arg.name)
 
-    result = "case tosa2spirv::tosa::OperatorEnum::"
+    result = "case tfsc::tosa::OperatorEnum::"
     if attr_name == "FFT2d":
         result += "Fft2d"
     elif attr_name == "RFFT2d":

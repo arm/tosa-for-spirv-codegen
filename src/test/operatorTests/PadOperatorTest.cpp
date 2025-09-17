@@ -6,15 +6,15 @@
 // Generated automatically by Spirv2tosaTool for TOSA 1.0
 
 #include <OpTestUtils.hpp>
-#include <tosa2spirv.hpp>
+#include <TosaForSpirvCodegen.hpp>
 
 #include <gtest/gtest.h>
 
-using namespace tosa2spirv::tosa;
+using namespace tfsc::tosa;
 using namespace testutils;
 
 // TEST HASH 4396211930894833507
-TEST(TOSA2SPIRV_OPERATOR, PadOperatorTest0)
+TEST(tosa_for_spirv_codegen_OPERATOR, PadOperatorTest0)
 {
 // Operator Definition, separated for reuse in the test fixture
 const OperatorEnum op = OperatorEnum::Pad;
@@ -23,7 +23,7 @@ const std::vector<Tensor> outputs {{DataType::uint8_t, {1, 113, 113, 64}}};
 const std::vector<Attribute> attributes {};
 
 // Adding operator using Graph API
-std::shared_ptr<tosa2spirv::spirv::Module> module = tosa2spirv::CreateModule(tosa2spirv::TOSAVersion::v1_0);
+std::shared_ptr<tfsc::spirv::Module> module = tfsc::CreateModule(tfsc::TOSAVersion::v1_0);
 Graph graph{module};
 
 const auto& input1 = graph.AddInput(inputs[0].GetTensor(), 0);

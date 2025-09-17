@@ -4,7 +4,7 @@
 //
 
 #include <ModuleComparator.hpp>
-#include <tosa2spirv.hpp>
+#include <TosaForSpirvCodegen.hpp>
 
 #include "AdjacencyMatrix.hpp"
 #include "AssemblyUtils.hpp"
@@ -22,7 +22,7 @@
 
 namespace testutils
 {
-using namespace tosa2spirv::spirv;
+using namespace tfsc::spirv;
 
 std::string CompareInstructionsOfType(const spv::Op op,
                                       const std::shared_ptr<Module>& lhsModule,
@@ -252,12 +252,12 @@ std::string CompareModules(const std::shared_ptr<Module>& lhs, const std::shared
     }
     else
     {
-        const auto lhsBinary = tosa2spirv::WriteToBinary(lhs);
+        const auto lhsBinary = tfsc::WriteToBinary(lhs);
         auto lhsDis = DisassembleSPIRV(lhsBinary, false);
         lhsString =
             co.m_modelView == ModelView::module ? lhsDis : GetSubString(lhsDis, "OpTypeGraphARM ", "OpGraphEndARM");
 
-        const auto rhsBinary = tosa2spirv::WriteToBinary(rhs);
+        const auto rhsBinary = tfsc::WriteToBinary(rhs);
         auto rhsDis = DisassembleSPIRV(rhsBinary, false);
         rhsString =
             co.m_modelView == ModelView::module ? rhsDis : GetSubString(rhsDis, "OpTypeGraphARM ", "OpGraphEndARM");

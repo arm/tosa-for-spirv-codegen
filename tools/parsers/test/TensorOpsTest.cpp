@@ -13,8 +13,8 @@
 #include <gtest/gtest.h>
 
 using namespace tosa;
-using namespace tosa2spirv::parsers;
-TEST(TOSA2SPIRV_PARSER, ArgMax)
+using namespace tfsc::parsers;
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, ArgMax)
 {
     int32_t axis = 1;
     int32_t nan_mode = 1;
@@ -63,7 +63,7 @@ TEST(TOSA2SPIRV_PARSER, ArgMax)
                            {{{1}, DataType::int32_t, {1}}, {{1}, DataType::int32_t, {1}}});
 }
 
-TEST(TOSA2SPIRV_PARSER, AvgPool2d)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, AvgPool2d)
 {
     std::vector<int32_t> kernel = {1, 1};
     std::vector<int32_t> stride = {1, 1};
@@ -148,7 +148,7 @@ TEST(TOSA2SPIRV_PARSER, AvgPool2d)
                             {{1}, DataType::int32_t, {1}}});
 }
 
-TEST(TOSA2SPIRV_PARSER, Conv2d)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Conv2d)
 {
     std::vector<int32_t> pad = {1, 1, 1, 1};
     std::vector<int32_t> stride = {1, 1};
@@ -252,7 +252,7 @@ TEST(TOSA2SPIRV_PARSER, Conv2d)
                             {{1}, DataType::bool_t, {1}}});
 }
 
-TEST(TOSA2SPIRV_PARSER, Conv3d)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Conv3d)
 {
     std::vector<int32_t> pad = {1, 1, 1, 1, 1, 1};
     std::vector<int32_t> stride = {1, 1, 1};
@@ -356,7 +356,7 @@ TEST(TOSA2SPIRV_PARSER, Conv3d)
                             {{1}, DataType::bool_t, {1}}});
 }
 
-TEST(TOSA2SPIRV_PARSER, DepthwiseConv2d)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, DepthwiseConv2d)
 {
     std::vector<int32_t> pad = {1, 1, 1, 1};
     std::vector<int32_t> stride = {1, 1};
@@ -460,7 +460,7 @@ TEST(TOSA2SPIRV_PARSER, DepthwiseConv2d)
                             {{1}, DataType::bool_t, {1}}});
 }
 
-TEST(TOSA2SPIRV_PARSER, Fft2d)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Fft2d)
 {
     bool inverse = true;
     bool local_bound = true;
@@ -534,7 +534,7 @@ TEST(TOSA2SPIRV_PARSER, Fft2d)
                            {{{1}, DataType::bool_t, {1}}, {{1}, DataType::bool_t, {1}}});
 }
 
-TEST(TOSA2SPIRV_PARSER, Matmul)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Matmul)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
@@ -609,7 +609,7 @@ TEST(TOSA2SPIRV_PARSER, Matmul)
                            {});
 }
 
-TEST(TOSA2SPIRV_PARSER, MaxPool2d)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, MaxPool2d)
 {
     std::vector<int32_t> kernel = {1, 1};
     std::vector<int32_t> stride = {1, 1};
@@ -663,7 +663,7 @@ TEST(TOSA2SPIRV_PARSER, MaxPool2d)
                             {{1}, DataType::int32_t, {1}}});
 }
 
-TEST(TOSA2SPIRV_PARSER, Rfft2d)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Rfft2d)
 {
     bool local_bound = false;
     // Create Attribute
@@ -728,7 +728,7 @@ TEST(TOSA2SPIRV_PARSER, Rfft2d)
                            {{{0}, DataType::bool_t, {1}}});
 }
 
-TEST(TOSA2SPIRV_PARSER, TransposeConv2d)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, TransposeConv2d)
 {
     std::vector<int32_t> out_pad = {1, 1, 1, 1};
     std::vector<int32_t> stride = {1, 1};

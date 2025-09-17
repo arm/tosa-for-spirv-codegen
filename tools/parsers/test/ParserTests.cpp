@@ -17,9 +17,9 @@
 #include <gtest/gtest.h>
 
 using namespace ::tosa;
-using namespace tosa2spirv::parsers;
+using namespace tfsc::parsers;
 
-TEST(TOSA2SPIRV_PARSER, ConstInputOpTest)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, ConstInputOpTest)
 {
     // Create Conv2d Attribute
     std::vector<int> pad = {0, 0, 0, 0};
@@ -231,7 +231,7 @@ TEST(TOSA2SPIRV_PARSER, ConstInputOpTest)
     EXPECT_TRUE(!binarySpirv.empty()) << "BinarySpirv is empty when it shouldn't be.";
 }
 
-TEST(TOSA2SPIRV_PARSER, UnsupportedOperator)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, UnsupportedOperator)
 {
     // Create Tensors
     std::string inputName = "input1";
@@ -262,7 +262,7 @@ TEST(TOSA2SPIRV_PARSER, UnsupportedOperator)
     EXPECT_ANY_THROW(parser.GenerateSPIRV("main"));
 }
 
-TEST(TOSA2SPIRV_PARSER, InvalidDtype)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, InvalidDtype)
 {
     // Create Attribute
     std::vector<int> pad = {1, 1, 1, 1};
@@ -359,7 +359,7 @@ std::unique_ptr<TosaSerializationBasicBlock> ParserGeneratorSimpleMaxpool2dModel
 }
 
 // Simple Parser API usage test referenced in the README.md
-TEST(TOSA2SPIRV_PARSER, Readme)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Readme)
 {
     // Create a simple MaxPool2d model block.
     auto block = ParserGeneratorSimpleMaxpool2dModel();
@@ -599,7 +599,7 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DRescaleConv2DModel()
     return std::move(block);
 }
 
-TEST(TOSA2SPIRV_PARSER, Conv2DRescaleConv2D)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Conv2DRescaleConv2D)
 {
     // Create a model with 2 Conv2D operators which reuse the same weight and bias GraphConstantId
     auto block = GeneratorConv2DRescaleConv2DModel();
@@ -613,7 +613,7 @@ TEST(TOSA2SPIRV_PARSER, Conv2DRescaleConv2D)
 
 // Invalid block with graph input and output directly connected via IdentityOps
 // (input) - IDENTITY - IDENTITY - (output1) - CONV2D - (output2)
-TEST(TOSA2SPIRV_PARSER, InvalidBlockInputOutputConnectWithIdentity)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, InvalidBlockInputOutputConnectWithIdentity)
 {
     // Create Conv2D Attribute
     std::vector<int> pad = {0, 0, 0, 0};
@@ -891,7 +891,7 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorIdentityConv2DIdentityMode
     return std::move(block);
 }
 
-TEST(TOSA2SPIRV_PARSER, IdentityConv2dIdentity)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, IdentityConv2dIdentity)
 {
     // Create a IdentityConv2dIdentity model block.
     auto block = GeneratorIdentityConv2DIdentityModel();
@@ -1148,7 +1148,7 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DIdentityConv2DModel(
     return std::move(block);
 }
 
-TEST(TOSA2SPIRV_PARSER, Conv2dIdentityConv2d)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Conv2dIdentityConv2d)
 {
     // Create a IdentityConv2dIdentity model block.
     auto block = GeneratorConv2DIdentityConv2DModel();
@@ -1418,7 +1418,7 @@ std::unique_ptr<TosaSerializationBasicBlock> GeneratorConv2DIdentityOutputConv2D
     return std::move(block);
 }
 
-TEST(TOSA2SPIRV_PARSER, Conv2dIdentityConv2dDualOutput)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Conv2dIdentityConv2dDualOutput)
 {
     // Create a IdentityConv2dIdentity model block.
     auto block = GeneratorConv2DIdentityOutputConv2DModel();
@@ -1433,7 +1433,7 @@ TEST(TOSA2SPIRV_PARSER, Conv2dIdentityConv2dDualOutput)
 // Struct containing golden SPIRV of Add operator with one input having an empty shape.
 
 // Test case to test that we correctly transform empty tensor shape to shape of { 1 } otherwise this would fail.
-TEST(TOSA2SPIRV_PARSER, EmptyTensor)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, EmptyTensor)
 {
     // Create Tensors
     std::string input1Name = "input1";
@@ -1473,7 +1473,7 @@ TEST(TOSA2SPIRV_PARSER, EmptyTensor)
     TosaSerializationParser parser(&block);
 
     auto module1 = parser.GenerateSPIRVModule("main");
-    const auto binarySpirv = tosa2spirv::WriteToBinary(module1);
+    const auto binarySpirv = tfsc::WriteToBinary(module1);
     const std::string outputStr(testutils::DisassembleSPIRV(binarySpirv, true));
 
     EXPECT_EQ(spirvmodels::AddZeroDimOutputTensor, outputStr);

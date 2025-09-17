@@ -10,7 +10,7 @@ set(VGFWRITER_SOURCE src/VgfWriter.cpp)
 # Add utility library
 add_library(vgfWriter ${VGFWRITER_SOURCE})
 
-# Include headers for tosa2spirv and the vgfwriter.
+# Include headers for tosa_for_spirv_codegen and the vgfwriter.
 target_include_directories(vgfWriter PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(vgfWriter PRIVATE ${TOOLS_PATH}/vgfwriter/include)
 
@@ -33,7 +33,7 @@ find_library(VGF_ENCODER_LIBRARY_PATH
              NO_DEFAULT_PATH
              NO_CMAKE_FIND_ROOT_PATH)
 
-target_link_libraries(vgfWriter PRIVATE tosa2spirv)
+target_link_libraries(vgfWriter PRIVATE tosa_for_spirv_codegen)
 
 if(VGF_ENCODER_LIBRARY_PATH)
     message(STATUS "VGF library located at: ${VGF_ENCODER_LIBRARY_PATH}")

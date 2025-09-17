@@ -13,12 +13,12 @@
 
 #include <Graph.hpp>
 #include <gtest/gtest.h>
-#include <tosa2spirv.hpp>
+#include <TosaForSpirvCodegen.hpp>
 
 namespace testutils
 {
-using namespace tosa2spirv;
-using namespace tosa2spirv::tosa;
+using namespace tfsc;
+using namespace tfsc::tosa;
 
 TEST(TESTUTILS, TestReader)
 {

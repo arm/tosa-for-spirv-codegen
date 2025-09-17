@@ -13,4 +13,4 @@
 #include <gtest/gtest.h>
 
 using namespace tosa;
-using namespace tosa2spirv::parsers;
+using namespace tfsc::parsers;

@@ -7,7 +7,8 @@
 
 #include <string>
 
-namespace tosa2spirv::tosa
+// tosa-for-spirv-codegen's shorthand namespace
+namespace tfsc::tosa
 {
 // See tosa2spirv/python/source_generator.py and README
 // THIS SECTION IS GENERATED WITH TOSA 1.0. DO NOT EDIT!
@@ -82,4 +83,4 @@ enum class OperatorEnum
     Rescale,
 }; // OPERATOR ENUM SECTION END
 
-} // namespace tosa2spirv::tosa
+} // namespace tfsc::tosa

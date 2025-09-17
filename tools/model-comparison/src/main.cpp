@@ -7,7 +7,7 @@
 #include <ModelParsers.hpp>
 #include <ModuleComparator.hpp>
 #include <TosaSerializationParser.hpp>
-#include <tosa2spirv.hpp>
+#include <TosaForSpirvCodegen.hpp>
 
 #include <argparse.hpp>
 #include <tosa_serialization_handler.h>
@@ -23,7 +23,7 @@ class HeaderDecoder;
 
 using namespace tosa;
 
-namespace tosa2spirv::SPIRVComparison
+namespace tfsc::SPIRVComparison
 {
 
 // Parse SPIR-V, VGF, or TOSA file
@@ -40,7 +40,7 @@ std::shared_ptr<spirv::Module> ParseSpirvFile(const std::string& spirvFile)
     return LoadSPIRVDisassembly(spirvFile);
 }
 
-} // namespace tosa2spirv::SPIRVComparison
+} // namespace tfsc::SPIRVComparison
 
 int main(const int argc, char** argv)
 {
@@ -79,7 +79,7 @@ int main(const int argc, char** argv)
     const std::string lhsPath = parser.get("lhs");
     const std::string rhsPath = parser.get("rhs");
 
-    const auto lhsModule = tosa2spirv::SPIRVComparison::ParseSpirvFile(lhsPath);
+    const auto lhsModule = tfsc::SPIRVComparison::ParseSpirvFile(lhsPath);
 
     if (!lhsModule)
     {
@@ -95,13 +95,13 @@ int main(const int argc, char** argv)
             return EXIT_FAILURE;
         }
 
-        const auto binary = tosa2spirv::WriteToBinary(lhsModule);
+        const auto binary = tfsc::WriteToBinary(lhsModule);
         const auto disassembly = testutils::DisassembleSPIRV(binary);
         std::cout << disassembly << std::endl;
         return EXIT_SUCCESS;
     }
 
-    const auto rhsModule = tosa2spirv::SPIRVComparison::ParseSpirvFile(rhsPath);
+    const auto rhsModule = tfsc::SPIRVComparison::ParseSpirvFile(rhsPath);
 
     if (!lhsModule || !rhsModule)
     {

@@ -8,7 +8,8 @@
 #include <cstdint>
 #include <string>
 
-namespace tosa2spirv::spirv
+// tosa-for-spirv-codegen's shorthand namespace
+namespace tfsc::spirv
 {
 
 enum OperandType
@@ -21,9 +22,9 @@ enum OperandType
 };
 
 class Instruction;
-/// tosa2spirv's implementation of SPIR-V operand.
+/// tosa-for-spirv-codegen's implementation of SPIR-V operand.
 /// Operand is a typed union that can be either an uint32_t word, string or pointer to an Instruction
-/// Operands are the default return value for most tosa2spirv functions
+/// Operands are the default return value for most tosa-for-spirv-codegen functions
 class Operand
 {
     public:
@@ -92,4 +93,4 @@ class Operand
     };
 };
 
-} // namespace tosa2spirv::spirv
+} // namespace tfsc::spirv

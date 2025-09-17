@@ -7,7 +7,7 @@
 
 #include <algorithm>
 
-namespace tosa2spirv::spirv
+namespace tfsc::spirv
 {
 
 Operand Module::EmplaceInstruction(const spv::Op opCode, std::vector<Operand> operands)
@@ -43,4 +43,4 @@ Operand Module::EmplaceInstructionNonUnique(const spv::Op opCode, std::vector<Op
     return Operand{&(*m_SPIRVGraph.emplace(std::move(inst)))};
 }
 
-} // namespace tosa2spirv::spirv
+} // namespace tfsc::spirv

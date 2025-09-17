@@ -71,10 +71,10 @@ target_include_directories(spirv2tosaTool PRIVATE ${SERIALIZATION_LIB_SOURCE_PAT
 
 
 # Link libraries
-target_link_libraries(spirv2tosa PRIVATE tosa2spirv)
+target_link_libraries(spirv2tosa PRIVATE tosa_for_spirv_codegen)
 target_link_libraries(spirv2tosa PRIVATE utils)
 
-target_link_libraries(spirv2tosaTool PRIVATE tosa2spirv)
+target_link_libraries(spirv2tosaTool PRIVATE tosa_for_spirv_codegen)
 target_link_libraries(spirv2tosaTool PRIVATE utils)
 target_link_libraries(spirv2tosaTool PRIVATE spirv2tosa)
 

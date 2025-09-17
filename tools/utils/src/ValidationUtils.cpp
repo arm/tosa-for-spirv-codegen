@@ -8,7 +8,7 @@
 
 #include <ValidationUtils.hpp>
 
-using namespace tosa2spirv;
+using namespace tfsc;
 
 void CheckDataType(const spirv::Instruction* instr, tosa::DataType expectedDataType)
 {

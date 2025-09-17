@@ -7,11 +7,11 @@
 
 namespace spirv2tosa
 {
-using namespace tosa2spirv;
+using namespace tfsc;
 
 tosa::DataType GetDataTypeFromInstruction(const spirv::Instruction& typeInstruction)
 {
-    // Based on SPIRVDefinitions.cpp inverse of the function 'tosa2spirv::spirv::CreateDataType'
+    // Based on SPIRVDefinitions.cpp inverse of the function 'tfsc::spirv::CreateDataType'
     if (typeInstruction.GetOpCode() == spv::Op::OpTypeInt)
     {
         const auto bitWidth = typeInstruction.m_Operands[1].m_LiteralWord;

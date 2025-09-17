@@ -13,7 +13,7 @@
 
 constexpr uint32_t SPIRV_MAGIC = 0x07230203;
 
-std::shared_ptr<tosa2spirv::spirv::Module> LoadSPIRV(const std::string& filename)
+std::shared_ptr<tfsc::spirv::Module> LoadSPIRV(const std::string& filename)
 {
     std::ifstream file(filename, std::ios::binary);
     if (!file)
@@ -37,7 +37,7 @@ std::shared_ptr<tosa2spirv::spirv::Module> LoadSPIRV(const std::string& filename
     return LoadSPIRVDisassembly(filename);
 }
 
-std::shared_ptr<tosa2spirv::spirv::Module> LoadSPIRVAssembly(const std::string& filename)
+std::shared_ptr<tfsc::spirv::Module> LoadSPIRVAssembly(const std::string& filename)
 {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
     if (!file)
@@ -59,7 +59,7 @@ std::shared_ptr<tosa2spirv::spirv::Module> LoadSPIRVAssembly(const std::string& 
     return testutils::LoadSPIRVDisassembly(disassembly);
 }
 
-std::shared_ptr<tosa2spirv::spirv::Module> LoadSPIRVDisassembly(const std::string& filename)
+std::shared_ptr<tfsc::spirv::Module> LoadSPIRVDisassembly(const std::string& filename)
 {
     std::ifstream file(filename);
     if (!file)
@@ -74,7 +74,7 @@ std::shared_ptr<tosa2spirv::spirv::Module> LoadSPIRVDisassembly(const std::strin
     return testutils::LoadSPIRVDisassembly(disassembly);
 }
 
-std::shared_ptr<tosa2spirv::spirv::Module> LoadTOSAFile(const std::string& filename)
+std::shared_ptr<tfsc::spirv::Module> LoadTOSAFile(const std::string& filename)
 {
     using namespace tosa;
     TosaSerializationHandler handler;
@@ -104,12 +104,12 @@ std::shared_ptr<tosa2spirv::spirv::Module> LoadTOSAFile(const std::string& filen
     }
 
     // Initialize TosaSerializationParser with main block.
-    auto parser = tosa2spirv::parsers::TosaSerializationParser(mainBlock);
+    auto parser = tfsc::parsers::TosaSerializationParser(mainBlock);
     return parser.GenerateSPIRVModule("");
 }
 
 // Stolen from samples/2_decode_simple_graph_sample.cpp
-std::shared_ptr<tosa2spirv::spirv::Module> LoadVGFFile(const std::string& filename)
+std::shared_ptr<tfsc::spirv::Module> LoadVGFFile(const std::string& filename)
 {
     using namespace mlsdk;
 

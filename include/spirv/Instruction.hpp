@@ -11,9 +11,10 @@
 
 #include <vector>
 
-namespace tosa2spirv::spirv
+// tosa-for-spirv-codegen's shorthand namespace
+namespace tfsc::spirv
 {
-/// tosa2spirv's implementation of SPIR-V Instruction.
+/// tosa-for-spirv-codegen's implementation of SPIR-V Instruction.
 class Instruction
 {
     public:
@@ -61,4 +62,4 @@ struct InstructionComparator
     bool operator()(const Instruction& lhs, const Instruction& rhs) const noexcept;
 };
 
-} // namespace tosa2spirv::spirv
+} // namespace tfsc::spirv

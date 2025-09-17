@@ -791,7 +791,7 @@ class TestGenerator:
     def generate_parser_test_case(self, op, file):
         op_pascal_case_name = self.operator_name_to_pascal_case(op.name)
 
-        file.write("TEST(TOSA2SPIRV_PARSER, {})\n".format(op_pascal_case_name))
+        file.write("TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, {})\n".format(op_pascal_case_name))
         file.write("{\n")
         file.start_block()
 

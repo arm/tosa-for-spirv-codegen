@@ -4,7 +4,7 @@
 //
 
 #include <spirv/Module.hpp>
-#include <tosa2spirv.hpp>
+#include <TosaForSpirvCodegen.hpp>
 
 #include <vgf/encoder.hpp>
 #include <vgf/vulkan_helpers.generated.hpp>
@@ -14,7 +14,7 @@
 #include <numeric>
 #include <unordered_map>
 
-namespace tosa2spirv::vgfwriter
+namespace tfsc::vgfwriter
 {
 
 std::vector<int64_t> ExtractShapeFromTensor(const spirv::Instruction* tensorInstruction)
@@ -223,5 +223,5 @@ void WriteVGF(std::shared_ptr<spirv::Module>& module,
         vgf_file.close();
     }
 }
-// tosa2spirv::vgfwriter namespace
-} // namespace tosa2spirv::vgfwriter
+// tfsc::vgfwriter namespace
+} // namespace tfsc::vgfwriter

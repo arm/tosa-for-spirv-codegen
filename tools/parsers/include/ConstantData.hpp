@@ -10,7 +10,7 @@
 #include <variant>
 #include <vector>
 
-namespace tosa2spirv::parsers
+namespace tfsc::parsers
 {
 using ConstantData = std::variant<const std::vector<uint8_t>,
                                   const std::vector<int8_t>,
@@ -41,4 +41,4 @@ static std::vector<PointerPair> ConvertConstantDataToVoid(std::vector<ConstantDa
     return voidPointers;
 }
 
-} // namespace tosa2spirv::parsers
+} // namespace tfsc::parsers

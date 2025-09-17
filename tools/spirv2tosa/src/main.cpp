@@ -21,11 +21,11 @@
 #include <OperatorEnum.hpp>
 #include <TosaOperator.hpp>
 #include <spirv2tosa.hpp>
-#include <tosa2spirv.hpp>
+#include <TosaForSpirvCodegen.hpp>
 
 #include <tosa_serialization_handler.h>
 
-namespace tosa2spirv::spirv2tosatool
+namespace tfsc::spirv2tosatool
 {
 
 void Usage()
@@ -123,12 +123,12 @@ std::string GetTestDefinition(const spirv2tosa::TosaOperator op,
                               const std::string& testHash,
                               const std::string& testName)
 {
-    std::string testDefinition = "// TEST HASH " + testHash + "\nTEST(TOSA2SPIRV_OPERATOR, " + testName + ")\n{\n";
+    std::string testDefinition = "// TEST HASH " + testHash + "\nTEST(TOSA_FOR_SPIRV_CODEGEN_OPERATOR, " + testName + ")\n{\n";
     testDefinition += "// Operator Definition, separated for reuse in the test fixture\n" + operatorDefinition + "\n\n";
 
     testDefinition += "// Adding operator using Graph API\n"
-                      "std::shared_ptr<tosa2spirv::spirv::Module> module = "
-                      "tosa2spirv::CreateModule(tosa2spirv::TOSAVersion::v1_0);\n"
+                      "std::shared_ptr<tfsc::spirv::Module> module = "
+                      "tfsc::CreateModule(tfsc::TOSAVersion::v1_0);\n"
                       "Graph graph{module};\n\n";
     testDefinition += spirv2tosa::OperatorToGraphDefinition(op, "graph", "inputs", "outputs", "attributes");
 
@@ -238,13 +238,13 @@ int Tests(const int argc, char** argv, const std::ifstream& spirvFile, std::stri
     return 0;
 }
 
-} // namespace tosa2spirv::spirv2tosatool
+} // namespace tfsc::spirv2tosatool
 
 int main(const int argc, char** argv)
 {
     if (argc < 3)
     {
-        tosa2spirv::spirv2tosatool::Usage();
+        tfsc::spirv2tosatool::Usage();
         return 1;
     }
 
@@ -261,7 +261,7 @@ int main(const int argc, char** argv)
     int result = 1;
     if (strcmp(argv[2], "ops") == 0)
     {
-        result = tosa2spirv::spirv2tosatool::Ops(argc, argv, spirvFile);
+        result = tfsc::spirv2tosatool::Ops(argc, argv, spirvFile);
     }
     else if (strcmp(argv[2], "tests") == 0)
     {
@@ -269,18 +269,18 @@ int main(const int argc, char** argv)
                                  "// Copyright © 2025 Arm Ltd and Contributors. All rights reserved.\n"
                                  "// SPDX-License-Identifier: Apache-2.0\n"
                                  "//\n\n"
-                                 "// Generated automatically by Spirv2tosaTool for TOSA 1.0\n\n"
+                                 "// Generated automatically by spirv2tosaTool for TOSA 1.0\n\n"
                                  "#include <OpTestUtils.hpp>\n"
-                                 "#include <tosa2spirv.hpp>\n\n"
+                                 "#include <TosaForSpirvCodegen.hpp>\n\n"
                                  "#include <gtest/gtest.h>\n\n"
-                                 "using namespace tosa2spirv::tosa;\n"
+                                 "using namespace tfsc::tosa;\n"
                                  "using namespace testutils;\n"
                                  "\n";
-        result = tosa2spirv::spirv2tosatool::Tests(argc, argv, spirvFile, fileHeader);
+        result = tfsc::spirv2tosatool::Tests(argc, argv, spirvFile, fileHeader);
     }
     else if (strcmp(argv[2], "tosa") == 0)
     {
-        tosa2spirv::spirv2tosatool::Tosa(argc, argv, spirvFile);
+        tfsc::spirv2tosatool::Tosa(argc, argv, spirvFile);
     }
     else
     {

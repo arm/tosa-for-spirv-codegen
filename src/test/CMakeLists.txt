@@ -5,7 +5,7 @@
 
 enable_testing()
 
-add_executable(tosa2spirv_unittests
+add_executable(tosa_for_spirv_codegen_unittests
         GraphTests.cpp
         TensorTests.cpp
         operatorTests/AbsOperatorTest.cpp
@@ -77,18 +77,18 @@ add_executable(tosa2spirv_unittests
         OperandTests.cpp
         InstructionTests.cpp)
 
-target_include_directories(tosa2spirv_unittests PRIVATE
+target_include_directories(tosa_for_spirv_codegen_unittests PRIVATE
         $<BUILD_INTERFACE${GOOGLETEST_PATH}/include)
 
-target_include_directories(tosa2spirv_unittests PRIVATE
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/tosa2spirv/src/test>)
-target_include_directories(tosa2spirv_unittests PRIVATE
+target_include_directories(tosa_for_spirv_codegen_unittests PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/tosa-for-spirv-codegen/src/test>)
+target_include_directories(tosa_for_spirv_codegen_unittests PRIVATE
         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/external>)
-target_include_directories(tosa2spirv_unittests PRIVATE
+target_include_directories(tosa_for_spirv_codegen_unittests PRIVATE
         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/generator/include>)
 
-target_link_libraries(tosa2spirv_unittests GTest::gtest_main)
-target_link_libraries(tosa2spirv_unittests test_utils)
+target_link_libraries(tosa_for_spirv_codegen_unittests GTest::gtest_main)
+target_link_libraries(tosa_for_spirv_codegen_unittests test_utils)
 
 if (EXISTS ${GOOGLETEST_PATH})
     add_subdirectory(${GOOGLETEST_PATH} googletest EXCLUDE_FROM_ALL)
@@ -100,7 +100,7 @@ endif()
 # a different machine e.g. x86-64 then running the unit tests automatically wil result in failures.
 if(NOT ANDROID)
     include(GoogleTest)
-    gtest_discover_tests(tosa2spirv_unittests)
+    gtest_discover_tests(tosa_for_spirv_codegen_unittests)
 else()
     message(STATUS "Skipping gtest_discover_tests for Android cross-build")
 endif()

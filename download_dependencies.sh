@@ -48,7 +48,7 @@ function DownloadJson {
   scripts/clone_json.sh || exit 1
 }
 
-echo "*** Downloading tosa2spirv dependencies"
+echo "*** Downloading tfsc dependencies"
 mkdir -p external
 
 DownloadGoogleTests

@@ -13,8 +13,8 @@
 #include <gtest/gtest.h>
 
 using namespace tosa;
-using namespace tosa2spirv::parsers;
-TEST(TOSA2SPIRV_PARSER, Equal)
+using namespace tfsc::parsers;
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Equal)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
@@ -69,7 +69,7 @@ TEST(TOSA2SPIRV_PARSER, Equal)
                            {});
 }
 
-TEST(TOSA2SPIRV_PARSER, Greater)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Greater)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
@@ -124,7 +124,7 @@ TEST(TOSA2SPIRV_PARSER, Greater)
                            {});
 }
 
-TEST(TOSA2SPIRV_PARSER, GreaterEqual)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, GreaterEqual)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;

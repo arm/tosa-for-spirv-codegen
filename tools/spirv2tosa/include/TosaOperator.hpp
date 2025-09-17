@@ -29,7 +29,7 @@ enum class TosaInputType
 struct TosaInput
 {
     /// Tensor (shape/type) and optionally data (if TensorConstant type)
-    tosa2spirv::tosa::Attribute data;
+    tfsc::tosa::Attribute data;
     /// The type of the input tensor
     TosaInputType type;
     /// Tensor unique identifier number/name
@@ -40,7 +40,7 @@ struct TosaInput
     uint32_t bindingId;
 
     /// Utility constructor with default values, allowing users to construct an instance with just an attribute
-    TosaInput(tosa2spirv::tosa::Attribute attribute,
+    TosaInput(tfsc::tosa::Attribute attribute,
               TosaInputType type = TosaInputType::TensorConstant,
               uint32_t id = 0,
               uint8_t idx = 0,
@@ -52,8 +52,8 @@ struct TosaInput
         , bindingId(bindingId) {};
 
     /// Utility constructor with default values, allowing users to construct an instance out of a
-    /// tosa2spirv::tosa::Tensor
-    TosaInput(tosa2spirv::tosa::Tensor tensor,
+    /// tfsc::tosa::Tensor
+    TosaInput(tfsc::tosa::Tensor tensor,
               TosaInputType type = TosaInputType::Dynamic,
               uint32_t id = 0,
               uint8_t idx = 0,
@@ -64,39 +64,39 @@ struct TosaInput
         , idx(idx)
         , bindingId(bindingId) {};
 
-    tosa2spirv::tosa::Tensor GetTensor() const { return data.GetTensor(); };
-    tosa2spirv::tosa::Attribute GetAttribute() const { return data; };
+    tfsc::tosa::Tensor GetTensor() const { return data.GetTensor(); };
+    tfsc::tosa::Attribute GetAttribute() const { return data; };
 };
 
 /// Structure defining an output from a TosaOperator structure
 struct TosaOutput
 {
     /// Tensor shape/type of the output
-    tosa2spirv::tosa::Tensor tensor;
+    tfsc::tosa::Tensor tensor;
     /// Output unique identifier number
     uint32_t id;
     /// Output subidentifier for tensors with the same ID, used in multiple output operators
     uint8_t idx;
 
-    TosaOutput(tosa2spirv::tosa::Tensor tensor, uint32_t id = 0, uint8_t idx = 0)
+    TosaOutput(tfsc::tosa::Tensor tensor, uint32_t id = 0, uint8_t idx = 0)
         : tensor(tensor)
         , id(id)
         , idx(idx) {};
 
-    tosa2spirv::tosa::Tensor GetTensor() const { return tensor; };
+    tfsc::tosa::Tensor GetTensor() const { return tensor; };
 };
 
 /// TOSA Operator Definition structure, collection of data describing a single TOSA Operator
 struct TosaOperator
 {
     /// The type of operator
-    tosa2spirv::tosa::OperatorEnum op;
+    tfsc::tosa::OperatorEnum op;
     /// Input tensors
     std::vector<TosaInput> inputs;
     /// Output tensors
     std::vector<TosaOutput> outputs;
     /// Additional attributes for the given operator
-    std::vector<tosa2spirv::tosa::Attribute> attributes;
+    std::vector<tfsc::tosa::Attribute> attributes;
 };
 
 bool operator==(const TosaOperator& lhs, const TosaOperator& rhs);

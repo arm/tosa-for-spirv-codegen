@@ -8,7 +8,7 @@ enable_testing()
 file(GLOB_RECURSE TEST_SRCS_CORE CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/test/*.cpp)
 file(GLOB_RECURSE TEST_SRCS_OPERATOR CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/test/operatorTests/*.cpp)
 file(GLOB_RECURSE UTILS CONFIGURE_DEPENDS ${TOOLS_PATH}/utils/src/test/*.cpp)
-file(GLOB_RECURSE COMPARISON CONFIGURE_DEPENDS ${TOOLS_PATH}/ModelComparisonTool/src/test/*.cpp)
+file(GLOB_RECURSE COMPARISON CONFIGURE_DEPENDS ${TOOLS_PATH}/model-comparison/src/test/*.cpp)
 
 set(UNITTEST_SRCS ${TEST_SRCS_CORE} ${TEST_SRCS_OPERATOR} ${UTILS} ${COMPARISON})
 
@@ -34,12 +34,12 @@ target_include_directories(tosa_for_spirv_tests PRIVATE
   ${CMAKE_SOURCE_DIR}/src
   ${TOOLS_PATH}/utils/include
   ${TOOLS_PATH}/utils/src
-  ${TOOLS_PATH}/ModelComparisonTool/src)
+  ${TOOLS_PATH}/model-comparison/src)
 
 add_subdirectory(${GOOGLETEST_PATH} ${GOOGLETEST_PATH}/build)
 
 target_link_libraries(tosa_for_spirv_tests PRIVATE
-  tosa2spirv
+  tosa_for_spirv_codegen
   module_comparator
   utils
   GTest::gtest_main)
@@ -59,7 +59,7 @@ if (BUILD_TOSA_SERIALIZATION_PARSER)
   target_include_directories(tosa_for_spirv_tests PRIVATE
     ${TOOLS_PATH}/parsers/include
     ${TOOLS_PATH}/parsers/src
-    ${TOOLS_PATH}/ModelComparisonTool/include
+    ${TOOLS_PATH}/model-comparison/include
     ${SERIALIZATION_LIB_SOURCE_PATH}/include
     ${SERIALIZATION_LIB_SOURCE_PATH}/third_party/half/include
     ${FLATBUFFERS_SOURCE_PATH}/include)

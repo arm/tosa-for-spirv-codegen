@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <string>
 
-namespace tosa2spirv::spirv
+namespace tfsc::spirv
 {
 
 uint32_t Operand::WordSize() const
@@ -166,4 +166,4 @@ Operand::~Operand()
     }
 }
 
-} // namespace tosa2spirv::spirv
+} // namespace tfsc::spirv

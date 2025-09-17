@@ -8,7 +8,7 @@
 #include <array>
 #include <stdexcept>
 
-namespace tosa2spirv::tosa
+namespace tfsc::tosa
 {
 
 // See tosa2spirv/python/source_generator.py and README
@@ -530,4 +530,4 @@ TOSAInstructions GetTOSAInstructions(const OperatorEnum operatorType)
     }
 }
 
-} // namespace tosa2spirv::tosa
+} // namespace tfsc::tosa

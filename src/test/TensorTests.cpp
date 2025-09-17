@@ -5,15 +5,15 @@
 
 #include <AssemblyUtils.hpp>
 #include <Graph.hpp>
-#include <tosa2spirv.hpp>
+#include <TosaForSpirvCodegen.hpp>
 
 #include <AssemblyUtils.hpp>
 
 #include <gtest/gtest.h>
 
-TEST(TOSA2SPIRV, EmptyShapeInputs)
+TEST(TOSA_FOR_SPIRV_CODEGEN, EmptyShapeInputs)
 {
-    using namespace tosa2spirv::tosa;
+    using namespace tfsc::tosa;
     std::vector<unsigned int> shape{};
     auto datatype = DataType::int32_t;
     auto tensor = Tensor(datatype, shape);
@@ -42,10 +42,10 @@ TEST(TOSA2SPIRV, EmptyShapeInputs)
     EXPECT_EQ(input.GetTensorShape(), expectedShape);
 }
 
-TEST(TOSA2SPIRV, FloatingPointAttributes)
+TEST(TOSA_FOR_SPIRV_CODEGEN, FloatingPointAttributes)
 {
     // Taken from modelzoo_deit_base_fp32_layer_000_conv_2d
-    using namespace tosa2spirv::tosa;
+    using namespace tfsc::tosa;
     auto floatAttr = Attribute(std::vector<float>{3.14f}, DataType::float32_t);
     auto data = floatAttr.GetData();
 
@@ -55,7 +55,7 @@ TEST(TOSA2SPIRV, FloatingPointAttributes)
     // Expect same value up to first 3 decimal places
     EXPECT_NEAR(actual, 3.14f, 0.001f);
 
-    auto module = CreateModule(tosa2spirv::TOSAVersion{});
+    auto module = CreateModule(tfsc::TOSAVersion{});
     auto graph = Graph{module};
 
     auto input = graph.AddInput(Tensor(DataType::float32_t, std::vector<unsigned int>{1, 224, 224, 3}), 0);
@@ -86,7 +86,7 @@ TEST(TOSA2SPIRV, FloatingPointAttributes)
     // Add output in place
     graph.AddOutput(res, 1);
     graph.FinalizeGraph();
-    auto binary = tosa2spirv::WriteToBinary(module);
+    auto binary = tfsc::WriteToBinary(module);
     // Check SPIR-V is valid
     std::string outputStr(testutils::DisassembleSPIRV(binary, true));
     EXPECT_FALSE(outputStr.empty());

@@ -6,11 +6,11 @@
 #include <TosaSerializationParser.hpp>
 #include <ParserUtils.hpp>
 
-namespace tosa2spirv::parsers
+namespace tfsc::parsers
 {
 
 using namespace ::tosa;
-using namespace tosa2spirv::tosa;
+using namespace tfsc::tosa;
 
 TosaSerializationParser::TosaSerializationParser(TosaSerializationHandler* handler, const std::string& blockName)
 {
@@ -377,7 +377,7 @@ void TosaSerializationParser::ParseOperator(TosaSerializationOperator* op, Graph
         }
     };
 
-    std::vector<tosa2spirv::tosa::Attribute> attributes;
+    std::vector<tfsc::tosa::Attribute> attributes;
     auto attr = op->GetAttributeType();
     switch (attr)
     {
@@ -686,4 +686,4 @@ void TosaSerializationParser::ParseOperator(TosaSerializationOperator* op, Graph
     }
 }
 
-}  // namespace tosa2spirv::parsers
+}  // namespace tfsc::parsers

@@ -14,8 +14,8 @@
 
 std::string OpToString(const spv::Op op);
 TOSAInstructions GetTosaOpEnum(const std::string &instruction);
-tosa2spirv::tosa::OperatorEnum GetOperatorEnum(TOSAInstructions instructionType);
+tfsc::tosa::OperatorEnum GetOperatorEnum(TOSAInstructions instructionType);
 spv::Capability GetCapabilityEnum(const std::string &instruction);
 spv::Op GetOpEnum(const std::string &instruction);
 unsigned int GetResultIdPosition(spv::Op op);
-unsigned int GetResId(const tosa2spirv::spirv::Instruction &instruction);
+unsigned int GetResId(const tfsc::spirv::Instruction &instruction);

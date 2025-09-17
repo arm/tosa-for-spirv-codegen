@@ -13,7 +13,7 @@
 
 using namespace tosa;
 
-namespace tosa2spirv::generator
+namespace tfsc::generator
 {
 
 void LoadGraph(TosaSerializationHandler& handler,
@@ -21,11 +21,11 @@ void LoadGraph(TosaSerializationHandler& handler,
                const std::string& jsonFile,
                const std::string& schemaFile);
 
-} // namespace tosa2spirv::generator
+} // namespace tfsc::generator
 
 int main(const int argc, char** argv)
 {
-    using namespace tosa2spirv::generator;
+    using namespace tfsc::generator;
     std::string tosaFile;
     std::string jsonFile;
     std::string schemaFile;
@@ -34,7 +34,7 @@ int main(const int argc, char** argv)
     // Parse options using argparse
     try
     {
-        argparse::ArgumentParser parser("tosa2spirvGenerator");
+        argparse::ArgumentParser parser("tfsc-generator");
         parser.add_argument("-t", "--tosa-file")
             .help("TOSA Flatbuffers input file. Supports .tosa extension.")
             .default_value(std::string{""});
@@ -106,7 +106,7 @@ int main(const int argc, char** argv)
     }
 
     // Initialize TosaSerializationParser with main block.
-    auto parser = tosa2spirv::parsers::TosaSerializationParser(mainBlock);
+    auto parser = tfsc::parsers::TosaSerializationParser(mainBlock);
 
     auto module = parser.GenerateSPIRVModule("main");
 
@@ -131,8 +131,8 @@ int main(const int argc, char** argv)
         const auto vgfPosition = outputFile.find_last_of(".vgf");
         const std::string modelName = outputFile.substr(0, vgfPosition - 3);
 
-        tosa2spirv::vgfwriter::WriteVGF(module,
-                                        tosa2spirv::parsers::ConvertConstantDataToVoid(parser.GetExternalConstants()),
+        tfsc::vgfwriter::WriteVGF(module,
+                                        tfsc::parsers::ConvertConstantDataToVoid(parser.GetExternalConstants()),
                                         modelName,
                                         path,
                                         outputFile);
@@ -141,7 +141,7 @@ int main(const int argc, char** argv)
     return EXIT_SUCCESS;
 }
 
-namespace tosa2spirv::generator
+namespace tfsc::generator
 {
 
 void LoadGraph(TosaSerializationHandler& handler,
@@ -185,4 +185,4 @@ void LoadGraph(TosaSerializationHandler& handler,
     }
 }
 
-} // tosa2spirv::generator
+} // tfsc::generator

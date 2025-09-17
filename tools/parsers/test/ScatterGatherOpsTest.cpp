@@ -13,8 +13,8 @@
 #include <gtest/gtest.h>
 
 using namespace tosa;
-using namespace tosa2spirv::parsers;
-TEST(TOSA2SPIRV_PARSER, Gather)
+using namespace tfsc::parsers;
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Gather)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
@@ -71,7 +71,7 @@ TEST(TOSA2SPIRV_PARSER, Gather)
                            {});
 }
 
-TEST(TOSA2SPIRV_PARSER, Scatter)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Scatter)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;

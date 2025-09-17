@@ -6,7 +6,7 @@
 #include <Instruction.hpp>
 #include <ModuleComparator.hpp>
 #include <StringUtils.hpp>
-#include <tosa2spirv.hpp>
+#include <TosaForSpirvCodegen.hpp>
 
 #include <map>
 #include <optional>
@@ -15,7 +15,7 @@
 
 namespace testutils
 {
-using namespace tosa2spirv::spirv;
+using namespace tfsc::spirv;
 
 struct InstructionPair
 {

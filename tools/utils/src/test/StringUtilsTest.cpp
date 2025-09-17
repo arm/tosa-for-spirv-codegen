@@ -7,7 +7,7 @@
 #include <StringUtils.hpp>
 
 #include <Graph.hpp>
-#include <tosa2spirv.hpp>
+#include <TosaForSpirvCodegen.hpp>
 
 #include <gtest/gtest.h>
 #include <spirvmodels/Conv2d.hpp>

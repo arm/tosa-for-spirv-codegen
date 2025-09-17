@@ -6,10 +6,10 @@
 #include <Module.hpp>
 #include <gtest/gtest.h>
 
-namespace tosa2spirv::spirv
+namespace tfsc::spirv
 {
 
-TEST(TOSA2SPIRV, Instruction)
+TEST(TOSA_FOR_SPIRV_CODEGEN, Instruction)
 {
     // Test that we can create an Instruction object and test its methods.
     Operand operand1(spv::Capability::CapabilityVulkanMemoryModel);
@@ -181,4 +181,4 @@ TEST(ModuleTests, EmplaceInstructionNonUniqueCreatesUniqueInstructions)
     EXPECT_TRUE(hasDifferentResId);
 }
 
-} // namespace tosa2spirv::spirv
+} // namespace tfsc::spirv

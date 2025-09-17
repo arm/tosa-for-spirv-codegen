@@ -14,24 +14,24 @@ using namespace spirv2tosa;
 TEST(Spirv2TosaTest, TosaOperatorCompareTest)
 {
     TosaOperator op1{
-        tosa2spirv::tosa::OperatorEnum::Equal,
-        {{{tosa2spirv::tosa::DataType::uint32_t, {2, 2}}}, {{tosa2spirv::tosa::DataType::uint32_t, {2, 2}}}},
-        {{{tosa2spirv::tosa::DataType::uint32_t, {2, 2}}}},
+        tfsc::tosa::OperatorEnum::Equal,
+        {{{tfsc::tosa::DataType::uint32_t, {2, 2}}}, {{tfsc::tosa::DataType::uint32_t, {2, 2}}}},
+        {{{tfsc::tosa::DataType::uint32_t, {2, 2}}}},
         {}};
     TosaOperator op2{
-        tosa2spirv::tosa::OperatorEnum::Equal,
-        {{{tosa2spirv::tosa::DataType::uint32_t, {2, 2}}}, {{tosa2spirv::tosa::DataType::uint32_t, {2, 2}}}},
-        {{{tosa2spirv::tosa::DataType::uint32_t, {2, 2}}}},
+        tfsc::tosa::OperatorEnum::Equal,
+        {{{tfsc::tosa::DataType::uint32_t, {2, 2}}}, {{tfsc::tosa::DataType::uint32_t, {2, 2}}}},
+        {{{tfsc::tosa::DataType::uint32_t, {2, 2}}}},
         {}};
 
     EXPECT_TRUE(op1 == op2);
     EXPECT_FALSE(op1 != op2);
 
-    op2.op = tosa2spirv::tosa::OperatorEnum::GreaterEqual;
+    op2.op = tfsc::tosa::OperatorEnum::GreaterEqual;
     EXPECT_FALSE(op1 == op2);
     EXPECT_TRUE(op1 != op2);
 
-    op2.op = tosa2spirv::tosa::OperatorEnum::Equal;
+    op2.op = tfsc::tosa::OperatorEnum::Equal;
     op2.inputs[0].type = TosaInputType::GraphConstant;
     EXPECT_FALSE(op1 == op2);
     EXPECT_TRUE(op1 != op2);
@@ -65,7 +65,7 @@ TEST(Spirv2TosaTest, TosaOperatorCompareTest)
     EXPECT_TRUE(op1 == op2);
     EXPECT_FALSE(op1 != op2);
 
-    op2.attributes.push_back(tosa2spirv::tosa::Attribute{{1, 2}, tosa2spirv::tosa::DataType::uint32_t, {2}});
+    op2.attributes.push_back(tfsc::tosa::Attribute{{1, 2}, tfsc::tosa::DataType::uint32_t, {2}});
     EXPECT_FALSE(op1 == op2);
     EXPECT_TRUE(op1 != op2);
 }
@@ -73,11 +73,11 @@ TEST(Spirv2TosaTest, TosaOperatorCompareTest)
 TEST(Spirv2TosaTest, TosaInputCompareTest)
 {
     // Attribute-based TensorConstant inputs
-    TosaInput in1{tosa2spirv::tosa::Attribute{{1, 1}, tosa2spirv::tosa::DataType::uint32_t, {2}}};
-    TosaInput in2{tosa2spirv::tosa::Attribute{{1, 1}, tosa2spirv::tosa::DataType::uint32_t, {2}}};
-    TosaInput in3{tosa2spirv::tosa::Attribute{{2, 1}, tosa2spirv::tosa::DataType::uint32_t, {2}}};
-    TosaInput in4{tosa2spirv::tosa::Attribute{{1, 1, 1}, tosa2spirv::tosa::DataType::uint32_t, {3}}};
-    TosaInput in5{tosa2spirv::tosa::Attribute{{1}, tosa2spirv::tosa::DataType::uint32_t, {1}}};
+    TosaInput in1{tfsc::tosa::Attribute{{1, 1}, tfsc::tosa::DataType::uint32_t, {2}}};
+    TosaInput in2{tfsc::tosa::Attribute{{1, 1}, tfsc::tosa::DataType::uint32_t, {2}}};
+    TosaInput in3{tfsc::tosa::Attribute{{2, 1}, tfsc::tosa::DataType::uint32_t, {2}}};
+    TosaInput in4{tfsc::tosa::Attribute{{1, 1, 1}, tfsc::tosa::DataType::uint32_t, {3}}};
+    TosaInput in5{tfsc::tosa::Attribute{{1}, tfsc::tosa::DataType::uint32_t, {1}}};
 
     EXPECT_TRUE(in1 == in2);
     EXPECT_TRUE(in1 <= in2);
@@ -101,16 +101,16 @@ TEST(Spirv2TosaTest, TosaInputCompareTest)
     EXPECT_FALSE(in3 >= in4);
 
     // Tensor-based Dynamic/GraphConstant inputs
-    TosaInput in6{tosa2spirv::tosa::Tensor{tosa2spirv::tosa::DataType::uint32_t, {2}}};
-    TosaInput in7{tosa2spirv::tosa::Tensor{tosa2spirv::tosa::DataType::uint32_t, {3}}};
-    TosaInput in8{tosa2spirv::tosa::Tensor{tosa2spirv::tosa::DataType::uint32_t, {2, 2}}};
-    TosaInput in9{tosa2spirv::tosa::Tensor{tosa2spirv::tosa::DataType::uint32_t, {2}}, TosaInputType::GraphConstant};
-    TosaInput in10{tosa2spirv::tosa::Tensor{tosa2spirv::tosa::DataType::uint32_t, {2}},
+    TosaInput in6{tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, {2}}};
+    TosaInput in7{tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, {3}}};
+    TosaInput in8{tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, {2, 2}}};
+    TosaInput in9{tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, {2}}, TosaInputType::GraphConstant};
+    TosaInput in10{tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, {2}},
                    TosaInputType::GraphConstant,
                    1,
                    0,
                    0};
-    TosaInput in11{tosa2spirv::tosa::Tensor{tosa2spirv::tosa::DataType::uint32_t, {2}},
+    TosaInput in11{tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, {2}},
                    TosaInputType::Dynamic,
                    0,
                    0,
@@ -141,14 +141,14 @@ TEST(Spirv2TosaTest, TosaInputCompareTest)
 
 TEST(Spirv2TosaTest, TosaOutputCompareTest)
 {
-    TosaOutput out1{tosa2spirv::tosa::Tensor{tosa2spirv::tosa::DataType::uint32_t, {1, 1}}};
-    TosaOutput out2{tosa2spirv::tosa::Tensor{tosa2spirv::tosa::DataType::uint32_t, {1, 1}}};
-    TosaOutput out3{tosa2spirv::tosa::Tensor{tosa2spirv::tosa::DataType::uint32_t, {1, 1}}, 1, 0};
-    TosaOutput out4{tosa2spirv::tosa::Tensor{tosa2spirv::tosa::DataType::uint32_t, {1, 1}}, 1, 1};
-    TosaOutput out5{tosa2spirv::tosa::Tensor{tosa2spirv::tosa::DataType::uint32_t, {1, 1, 1}}};
-    TosaOutput out6{tosa2spirv::tosa::Tensor{tosa2spirv::tosa::DataType::uint32_t, {1}}};
-    TosaOutput out7{tosa2spirv::tosa::Tensor{tosa2spirv::tosa::DataType::uint32_t, {1, 2}}};
-    TosaOutput out8{tosa2spirv::tosa::Tensor{tosa2spirv::tosa::DataType::uint16_t, {1, 1}}};
+    TosaOutput out1{tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, {1, 1}}};
+    TosaOutput out2{tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, {1, 1}}};
+    TosaOutput out3{tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, {1, 1}}, 1, 0};
+    TosaOutput out4{tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, {1, 1}}, 1, 1};
+    TosaOutput out5{tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, {1, 1, 1}}};
+    TosaOutput out6{tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, {1}}};
+    TosaOutput out7{tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, {1, 2}}};
+    TosaOutput out8{tfsc::tosa::Tensor{tfsc::tosa::DataType::uint16_t, {1, 1}}};
 
     EXPECT_TRUE(out1 == out2);
     EXPECT_FALSE(out1 != out2);
@@ -196,19 +196,19 @@ TEST(Spirv2TosaTest, TosaOutputCompareTest)
 TEST(Spirv2TosaTest, DefaultOpComparatorTest)
 {
     TosaOperator op1{
-        tosa2spirv::tosa::OperatorEnum::Equal,
-        {{{tosa2spirv::tosa::DataType::uint32_t, {2, 2}}}, {{tosa2spirv::tosa::DataType::uint32_t, {2, 2}}}},
-        {{{tosa2spirv::tosa::DataType::uint32_t, {2, 2}}}},
+        tfsc::tosa::OperatorEnum::Equal,
+        {{{tfsc::tosa::DataType::uint32_t, {2, 2}}}, {{tfsc::tosa::DataType::uint32_t, {2, 2}}}},
+        {{{tfsc::tosa::DataType::uint32_t, {2, 2}}}},
         {}};
     TosaOperator op2{
-        tosa2spirv::tosa::OperatorEnum::Add,
-        {{{tosa2spirv::tosa::DataType::uint32_t, {2, 2}}}, {{tosa2spirv::tosa::DataType::uint32_t, {2, 2}}}},
-        {{{tosa2spirv::tosa::DataType::uint32_t, {2, 2}}}},
+        tfsc::tosa::OperatorEnum::Add,
+        {{{tfsc::tosa::DataType::uint32_t, {2, 2}}}, {{tfsc::tosa::DataType::uint32_t, {2, 2}}}},
+        {{{tfsc::tosa::DataType::uint32_t, {2, 2}}}},
         {}};
-    TosaOperator op3{tosa2spirv::tosa::OperatorEnum::Add,
-                     {{{tosa2spirv::tosa::DataType::uint32_t, {2, 2}}, TosaInputType::GraphConstant},
-                      {{tosa2spirv::tosa::DataType::uint32_t, {2, 2}}}},
-                     {{{tosa2spirv::tosa::DataType::uint32_t, {2, 2}}}},
+    TosaOperator op3{tfsc::tosa::OperatorEnum::Add,
+                     {{{tfsc::tosa::DataType::uint32_t, {2, 2}}, TosaInputType::GraphConstant},
+                      {{tfsc::tosa::DataType::uint32_t, {2, 2}}}},
+                     {{{tfsc::tosa::DataType::uint32_t, {2, 2}}}},
                      {}};
 
     // Verifying that defaultOpComparator has the desired properties of std::less
@@ -231,10 +231,10 @@ TEST(Spirv2TosaTest, DefaultOpComparatorTest)
 
 TEST(Spirv2TosaTest, OperatorToStringTest)
 {
-    TosaOperator op{tosa2spirv::tosa::OperatorEnum::Equal,
-                    {{{tosa2spirv::tosa::DataType::uint32_t, {2, 2}}},
-                     {{tosa2spirv::tosa::DataType::uint32_t, {2, 2}}, TosaInputType::GraphConstant}},
-                    {{{tosa2spirv::tosa::DataType::uint32_t, {2, 2}}}},
+    TosaOperator op{tfsc::tosa::OperatorEnum::Equal,
+                    {{{tfsc::tosa::DataType::uint32_t, {2, 2}}},
+                     {{tfsc::tosa::DataType::uint32_t, {2, 2}}, TosaInputType::GraphConstant}},
+                    {{{tfsc::tosa::DataType::uint32_t, {2, 2}}}},
                     {}};
     std::string expected =
         "const OperatorEnum op = OperatorEnum::Equal;\n"
@@ -247,10 +247,10 @@ TEST(Spirv2TosaTest, OperatorToStringTest)
 
 TEST(Spirv2TosaTest, OperatorToGraphDefinitionTest)
 {
-    TosaOperator op{tosa2spirv::tosa::OperatorEnum::Equal,
-                    {{{tosa2spirv::tosa::DataType::uint32_t, {2, 2}}},
-                     {{tosa2spirv::tosa::DataType::uint32_t, {2, 2}}, TosaInputType::GraphConstant}},
-                    {{{tosa2spirv::tosa::DataType::uint32_t, {2, 2}}}},
+    TosaOperator op{tfsc::tosa::OperatorEnum::Equal,
+                    {{{tfsc::tosa::DataType::uint32_t, {2, 2}}},
+                     {{tfsc::tosa::DataType::uint32_t, {2, 2}}, TosaInputType::GraphConstant}},
+                    {{{tfsc::tosa::DataType::uint32_t, {2, 2}}}},
                     {}};
     std::string expected = "const auto& input1 = graph.AddInput(Tensor{DataType::uint32_t, {2, 2}}, 0);\n"
                            "const auto& input2 = graph.AddGraphConstant(Tensor{DataType::uint32_t, {2, 2}});\n"

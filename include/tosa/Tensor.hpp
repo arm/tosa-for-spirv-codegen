@@ -11,14 +11,14 @@
 #include <string>
 #include <vector>
 
-namespace tosa2spirv::spirv
+namespace tfsc::spirv
 {
 class Instruction;
 }
 
-namespace tosa2spirv::tosa
+namespace tfsc::tosa
 {
-/// Most state in tosa2spirv is represented as SPIRV instructions and operands
+/// Most state in tosa_for_spirv_codegen is represented as SPIRV instructions and operands
 /// ResIds are pointers to the SPIRV instructions representing the inputs, outputs, operators and constants
 using ResId = const spirv::Instruction*;
 
@@ -62,7 +62,7 @@ inline std::string GetDataTypeName(DataType type)
     return names[static_cast<size_t>(type)];
 }
 
-/// tosa2spirv's implementation of TOSA tensor.
+/// tosa_for_spirv_codegen's implementation of TOSA tensor.
 class Tensor
 {
     public:
@@ -226,4 +226,4 @@ template <> constexpr DataType GetDataType<uint8_t>() { return DataType::uint8_t
 template <> constexpr DataType GetDataType<float>() { return DataType::float32_t; }
 template <> constexpr DataType GetDataType<bool>() { return DataType::bool_t; }
 
-} // namespace tosa2spirv::tosa
+} // namespace tfsc::tosa

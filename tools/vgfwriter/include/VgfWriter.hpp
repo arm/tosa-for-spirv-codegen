@@ -5,11 +5,11 @@
 
 #pragma once
 
-#include <tosa2spirv.hpp>
+#include <TosaForSpirvCodegen.hpp>
 
 #include <memory>
 
-namespace tosa2spirv::vgfwriter
+namespace tfsc::vgfwriter
 {
 
 /// Write a given SPIR-V Module along with its Constants out as a .vgf (Vulkan Graph Format) file.
@@ -24,4 +24,4 @@ void WriteVGF(std::shared_ptr<spirv::Module>& module,
               const std::string& path,
               const std::string& filename);
 
-} // namespace tosa2spirv::vgfwriter
+} // namespace tfsc::vgfwriter

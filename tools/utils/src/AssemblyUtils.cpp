@@ -67,8 +67,8 @@ std::string DisassembleSPIRV(const std::vector<uint32_t>& binary, bool runValida
     return humanReadableSpirV;
 }
 
-using tosa2spirv::spirv::Module;
-using tosa2spirv::spirv::Operand;
+using tfsc::spirv::Module;
+using tfsc::spirv::Operand;
 using ResIdMap = std::unordered_map<std::string, Operand>;
 
 std::vector<Operand> ParseOperand(const std::string& token, ResIdMap& resIdMap)
@@ -270,7 +270,7 @@ void ParseSpirvTextImpl(const std::string& text, Module& module, ResIdMap& resId
         {
             // ResId position needs to be specified
             unsigned int pos = GetResultIdPosition(opcode);
-            operands.insert(operands.begin() + pos, tosa2spirv::spirv::RESID);
+            operands.insert(operands.begin() + pos, tfsc::spirv::RESID);
         }
 
         Operand op;

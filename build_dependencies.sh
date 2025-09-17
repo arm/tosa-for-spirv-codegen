@@ -71,7 +71,7 @@ function CleanPreviouslyBuiltDependencies {
     rm -rf ${EXTERNAL_DIR}/vgf_encoder/build
 }
 
-echo "*** Building tosa2spirv dependencies."
+echo "*** Building tfsc dependencies."
 
 CleanPreviouslyBuiltDependencies
 BuildSpirvTools

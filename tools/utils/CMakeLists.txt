@@ -21,7 +21,7 @@ target_include_directories(utils PUBLIC ${SPIRV_HEADERS_SOURCE_PATH}/include)
 target_include_directories(utils PUBLIC ${SPIRV_HEADERS_SOURCE_PATH})
 target_include_directories(utils PUBLIC ${GOOGLETEST_PATH}/googletest/include)
 
-target_link_libraries(utils PUBLIC tosa2spirv)
+target_link_libraries(utils PUBLIC tosa_for_spirv_codegen)
 
 # Find symbols for spvtools::SpirvTools::IsValid() etc.
 set(SPIRV_TOOLS_LIBRARY libSPIRV-Tools.a)

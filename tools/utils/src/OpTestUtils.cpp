@@ -53,7 +53,7 @@ void CheckModule(const std::shared_ptr<spirv::Module>& module,
                  const std::vector<tosa::Attribute>& attributes)
 {
     // Validating Module SPIR-V
-    const auto binary = tosa2spirv::WriteToBinary(module);
+    const auto binary = tfsc::WriteToBinary(module);
     EXPECT_FALSE(testutils::DisassembleSPIRV(binary, true) == "");
 
     // Validating module content

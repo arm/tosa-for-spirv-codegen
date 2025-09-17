@@ -9,7 +9,7 @@
 
 namespace testutils
 {
-using namespace tosa2spirv::spirv;
+using namespace tfsc::spirv;
 
 void RecursiveTraverse(const Instruction *instruction, AdjacencyMatrix &adjMatrix, unsigned int &index)
 {

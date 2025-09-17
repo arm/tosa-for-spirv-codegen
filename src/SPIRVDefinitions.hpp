@@ -7,7 +7,7 @@
 #include <Module.hpp>
 #include <Tensor.hpp>
 
-namespace tosa2spirv::spirv
+namespace tfsc::spirv
 {
 
 // Definitions of SPIR-V instructions used to make the TOSA graph
@@ -21,4 +21,4 @@ Operand CreateConstantCompositeTyped(const std::vector<uint32_t>& array, const O
 Operand CreateTensor(const tosa::Tensor& tensor, Module& module);
 Operand CreateAttribute(const tosa::Attribute& attribute, Module& module);
 
-} // namespace tosa2spirv::spirv
+} // namespace tfsc::spirv

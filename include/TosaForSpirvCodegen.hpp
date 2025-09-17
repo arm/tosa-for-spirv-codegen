@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 
-namespace tosa2spirv
+namespace tfsc
 {
 
 namespace spirv
@@ -35,4 +35,4 @@ std::shared_ptr<spirv::Module> CreateModule(TOSAVersion version);
 /// @return uint32_t binary spirv vector
 std::vector<uint32_t> WriteToBinary(const std::shared_ptr<spirv::Module>& module);
 
-} // namespace tosa2spirv
+} // namespace tfsc

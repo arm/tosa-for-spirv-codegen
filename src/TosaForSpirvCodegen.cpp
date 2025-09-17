@@ -6,19 +6,19 @@
 #include <Module.hpp>
 #include <algorithm>
 #include <iostream>
-#include <tosa2spirv.hpp>
+#include <TosaForSpirvCodegen.hpp>
 
 #include <functional>
 #include <memory>
 #include <ostream>
 #include <unordered_set>
 
-namespace tosa2spirv::spirv
+namespace tfsc::spirv
 {
 class Module;
 }
 
-namespace tosa2spirv
+namespace tfsc
 {
 using namespace spv;
 using namespace spirv;
@@ -345,4 +345,4 @@ constexpr int32_t GetMinorVersion()
             break;
     }
 }
-} // namespace tosa2spirv
+} // namespace tfsc

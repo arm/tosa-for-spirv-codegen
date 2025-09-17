@@ -9,8 +9,8 @@
 #include <gtest/gtest.h>
 
 using namespace ::tosa;
-using namespace tosa2spirv::parsers;
-using namespace tosa2spirv::tosa;
+using namespace tfsc::parsers;
+using namespace tfsc::tosa;
 
 TEST(ConvertToUint32, Uint8Type)
 {

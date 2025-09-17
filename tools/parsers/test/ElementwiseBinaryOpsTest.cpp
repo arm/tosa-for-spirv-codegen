@@ -13,8 +13,8 @@
 #include <gtest/gtest.h>
 
 using namespace tosa;
-using namespace tosa2spirv::parsers;
-TEST(TOSA2SPIRV_PARSER, Add)
+using namespace tfsc::parsers;
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Add)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
@@ -69,7 +69,7 @@ TEST(TOSA2SPIRV_PARSER, Add)
                            {});
 }
 
-TEST(TOSA2SPIRV_PARSER, ArithmeticRightShift)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, ArithmeticRightShift)
 {
     bool round = true;
     // Create Attribute
@@ -128,7 +128,7 @@ TEST(TOSA2SPIRV_PARSER, ArithmeticRightShift)
                            {{{1}, DataType::bool_t, {1}}});
 }
 
-TEST(TOSA2SPIRV_PARSER, BitwiseAnd)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, BitwiseAnd)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
@@ -183,7 +183,7 @@ TEST(TOSA2SPIRV_PARSER, BitwiseAnd)
                            {});
 }
 
-TEST(TOSA2SPIRV_PARSER, BitwiseOr)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, BitwiseOr)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
@@ -238,7 +238,7 @@ TEST(TOSA2SPIRV_PARSER, BitwiseOr)
                            {});
 }
 
-TEST(TOSA2SPIRV_PARSER, BitwiseXor)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, BitwiseXor)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
@@ -293,7 +293,7 @@ TEST(TOSA2SPIRV_PARSER, BitwiseXor)
                            {});
 }
 
-TEST(TOSA2SPIRV_PARSER, IntDiv)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, IntDiv)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
@@ -348,7 +348,7 @@ TEST(TOSA2SPIRV_PARSER, IntDiv)
                            {});
 }
 
-TEST(TOSA2SPIRV_PARSER, LogicalAnd)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, LogicalAnd)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
@@ -403,7 +403,7 @@ TEST(TOSA2SPIRV_PARSER, LogicalAnd)
                            {});
 }
 
-TEST(TOSA2SPIRV_PARSER, LogicalLeftShift)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, LogicalLeftShift)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
@@ -458,7 +458,7 @@ TEST(TOSA2SPIRV_PARSER, LogicalLeftShift)
                            {});
 }
 
-TEST(TOSA2SPIRV_PARSER, LogicalRightShift)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, LogicalRightShift)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
@@ -513,7 +513,7 @@ TEST(TOSA2SPIRV_PARSER, LogicalRightShift)
                            {});
 }
 
-TEST(TOSA2SPIRV_PARSER, LogicalOr)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, LogicalOr)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
@@ -568,7 +568,7 @@ TEST(TOSA2SPIRV_PARSER, LogicalOr)
                            {});
 }
 
-TEST(TOSA2SPIRV_PARSER, LogicalXor)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, LogicalXor)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
@@ -623,7 +623,7 @@ TEST(TOSA2SPIRV_PARSER, LogicalXor)
                            {});
 }
 
-TEST(TOSA2SPIRV_PARSER, Maximum)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Maximum)
 {
     int32_t nan_mode = 1;
     // Create Attribute
@@ -682,7 +682,7 @@ TEST(TOSA2SPIRV_PARSER, Maximum)
                            {{{1}, DataType::int32_t, {1}}});
 }
 
-TEST(TOSA2SPIRV_PARSER, Minimum)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Minimum)
 {
     int32_t nan_mode = 1;
     // Create Attribute
@@ -741,7 +741,7 @@ TEST(TOSA2SPIRV_PARSER, Minimum)
                            {{{1}, DataType::int32_t, {1}}});
 }
 
-TEST(TOSA2SPIRV_PARSER, Mul)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Mul)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
@@ -810,7 +810,7 @@ TEST(TOSA2SPIRV_PARSER, Mul)
                            {});
 }
 
-TEST(TOSA2SPIRV_PARSER, Pow)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Pow)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
@@ -865,7 +865,7 @@ TEST(TOSA2SPIRV_PARSER, Pow)
                            {});
 }
 
-TEST(TOSA2SPIRV_PARSER, Sub)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Sub)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;
@@ -920,7 +920,7 @@ TEST(TOSA2SPIRV_PARSER, Sub)
                            {});
 }
 
-TEST(TOSA2SPIRV_PARSER, Table)
+TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Table)
 {
     // Create Tensors
     std::vector<std::unique_ptr<TosaSerializationTensor>> tensors;

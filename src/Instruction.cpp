@@ -7,7 +7,7 @@
 
 #include <algorithm>
 
-namespace tosa2spirv::spirv
+namespace tfsc::spirv
 {
 
 bool InstructionComparator::operator()(const Instruction& lhs, const spv::Op rhs) const noexcept
@@ -45,4 +45,4 @@ bool InstructionComparator::operator()(const Instruction& lhs, const Instruction
     return false;
 }
 
-} // namespace tosa2spirv::spirv
+} // namespace tfsc::spirv

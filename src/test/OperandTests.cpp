@@ -7,7 +7,7 @@
 
 #include <gtest/gtest.h>
 
-using namespace tosa2spirv::spirv;
+using namespace tfsc::spirv;
 
 // Test Operand Type and Word Size
 TEST(OperandTests, TypeAndWordSize)
