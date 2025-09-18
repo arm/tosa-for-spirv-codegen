@@ -14,11 +14,11 @@ JSON_DIR=$EXTERNAL_DIR/json
 rm -rf $JSON_DIR
 
 # Pinned SHA for main-with-ARM-patches branch
-JSON_REVISION="upstream/release/3.11.3"
+JSON_REVISION="tags/v3.11.3"
 
 echo "+++ Cloning JSON"
 mkdir -p $JSON_DIR
-git clone https://eu-gerrit-1.euhpc.arm.com/mirrors/opensource/github/nlohmann/json $JSON_DIR
+git clone https://github.com/nlohmann/json.git $JSON_DIR
 
 pushd $JSON_DIR > /dev/null
   git checkout $JSON_REVISION

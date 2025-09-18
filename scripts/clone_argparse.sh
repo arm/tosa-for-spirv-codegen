@@ -14,11 +14,11 @@ ARGPARSE_DIR=$EXTERNAL_DIR/argparse
 rm -rf $ARGPARSE_DIR
 
 # Pinned SHA for main-with-ARM-patches branch
-ARGPARSE_REVISION="refs/tags/upstream/v3.1"
+ARGPARSE_REVISION="tags/v3.1"
 
 echo "+++ Cloning Argparse"
 mkdir -p $ARGPARSE_DIR
-git clone https://eu-gerrit-2.euhpc.arm.com/mirrors/opensource/github/p-ranav/argparse $ARGPARSE_DIR
+git clone https://github.com/p-ranav/argparse.git $ARGPARSE_DIR
 
 pushd $ARGPARSE_DIR > /dev/null
   git checkout $ARGPARSE_REVISION

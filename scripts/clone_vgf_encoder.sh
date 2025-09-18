@@ -21,7 +21,7 @@ FLATBUFFERS_REVISION="v23.5.26" # To align with flatbuffer version in the latest
 
 echo "+++ Cloning VGF Encoder"
 mkdir -p $VGF_ENCODER_DIR
-git clone ssh://$USERNAME@eu-gerrit-2.euhpc.arm.com:29418/mirrors/opensource/github/arm/ai-ml-sdk-vgf-library $VGF_ENCODER_DIR
+git clone https://github.com/arm/ai-ml-sdk-vgf-library.git $VGF_ENCODER_DIR
 git -C $VGF_ENCODER_DIR checkout $VGF_ENCODER_REVISION
 
 mkdir -p $FLATBUFFERS_DIR
