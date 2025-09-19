@@ -325,7 +325,7 @@ TEST(TOSA_FOR_SPIRV_CODEGEN_GENERATOR, GeneratorTestExampleTosaFile)
     }
 
     // Get the main block from the handler so that we can parse it
-    auto mainBlock = handler.GetMainRegion()->GetBlockByName("max_pool2d");
+    auto mainBlock = handler.GetMainRegion()->GetBlockByName("main");
     if (mainBlock == nullptr)
     {
         throw std::runtime_error("Please ensure there is a block called \"main\" within the TOSA graph.");
@@ -368,13 +368,26 @@ TEST(TOSA_FOR_SPIRV_CODEGEN_GENERATOR, GeneratorTestExampleJsonFile)
 
     auto companion = nlohmann::json::parse(fileStream);
 
-    std::string expectedJson =
-        "{\"regions\":[{\"blocks\":[{\"inputs\":[\"input1\"],\"name\":\"max_pool2d\",\"operators\":[{\"attribute\":{"
-        "\"kernel\":[2,2],\"nan_mode\":\"PROPAGATE\",\"pad\":[1,1,1,1],\"stride\":[2,2]},\"attribute_type\":"
-        "\"MaxPool2dAttribute\",\"inputs\":[\"input1\"],\"op\":\"MAX_POOL2D\",\"outputs\":[\"output1\"]}],\"outputs\":["
-        "\"output1\"],\"tensors\":[{\"data\":[],\"name\":\"input1\",\"shape\":[1,1,4,4],\"type\":\"INT8\",\"variable_"
-        "name\":\"\"},{\"data\":[],\"name\":\"output1\",\"shape\":[1,1,3,3],\"type\":\"INT8\",\"variable_name\":\"\"}]}"
-        "],\"name\":\"main\"}],\"version\":{\"_major\":1,\"_minor\":0,\"_patch\":0}}";
+    std::string expectedJson = nlohmann::json::parse(R"json(
+        {
+          "version": {"_major":1,"_minor":0,"_patch":0,"_draft":false},
+          "regions": [{
+            "name":"main",
+            "blocks":[{
+              "name":"main",
+              "operators":[{
+                "op":"MAX_POOL2D",
+                "attribute_type":"MaxPool2dAttribute",
+                "attribute":{"kernel":[2,2],"stride":[2,2],"pad":[0,0,0,0],"nan_mode":"PROPAGATE"},
+                "inputs":["TosaInput_0"],
+                "outputs":["TosaOutput_0"],
+                "location":{"text":"loc(unknown)"} } ],
+              "tensors":[
+                {"name":"TosaInput_0","shape":[1,16,16,16],"type":"INT8","data":[],"variable":false,"is_unranked":false,"variable_name":""},
+                {"name":"TosaOutput_0","shape":[1,8,8,16],"type":"INT8","data":[],"variable":false,"is_unranked":false,"variable_name":""}],
+              "inputs":["TosaInput_0"],"outputs":["TosaOutput_0"],"shapes":[] }]}]
+        }
+    )json").dump();
 
     EXPECT_EQ(companion.dump(), expectedJson);
 }
@@ -418,7 +431,7 @@ TEST(TOSA_FOR_SPIRV_CODEGEN_GENERATOR, GeneratorWriteVgfFile)
                     "constants": [],
             "header": {
                 "major": 0,
-                        "minor": 3,
+                        "minor": 4,
                         "patch": 0
             },
             "model_sequence": {
@@ -580,7 +593,7 @@ TEST(TOSA_FOR_SPIRV_CODEGEN_GENERATOR, GeneratorWriteNpyFiles)
         ],
         "header": {
             "major": 0,
-                    "minor": 3,
+                    "minor": 4,
                     "patch": 0
         },
         "model_sequence": {
@@ -780,7 +793,7 @@ TEST(TOSA_FOR_SPIRV_CODEGEN_GENERATOR, GeneratorWriteNpyFilesRescale)
     ],
     "header": {
         "major": 0,
-        "minor": 3,
+        "minor": 4,
         "patch": 0
     },
     "model_sequence": {

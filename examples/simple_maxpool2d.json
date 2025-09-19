@@ -2,46 +2,90 @@
   "version": {
     "_major": 1,
     "_minor": 0,
-    "_patch": 0
+    "_patch": 0,
+    "_draft": false
   },
   "regions": [
     {
       "name": "main",
       "blocks": [
         {
-          "name": "max_pool2d",
+          "name": "main",
           "operators": [
             {
               "op": "MAX_POOL2D",
               "attribute_type": "MaxPool2dAttribute",
               "attribute": {
-                "kernel": [2, 2],
-                "stride": [2, 2],
-                "pad": [1, 1, 1, 1],
+                "kernel": [
+                  2,
+                  2
+                ],
+                "stride": [
+                  2,
+                  2
+                ],
+                "pad": [
+                  0,
+                  0,
+                  0,
+                  0
+                ],
                 "nan_mode": "PROPAGATE"
               },
-              "inputs": ["input1"],
-              "outputs": ["output1"]
+              "inputs": [
+                "TosaInput_0"
+              ],
+              "outputs": [
+                "TosaOutput_0"
+              ],
+              "location": {
+                "text": "loc(unknown)"
+              }
             }
           ],
           "tensors": [
             {
-              "name": "input1",
-              "shape": [1, 1, 4, 4],
+              "name": "TosaInput_0",
+              "shape": [
+                1,
+                16,
+                16,
+                16
+              ],
               "type": "INT8",
-              "data": [],
+              "data": [
+
+              ],
+              "variable": false,
+              "is_unranked": false,
               "variable_name": ""
             },
             {
-              "name": "output1",
-              "shape": [1, 1, 3, 3],
+              "name": "TosaOutput_0",
+              "shape": [
+                1,
+                8,
+                8,
+                16
+              ],
               "type": "INT8",
-              "data": [],
+              "data": [
+
+              ],
+              "variable": false,
+              "is_unranked": false,
               "variable_name": ""
             }
           ],
-          "inputs": ["input1"],
-          "outputs": ["output1"]
+          "inputs": [
+            "TosaInput_0"
+          ],
+          "outputs": [
+            "TosaOutput_0"
+          ],
+          "shapes": [
+
+          ]
         }
       ]
     }
