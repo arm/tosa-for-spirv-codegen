@@ -24,8 +24,8 @@ enum class TOSAVersion
     v1_0
 };
 
-/// Factory function creating a tosa2spirv Module
-/// Module is used to construct the tosa2spirv::tosa::Graph
+/// Factory function creating a tosa_for_spirv_codegen Module
+/// Module is used to construct the tfsc::tosa::Graph
 /// Sets default SPIRV-V Capabilities, Extensions and Memory model
 /// @param[in] version version of TOSA
 /// @return shared pointer of the Module

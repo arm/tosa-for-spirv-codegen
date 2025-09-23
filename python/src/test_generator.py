@@ -179,7 +179,7 @@ class TestGenerator:
 //
 
 // THIS FILE IS GENERATED WITH TOSA {}. DO NOT EDIT!
-// See tosa2spirv/python/code_generator.py and README
+// See tosa-for-spirv-codegen/python/code_generator.py and README
 
 """.format(
             self.tosa_version
@@ -192,7 +192,7 @@ class TestGenerator:
 //
 
 // THIS FILE IS GENERATED WITH TOSA {}.
-// See tosa2spirv/python/code_generator.py and README
+// See tosa-for-spirv-codegen/python/code_generator.py and README
 
 """.format(
             self.tosa_version

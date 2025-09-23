@@ -4,7 +4,7 @@
 //
 
 // THIS FILE IS GENERATED WITH TOSA 1.0.1. DO NOT EDIT!
-// See tosa2spirv/python/code_generator.py and README
+// See tosa-for-spirv-codegen/python/code_generator.py and README
 
 #include <AssemblyUtils.hpp>
 #include <OpTestUtils.hpp>

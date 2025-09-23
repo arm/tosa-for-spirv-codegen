@@ -4,7 +4,7 @@
 //
 
 // THIS FILE IS GENERATED WITH TOSA 1.0. DO NOT EDIT!
-// See tosa2spirv/python/source_generator.py and README
+// See tosa-for-spirv-codegen/python/source_generator.py and README
 
 #pragma once
 

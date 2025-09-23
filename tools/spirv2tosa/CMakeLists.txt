@@ -13,16 +13,17 @@ set(SPIRV2TOSA_SOURCE
 
 add_library(spirv2tosa STATIC ${SPIRV2TOSA_SOURCE})
 target_include_directories(spirv2tosa PRIVATE ${TOOLS_PATH}/spirv2tosa/include)
-target_include_directories(spirv2tosa PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/tosa ${CMAKE_SOURCE_DIR}/include/spirv)
+target_include_directories(spirv2tosa PRIVATE ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/tosa ${PROJECT_SOURCE_DIR}/include/spirv)
 target_include_directories(spirv2tosa PRIVATE ${SPIRV_HEADERS_SOURCE_PATH}/include)
 target_include_directories(spirv2tosa PRIVATE ${SPIRV_HEADERS_SOURCE_PATH})
+target_include_directories(spirv2tosa PRIVATE ${PROJECT_SOURCE_DIR}/src)
 
 # Executable tool
 add_executable(spirv2tosaTool ${TOOL_SOURCE})
 target_include_directories(spirv2tosaTool PRIVATE ${TOOLS_PATH}/spirv2tosa/include)
-target_include_directories(spirv2tosaTool PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/tosa ${CMAKE_SOURCE_DIR}/include/spirv)
+target_include_directories(spirv2tosaTool PRIVATE ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/tosa ${PROJECT_SOURCE_DIR}/include/spirv)
 target_include_directories(spirv2tosaTool PRIVATE ${TOOLS_PATH}/utils/include)
-target_include_directories(spirv2tosaTool PRIVATE ${CMAKE_SOURCE_DIR}/src)
+target_include_directories(spirv2tosaTool PRIVATE ${PROJECT_SOURCE_DIR}/src)
 target_include_directories(spirv2tosaTool PRIVATE ${SPIRV_HEADERS_SOURCE_PATH}/include)
 target_include_directories(spirv2tosaTool PRIVATE ${SPIRV_HEADERS_SOURCE_PATH})
 
