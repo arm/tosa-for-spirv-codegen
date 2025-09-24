@@ -8,6 +8,8 @@ set(CMAKE_CXX_STANDARD 17)
 add_library(tosaSerializationParser
             src/TosaSerializationParser.cpp)
 
+set_target_properties(tosaSerializationParser PROPERTIES VERSION ${TFSC_LIB_VERSION} SOVERSION ${TFSC_MAJOR_VERSION})
+
 # Find and link the Flatbuffers library, which is needed for the TOSA Serialization Library.
 set(FLATBUFFERS_LIBRARY libflatbuffers.a)
 set(FLATBUFFERS_PATH "${SERIALIZATION_LIB_BUILD_PATH}/third_party/flatbuffers")

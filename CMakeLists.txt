@@ -30,7 +30,6 @@ option(BUILD_UNITTESTS "Build UnitTests for tosa_for_spirv_codegen" ON)
 
 # Root of the tosa_for_spirv_codegen project
 set(TFSC_ROOT "${CMAKE_CURRENT_LIST_DIR}")
-message(===========${TFSC_ROOT})
 
 # External dependencies root
 set(TFSC_EXTERNAL_PATH "${TFSC_ROOT}/external")
@@ -50,8 +49,6 @@ set(SPIRV_TOOLS_BUILD_PATH       "${SPIRV_TOOLS_SOURCE_PATH}/build"             
 
 # Tools path (relative to the repo root)
 set(TOOLS_PATH "${TFSC_ROOT}/tools" CACHE PATH "")
-message(===========${TOOLS_PATH})
-
 
 set(TOOLS_PATH ${CMAKE_SOURCE_DIR}/tools CACHE PATH "")
 
@@ -94,6 +91,19 @@ target_include_directories(tosa_for_spirv_codegen PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/include/spirv
     ${CMAKE_CURRENT_SOURCE_DIR}/include/tosa)
+
+file(READ ${CMAKE_CURRENT_LIST_DIR}/include/Version.hpp versionFile)
+
+# Parse the TFSC version components
+string(REGEX MATCH "#define TFSC_MAJOR_VERSION ([0-9]*)" _ ${versionFile})
+set(TFSC_MAJOR_VERSION ${CMAKE_MATCH_1})
+string(REGEX MATCH "#define TFSC_MINOR_VERSION ([0-9]*)" _ ${versionFile})
+set(TFSC_MINOR_VERSION ${CMAKE_MATCH_1})
+
+# Define LIB version
+set(TFSC_LIB_VERSION "${TFSC_MAJOR_VERSION}.${TFSC_MINOR_VERSION}")
+
+set_target_properties(tosa_for_spirv_codegen PROPERTIES VERSION ${TFSC_LIB_VERSION} SOVERSION ${TFSC_MAJOR_VERSION})
 
 target_include_directories(tosa_for_spirv_codegen PRIVATE
     src

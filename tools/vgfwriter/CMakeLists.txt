@@ -10,6 +10,8 @@ set(VGFWRITER_SOURCE src/VgfWriter.cpp)
 # Add utility library
 add_library(vgfWriter ${VGFWRITER_SOURCE})
 
+set_target_properties(vgfWriter PROPERTIES VERSION ${TFSC_LIB_VERSION} SOVERSION ${TFSC_MAJOR_VERSION})
+
 # Include headers for tosa_for_spirv_codegen and the vgfwriter.
 target_include_directories(vgfWriter PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(vgfWriter PRIVATE ${TOOLS_PATH}/vgfwriter/include)
