@@ -92,8 +92,14 @@ std::shared_ptr<tfsc::spirv::Module> LoadTOSAFile(const std::string& filename)
         throw std::runtime_error("Error loading TOSA Flatbuffers file. Error code: " + std::to_string(error));
     }
 
+    auto* mainRegion = handler.GetMainRegion();
+    if (mainRegion == nullptr)
+    {
+        throw std::runtime_error("No main region found from the handler.");
+    }
+
     // Try to get the main block from the handler.
-    const auto mainBlock = handler.GetMainRegion()->GetBlockByName("main");
+    const auto mainBlock = mainRegion->GetBlockByName("main");
 
     if (mainBlock == nullptr)
     {

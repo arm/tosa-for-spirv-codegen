@@ -228,7 +228,7 @@ void ParseSpirvTextImpl(const std::string& text, Module& module, ResIdMap& resId
         ++lineNumber;
         std::istringstream iss(line);
         std::string token;
-        spv::Op opcode;
+        spv::Op opcode = spv::Op::OpNop;
         std::vector<Operand> operands;
 
         std::string resId;
@@ -262,7 +262,7 @@ void ParseSpirvTextImpl(const std::string& text, Module& module, ResIdMap& resId
                 }
             }
         }
-        if (firstPass && (opcode == spv::Op::OpDecorate || opcode == spv::Op::OpGraphEntryPointARM))
+        if (firstPass && (opcode == spv::Op::OpDecorate || opcode == spv::Op::OpGraphEntryPointARM) || opcode == spv::Op::OpNop)
         {
             continue;
         }

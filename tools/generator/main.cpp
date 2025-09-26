@@ -96,8 +96,16 @@ int main(const int argc, char** argv)
         return EXIT_FAILURE;
     }
 
+    // Try to get the main region from the handler.
+    auto* mainRegion = handler.GetMainRegion();
+    if (mainRegion == nullptr)
+    {
+        std::cerr << "No main region found from the handler." << std::endl;
+        return EXIT_FAILURE;
+    }
+
     // Try to get the main block from the handler.
-    auto mainBlock = handler.GetMainRegion()->GetBlockByName("main");
+    auto mainBlock = mainRegion->GetBlockByName("main");
 
     if (mainBlock == nullptr)
     {
