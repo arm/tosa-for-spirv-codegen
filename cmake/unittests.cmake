@@ -3,6 +3,37 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+find_package(SPIRV-Tools CONFIG QUIET)
+
+set(SPV_TOOLS_TGT "")
+if(SPIRV-Tools_FOUND)
+  foreach(c IN ITEMS
+          SPIRV-Tools::SPIRV-Tools
+          SPIRV-Tools::SPIRV-Tools-static
+          SPIRV-Tools
+          SPIRV-Tools-static)
+    if(TARGET ${c})
+      set(SPV_TOOLS_TGT ${c})
+      break()
+    endif()
+  endforeach()
+endif()
+
+# Fallback: if no imported target was exported, try a raw library search
+if(NOT SPV_TOOLS_TGT)
+  set(_SPV_HINTS
+          "$ENV{SpirvToolsInstall}/lib"
+          "${CMAKE_PREFIX_PATH}/lib"
+          "${CMAKE_INSTALL_PREFIX}/lib"
+          "${SPIRV_TOOLS_BUILD_PATH}"
+          "${SPIRV_TOOLS_BUILD_PATH}/source")
+  find_library(SPV_TOOLS_LIB NAMES SPIRV-Tools SPIRV-Tools-static HINTS ${_SPV_HINTS})
+  if(SPV_TOOLS_LIB)
+    # CMake accepts full paths in target_link_libraries so we can use it directly
+    set(SPV_TOOLS_TGT "${SPV_TOOLS_LIB}")
+  endif()
+endif()
+
 enable_testing()
 
 file(GLOB_RECURSE TEST_SRCS_CORE CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/test/*.cpp)
@@ -126,6 +157,10 @@ endif()
 if (BUILD_SPIRV_2_TOSA)
     target_include_directories(tosa_for_spirv_tests PRIVATE ${TOOLS_PATH}/spirv2tosa/include)
     target_link_libraries(tosa_for_spirv_tests PRIVATE spirv2tosa)
+endif()
+
+if(SPV_TOOLS_TGT)
+  target_link_libraries(tosa_for_spirv_tests PRIVATE ${SPV_TOOLS_TGT})
 endif()
 
 # Don't run unit tests automatically if it is an Android build.

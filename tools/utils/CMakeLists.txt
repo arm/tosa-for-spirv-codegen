@@ -3,6 +3,35 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+find_package(SPIRV-Tools CONFIG QUIET)
+
+set(SPV_TOOLS_TGT "")
+if(SPIRV-Tools_FOUND)
+    foreach(c IN ITEMS
+            SPIRV-Tools::SPIRV-Tools
+            SPIRV-Tools::SPIRV-Tools-static
+            SPIRV-Tools
+            SPIRV-Tools-static)
+        if(TARGET ${c})
+            set(SPV_TOOLS_TGT ${c})
+            break()
+        endif()
+    endforeach()
+endif()
+
+if(NOT SPV_TOOLS_TGT)
+    set(_SPV_HINTS
+            "$ENV{SpirvToolsInstall}/lib"
+            "${CMAKE_PREFIX_PATH}/lib"
+            "${CMAKE_INSTALL_PREFIX}/lib"
+            "${SPIRV_TOOLS_BUILD_PATH}"
+            "${SPIRV_TOOLS_BUILD_PATH}/source")
+    find_library(SPV_TOOLS_LIB NAMES SPIRV-Tools SPIRV-Tools-static HINTS ${_SPV_HINTS})
+    if(SPV_TOOLS_LIB)
+        set(SPV_TOOLS_TGT "${SPV_TOOLS_LIB}")
+    endif()
+endif()
+
 set(BUILD_SHARED_LIBS OFF)
 
 set(UTILS_SOURCE
@@ -74,3 +103,6 @@ else()
     target_link_libraries(utils PUBLIC ${SPIRV_TOOLS_LIBRARY_PATH})
 endif()
 
+if(SPV_TOOLS_TGT)
+    target_link_libraries(utils PUBLIC ${SPV_TOOLS_TGT})
+endif()
