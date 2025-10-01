@@ -14,7 +14,7 @@ rm -rf $TOSA_SERIALIZATION_LIB_DIR
 TOSA_SERIALIZATION_LIB_REVISION="359145e768e565d7666aa6ebd0abb92784f398cb" # Released with TOSA Software v2025.07.0
 
 echo "+++ Cloning TOSA Serialization Library"
-git clone "https://review.mlplatform.org/tosa/serialization_lib" $TOSA_SERIALIZATION_LIB_DIR
+git clone "https://gitlab.arm.com/tosa/tosa-serialization.git" $TOSA_SERIALIZATION_LIB_DIR
 
 pushd $TOSA_SERIALIZATION_LIB_DIR > /dev/null
   git checkout $TOSA_SERIALIZATION_LIB_REVISION
