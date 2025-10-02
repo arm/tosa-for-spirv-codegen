@@ -14,7 +14,18 @@ using namespace tfsc::tosa;
 
 TosaSerializationParser::TosaSerializationParser(TosaSerializationHandler* handler, const std::string& blockName)
 {
-    m_Block = handler->GetMainRegion()->GetBlockByName(blockName);
+    if (!handler)
+    {
+        throw std::invalid_argument("TosaSerializationParser: handler is null.");
+    }
+
+    auto* region = handler->GetMainRegion();
+    if (!region)
+    {
+        throw std::invalid_argument("TosaSerializationParser: TosaSerializationHandler has no main region.");
+    }
+
+    m_Block = region->GetBlockByName(blockName);
     if (!m_Block)
     {
         throw std::invalid_argument("TosaSerializationParser: Block was not found within TosaSerializationHandler.");
@@ -164,7 +175,11 @@ ResId TosaSerializationParser::ParseConstantTensor(const std::string& tensorName
             }
             return AddExternalConstant(graph, constTensor, vec, tensorName);
         }
-        const ConstantData constantData{constTosaTensor->GetData()};
+
+        ConstantData constantData;
+        constantData.emplace<std::vector<uint8_t>>(constTosaTensor->GetData().begin(),
+                                                   constTosaTensor->GetData().end());
+
         return AddExternalConstant(graph, constTensor, constantData, tensorName);
     }
 

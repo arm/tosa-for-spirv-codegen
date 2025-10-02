@@ -96,6 +96,13 @@ int main(const int argc, char** argv)
         return EXIT_FAILURE;
     }
 
+    // Ensure handler has regions before using GetMainRegion()
+    if (handler.GetRegions().empty())
+    {
+        std::cerr << "Handler did not produce any regions." << std::endl;
+        return EXIT_FAILURE;
+    }
+
     // Try to get the main region from the handler.
     auto* mainRegion = handler.GetMainRegion();
     if (mainRegion == nullptr)
