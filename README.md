@@ -384,8 +384,8 @@ External dependencies used by tosa-for-spirv-codegen:
 | Tool                       | License           | Description                                                  | Version                                  | Provenience |
 |----------------------------|-------------------|--------------------------------------------------------------|------------------------------------------|--|
 | GoogleTest                 | BSD 3-Clause      | C++ testing framework                                        | v1.13.0                                  | https://github.com/google/googletest |
-| SPIR-V Headers             | Khronos Group Inc | Machine-readable files for the SPIR-V Registry               | 6109da33ee4dd449ede9f7293b55eb6db48570a0 | https://github.com/KhronosGroup/SPIRV-Headers |
-| SPIR-V Tools               | Khronos Group Inc | API and commands for processing SPIR-V modules               | 6864ca7360dbb0d0252f0a6630a62532fc403a77 | https://github.com/KhronosGroup/SPIRV-Tools |
+| SPIR-V Headers             | Khronos Group Inc | Machine-readable files for the SPIR-V Registry               | 01e0577914a75a2569c846778c2f93aa8e6feddd | https://github.com/KhronosGroup/SPIRV-Headers |
+| SPIR-V Tools               | Khronos Group Inc | API and commands for processing SPIR-V modules               | 7f2d9ee926f98fc77a3ed1e1e0f113b8c9c49458 | https://github.com/KhronosGroup/SPIRV-Tools |
 | TOSA Serialization Library | Apache-2.0        | Provides methods to read and write serialized TOSA graphs    | v0.60.0                                  | https://review.mlplatform.org/plugins/gitiles/tosa/serialization_lib/ |
 | JSON for Modern C++        | MIT               | Provides methods to read and write JSON                      | 3.11.2                                   | https://github.com/nlohmann/json/ |
 | argparse                   | MIT               | Provides methods to parse command-line arguments             | v3.0                                     | https://github.com/p-ranav/argparse |
