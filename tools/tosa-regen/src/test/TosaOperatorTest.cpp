@@ -9,7 +9,7 @@
 
 #include <gtest/gtest.h>
 
-using namespace spirv2tosa;
+using namespace tosaregen;
 
 TEST(Spirv2TosaTest, TosaOperatorCompareTest)
 {

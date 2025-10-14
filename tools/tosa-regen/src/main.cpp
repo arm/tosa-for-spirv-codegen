@@ -20,18 +20,18 @@
 #include <OperatorDefinitions.hpp>
 #include <OperatorEnum.hpp>
 #include <TosaOperator.hpp>
-#include <spirv2tosa.hpp>
+#include <TosaRegen.hpp>
 #include <TosaForSpirvCodegen.hpp>
 
 #include <tosa_serialization_handler.h>
 
-namespace tfsc::spirv2tosatool
+namespace tfsc::regen
 {
 
 void Usage()
 {
-    std::puts("spirv2tosatool usage:");
-    std::puts("./spirv2tosatool <spirv disassembly file> <ops|tests|tosa> [options...]");
+    std::puts("tosa-regen usage:");
+    std::puts("./tosa-regen <spirv disassembly file> <ops|tests|tosa> [options...]");
     std::puts(" ops ..... generate C/C++ strings for present TOSA Operators");
     std::puts("   options:");
     std::puts("   --unique: only show operators with unique opcodes");
@@ -75,19 +75,19 @@ std::shared_ptr<spirv::Module> LoadSpirvFile(const std::ifstream& spirvFile)
 
 int Ops(const int argc, char** argv, const std::ifstream& spirvFile)
 {
-    spirv2tosa::OperatorComparator opComparator = spirv2tosa::defaultOpComparator;
+    tosaregen::OperatorComparator opComparator = tosaregen::defaultOpComparator;
 
     for (size_t argIdx = 3; argIdx < argc; ++argIdx)
     {
         if (std::strcmp(argv[argIdx], "--unique") == 0)
         {
-            opComparator = [](const spirv2tosa::TosaOperator& lhs, const spirv2tosa::TosaOperator& rhs) -> bool
+            opComparator = [](const tosaregen::TosaOperator& lhs, const tosaregen::TosaOperator& rhs) -> bool
             { return lhs.op < rhs.op; };
         }
     }
 
     const auto& module = LoadSpirvFile(spirvFile);
-    const std::vector<std::string> ops = spirv2tosa::Spirv2tosa(module, opComparator);
+    const std::vector<std::string> ops = tosaregen::Spirv2tosa(module, opComparator);
 
     std::puts("------");
     for (const auto& opString : ops)
@@ -114,11 +114,11 @@ void Tosa(const int argc, char** argv, const std::ifstream& spirvFile)
     }
 
     const auto& module = LoadSpirvFile(spirvFile);
-    auto handler = spirv2tosa::GetTosaSerializationHandler(module);
+    auto handler = tosaregen::GetTosaSerializationHandler(module);
     handler->SaveFileTosaFlatbuffer(outputFile.c_str());
 }
 
-std::string GetTestDefinition(const spirv2tosa::TosaOperator op,
+std::string GetTestDefinition(const tosaregen::TosaOperator op,
                               const std::string& operatorDefinition,
                               const std::string& testHash,
                               const std::string& testName)
@@ -130,7 +130,7 @@ std::string GetTestDefinition(const spirv2tosa::TosaOperator op,
                       "std::shared_ptr<tfsc::spirv::Module> module = "
                       "tfsc::CreateModule(tfsc::TOSAVersion::v1_0);\n"
                       "Graph graph{module};\n\n";
-    testDefinition += spirv2tosa::OperatorToGraphDefinition(op, "graph", "inputs", "outputs", "attributes");
+    testDefinition += tosaregen::OperatorToGraphDefinition(op, "graph", "inputs", "outputs", "attributes");
 
     testDefinition += "\n\n// Validating generated SPIR-V Module\n"
                       "testutils::CheckModule(module, op, inputs, outputs, attributes);\n}\n\n";
@@ -141,7 +141,7 @@ int Tests(const int argc, char** argv, const std::ifstream& spirvFile, std::stri
 {
     std::string outputDir = ".";
     bool overwrite = false;
-    spirv2tosa::OperatorComparator opComparator = spirv2tosa::defaultOpComparator;
+    tosaregen::OperatorComparator opComparator = tosaregen::defaultOpComparator;
 
     for (size_t argIdx = 3; argIdx < argc; ++argIdx)
     {
@@ -158,13 +158,13 @@ int Tests(const int argc, char** argv, const std::ifstream& spirvFile, std::stri
         }
         else if (strcmp(argv[argIdx], "--unique") == 0)
         {
-            opComparator = [](const spirv2tosa::TosaOperator& lhs, const spirv2tosa::TosaOperator& rhs) -> bool
+            opComparator = [](const tosaregen::TosaOperator& lhs, const tosaregen::TosaOperator& rhs) -> bool
             { return lhs.op < rhs.op; };
         }
     }
 
     const auto& module = LoadSpirvFile(spirvFile);
-    const std::vector<spirv2tosa::TosaOperator> ops = spirv2tosa::Spirv2operators(module, opComparator);
+    const std::vector<tosaregen::TosaOperator> ops = tosaregen::Spirv2operators(module, opComparator);
 
     std::map<tosa::OperatorEnum, std::pair<std::fstream, uint32_t>> opFiles;
     for (const auto& op : ops)
@@ -219,7 +219,7 @@ int Tests(const int argc, char** argv, const std::ifstream& spirvFile, std::stri
             file << testFileHeader;
         }
         // Append test case for the current operator
-        const std::string opDefinition = spirv2tosa::OperatorToString(op);
+        const std::string opDefinition = tosaregen::OperatorToString(op);
         const std::string testHash = std::to_string(std::hash<std::string>{}(opDefinition));
         const std::string testName = tosa::GetOperatorName(op.op) + "OperatorTest" + std::to_string(lastTestId);
 
@@ -238,13 +238,13 @@ int Tests(const int argc, char** argv, const std::ifstream& spirvFile, std::stri
     return 0;
 }
 
-} // namespace tfsc::spirv2tosatool
+} // namespace tfsc::regen
 
 int main(const int argc, char** argv)
 {
     if (argc < 3)
     {
-        tfsc::spirv2tosatool::Usage();
+        tfsc::regen::Usage();
         return 1;
     }
 
@@ -261,7 +261,7 @@ int main(const int argc, char** argv)
     int result = 1;
     if (strcmp(argv[2], "ops") == 0)
     {
-        result = tfsc::spirv2tosatool::Ops(argc, argv, spirvFile);
+        result = tfsc::regen::Ops(argc, argv, spirvFile);
     }
     else if (strcmp(argv[2], "tests") == 0)
     {
@@ -269,18 +269,18 @@ int main(const int argc, char** argv)
                                  "// Copyright © 2025 Arm Ltd and Contributors. All rights reserved.\n"
                                  "// SPDX-License-Identifier: Apache-2.0\n"
                                  "//\n\n"
-                                 "// Generated automatically by spirv2tosaTool for TOSA 1.0\n\n"
+                                 "// Generated automatically by tosa-regen for TOSA 1.0\n\n"
                                  "#include <OpTestUtils.hpp>\n"
                                  "#include <TosaForSpirvCodegen.hpp>\n\n"
                                  "#include <gtest/gtest.h>\n\n"
                                  "using namespace tfsc::tosa;\n"
                                  "using namespace testutils;\n"
                                  "\n";
-        result = tfsc::spirv2tosatool::Tests(argc, argv, spirvFile, fileHeader);
+        result = tfsc::regen::Tests(argc, argv, spirvFile, fileHeader);
     }
     else if (strcmp(argv[2], "tosa") == 0)
     {
-        tfsc::spirv2tosatool::Tosa(argc, argv, spirvFile);
+        tfsc::regen::Tosa(argc, argv, spirvFile);
     }
     else
     {

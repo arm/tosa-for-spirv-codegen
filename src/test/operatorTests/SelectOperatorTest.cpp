@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// Generated automatically by Spirv2tosaTool for TOSA 1.0
+// Generated automatically by tosa-regen for TOSA 1.0
 
 #include <OpTestUtils.hpp>
 #include <TosaForSpirvCodegen.hpp>

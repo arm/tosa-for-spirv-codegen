@@ -25,7 +25,7 @@ class SourceGenerator:
         self.op_def_path = "src/OperatorDefinitions.cpp"
         self.parser_utils_path = "tools/parsers/src/ParserUtils.hpp"
         self.tosa_operator_enum_path = "include/tosa/OperatorEnum.hpp"
-        self.serialization_attr_path = "tools/spirv2tosa/src/spirv2tosa.cpp"
+        self.serialization_attr_path = "tools/tosa-regen/src/TosaRegen.cpp"
         self.spec = tosa.TOSASpec("./external/tosa_specification/tosa.xml")
 
         self.tosa_version = "{}.{}.{}".format(self.spec.version_major, self.spec.version_minor, self.spec.version_patch)

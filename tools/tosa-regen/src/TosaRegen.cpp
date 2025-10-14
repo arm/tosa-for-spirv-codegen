@@ -3,9 +3,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <spirv2tosa.hpp>
+#include <TosaRegen.hpp>
 
-namespace spirv2tosa
+namespace tosaregen
 {
 using namespace tfsc;
 using namespace ::tosa;
@@ -406,7 +406,7 @@ void GetTosaSerializationOperator(const TosaOperator& op,
         if (tensors.find(tensorName) == tensors.end())
         {
             std::vector<uint32_t> data;
-            if (input.type == spirv2tosa::TosaInputType::GraphConstant && graphConstants.size() > input.bindingId)
+            if (input.type == tosaregen::TosaInputType::GraphConstant && graphConstants.size() > input.bindingId)
             {
                 for (const uint32_t element : graphConstants.at(input.bindingId))
                 {
@@ -419,8 +419,8 @@ void GetTosaSerializationOperator(const TosaOperator& op,
             }
             tensors[tensorName] = GetTosaSerializationTensor(input.GetTensor(), tensorName, data);
 
-            if (input.type == spirv2tosa::TosaInputType::TensorConstant ||
-                input.type == spirv2tosa::TosaInputType::GraphConstant)
+            if (input.type == tosaregen::TosaInputType::TensorConstant ||
+                input.type == tosaregen::TosaInputType::GraphConstant)
             {
                 auto constOp = std::make_unique<TosaSerializationOperator>(Op::Op_CONST,
                                                                            Attribute::Attribute_NONE,
@@ -432,7 +432,7 @@ void GetTosaSerializationOperator(const TosaOperator& op,
             }
         }
         inputNames.push_back(tensorName);
-        if (input.type == spirv2tosa::TosaInputType::Dynamic)
+        if (input.type == tosaregen::TosaInputType::Dynamic)
         {
             dynamicInputNames.insert(tensorName);
         }
@@ -467,7 +467,7 @@ GetTosaSerializationHandler(const std::shared_ptr<tfsc::spirv::Module>& module,
                             const std::vector<std::vector<uint32_t>>& graphConstants,
                             const std::map<uint32_t, std::string>& tensorNameMap)
 {
-    const auto& ops = spirv2tosa::Spirv2operators(module, spirv2tosa::defaultOpComparator);
+    const auto& ops = tosaregen::Spirv2operators(module, tosaregen::defaultOpComparator);
 
     std::vector<std::string> graphInputNames;
     const auto& inputOps = module->GetInstructionsOfType(spv::Op::OpGraphInputARM);
@@ -530,4 +530,4 @@ GetTosaSerializationHandler(const std::shared_ptr<tfsc::spirv::Module>& module,
     return std::move(tosaHandler);
 }
 
-} // namespace spirv2tosa
+} // namespace tosaregen

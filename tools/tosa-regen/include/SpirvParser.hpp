@@ -13,7 +13,7 @@
 
 #include <stdexcept>
 
-namespace spirv2tosa
+namespace tosaregen
 {
 
 /// Parses a tfsc::tosa::DataType from a SPIR-V OpTypeInt, OpTypeFloat or OpTypeBool instruction
@@ -34,4 +34,4 @@ tfsc::tosa::Attribute GetAttributeFromInstruction(const tfsc::spirv::Instruction
 /// found in the given instruction
 TosaOperator GetTosaOperator(const tfsc::spirv::Instruction& instruction);
 
-} // namespace spirv2tosa
+} // namespace tosaregen

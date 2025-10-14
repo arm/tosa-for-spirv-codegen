@@ -5,7 +5,7 @@
 
 #include <SpirvParser.hpp>
 
-namespace spirv2tosa
+namespace tosaregen
 {
 using namespace tfsc;
 
@@ -281,4 +281,4 @@ TosaOperator GetTosaOperator(const spirv::Instruction& instruction)
     return tosaOp;
 }
 
-} // namespace spirv2tosa
+} // namespace tosaregen

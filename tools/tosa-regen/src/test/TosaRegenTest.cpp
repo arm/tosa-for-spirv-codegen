@@ -13,7 +13,7 @@
 #include <Tensor.hpp>
 #include <TosaOperator.hpp>
 #include <TosaSerializationParser.hpp>
-#include <spirv2tosa.hpp>
+#include <TosaRegen.hpp>
 #include <TosaForSpirvCodegen.hpp>
 
 #include <algorithm>
@@ -28,7 +28,7 @@
 #include <tosa_generated.h>
 #include <tosa_serialization_handler.h>
 
-using namespace spirv2tosa;
+using namespace tosaregen;
 
 bool Spirv2tosaTest(const std::vector<TosaOperator> ops, const std::vector<std::string> opDeclarations)
 {
@@ -692,7 +692,7 @@ TEST(Spirv2TosaTest, GetTosaSerializationHandlerBasicTest)
     graph.FinalizeGraph();
 
     // Converting graph to TOSA Serialization structure
-    const auto handler = spirv2tosa::GetTosaSerializationHandler(module);
+    const auto handler = tosaregen::GetTosaSerializationHandler(module);
 
     // Verifying the correctness of the generated handler using the parser and comparator
     tfsc::parsers::TosaSerializationParser parser{handler->GetMainRegion()->GetBlockByName("main")};
@@ -759,7 +759,7 @@ TEST(Spirv2TosaTest, GetTosaSerializationHandlerTensorNameTest)
     tensorNameMap[GetResIdNumber(result2)] = "Output_2";
 
     // Converting graph to TOSA Serialization structure
-    const auto handler = spirv2tosa::GetTosaSerializationHandler(module, {}, tensorNameMap);
+    const auto handler = tosaregen::GetTosaSerializationHandler(module, {}, tensorNameMap);
     handler->SaveFileTosaFlatbuffer("tosa_demo.tosa");
 
     // Verifying the correctness of the generated handler using the parser and comparator

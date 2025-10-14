@@ -5,7 +5,7 @@
 
 #include <TosaOperator.hpp>
 
-namespace spirv2tosa
+namespace tosaregen
 {
 using namespace tfsc;
 
@@ -407,4 +407,4 @@ std::string OperatorToGraphDefinition(const TosaOperator& op,
     return opString;
 }
 
-} // namespace spirv2tosa
+} // namespace tosaregen

@@ -25,7 +25,7 @@
 #include <tosa_generated.h>
 #include <tosa_serialization_handler.h>
 
-namespace spirv2tosa
+namespace tosaregen
 {
 
 /// Generates an std::vector of C/C++ strings describing all operators found in the given Module instance, using
@@ -74,4 +74,4 @@ GetTosaSerializationHandler(const std::shared_ptr<tfsc::spirv::Module>& module,
                             const std::vector<std::vector<uint32_t>>& graphConstants = {},
                             const std::map<uint32_t, std::string>& tensorNameMap = {});
 
-} // namespace spirv2tosa
+} // namespace tosaregen

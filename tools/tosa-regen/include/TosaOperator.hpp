@@ -11,7 +11,7 @@
 
 #include <functional>
 
-namespace spirv2tosa
+namespace tosaregen
 {
 
 /// The type of an input tensor to a TosaOperator structure
@@ -136,4 +136,4 @@ std::string OperatorToGraphDefinition(const TosaOperator& op,
                                       std::string outputsName = "",
                                       std::string attributesName = "");
 
-} // namespace spirv2tosa
+} // namespace tosaregen

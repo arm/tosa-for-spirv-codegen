@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-using namespace spirv2tosa;
+using namespace tosaregen;
 
 bool GetTosaOperatorTest(TosaOperator op)
 {
