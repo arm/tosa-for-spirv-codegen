@@ -114,42 +114,60 @@ std::size_t GetVisibleLength(const std::string& s)
     }
     return count;
 }
+#include <cctype>
+#include <string>
+
 void HighlightString(std::string& str, const std::string& pattern, const std::string& pre, const std::string& post)
 {
+    if (pattern.empty())
+        return; // nothing to do
+
     const std::string highlighted = pre + pattern + post;
     size_t scanPos = 0;
+
+    auto is_word_char = [](unsigned char ch) -> bool { return std::isalnum(ch) || ch == '_' || ch == '%'; };
 
     while (true)
     {
         size_t found = str.find(pattern, scanPos);
         if (found == std::string::npos)
-        {
             break;
-        }
 
         size_t afterPos = found + pattern.size();
-        bool validAfter = false;
 
-        // edge case pattern is at the very end of the string
+        // Check "word boundary" BEFORE
+        bool validBefore = false;
+        if (found == 0)
+        {
+            validBefore = true; // start of string is a boundary
+        }
+        else
+        {
+            unsigned char cPrev = static_cast<unsigned char>(str[found - 1]);
+            validBefore = !is_word_char(cPrev);
+        }
+
+        // Check "word boundary" AFTER
+        bool validAfter = false;
         if (afterPos == str.size())
         {
-            validAfter = true;
+            validAfter = true; // end of string is a boundary
         }
-        else if (afterPos < str.size())
+        else
         {
-            char cNext = str[afterPos];
-            validAfter = !(std::isalnum(static_cast<unsigned char>(cNext)) || cNext == '_');
+            unsigned char cNext = static_cast<unsigned char>(str[afterPos]);
+            validAfter = !is_word_char(cNext);
         }
 
-        if (validAfter)
+        if (validBefore && validAfter)
         {
-            // Perform replacement of just the resId with the highlighted version
             str.replace(found, pattern.size(), highlighted);
-
+            // Jump past the inserted highlight to avoid re-matching inside it
             scanPos = found + highlighted.size();
         }
         else
         {
+            // Not a whole-word match; continue scanning after this position
             scanPos = found + 1;
         }
     }

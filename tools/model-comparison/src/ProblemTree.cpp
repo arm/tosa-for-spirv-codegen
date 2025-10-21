@@ -5,7 +5,6 @@
 
 #include "ProblemTree.hpp"
 #include <StringUtils.hpp>
-#include <TosaForSpirvCodegen.hpp>
 
 #include <optional>
 #include <sstream>
@@ -51,12 +50,12 @@ std::string PrintProblemTreeRhs(const ProblemTree& pt)
 {
     std::stringstream ss;
     const std::string indent(pt.m_Depth * 4, ' ');
-    ss << indent << InstructionToString(*pt.m_Root.m_Rhs) << "\n";
 
     for (const auto& leaf : pt.m_Leafs)
     {
         ss << PrintProblemTreeRhs(leaf);
     }
+    ss << indent << InstructionToString(*pt.m_Root.m_Rhs) << "\n";
     return ss.str();
 }
 
@@ -64,12 +63,12 @@ std::string PrintProblemTreeLhs(const ProblemTree& pt)
 {
     std::stringstream ss;
     const std::string indent(pt.m_Depth * 4, ' ');
-    ss << indent << InstructionToString(*pt.m_Root.m_Lhs) << "\n";
 
     for (const auto& leaf : pt.m_Leafs)
     {
         ss << PrintProblemTreeLhs(leaf);
     }
+    ss << indent << InstructionToString(*pt.m_Root.m_Lhs) << "\n";
     return ss.str();
 }
 

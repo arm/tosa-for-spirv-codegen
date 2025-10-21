@@ -8,6 +8,7 @@
 
 #include "AdjacencyMatrix.hpp"
 #include "AssemblyUtils.hpp"
+#include "CustomInstructionRules.hpp"
 #include "Instruction.hpp"
 #include "ProblemTree.hpp"
 #include "StringUtils.hpp"
@@ -60,16 +61,33 @@ std::string CompareModuleHeaders(const std::shared_ptr<Module>& lhsModule, const
     return out;
 }
 
+static std::unique_ptr<CustomRegistry> customRegistry;
+
+CustomRegistry* GetCustomRegisry()
+{
+    if (!customRegistry)
+    {
+        customRegistry = std::make_unique<CustomRegistry>();
+    }
+
+    return customRegistry.get();
+}
+
 std::optional<ProblemTree> CompareInstructions(const Instruction& lhs, const Instruction& rhs, const int depth)
 {
+    auto customRule = GetCustomRegisry()->m_rules.find({lhs.m_Opcode, rhs.m_Opcode});
+    if (customRule != GetCustomRegisry()->m_rules.end())
+    {
+        return customRule->second(lhs, rhs, depth);
+    }
+
     if (lhs.m_Opcode != rhs.m_Opcode || lhs.m_Operands.size() != rhs.m_Operands.size())
     {
         return ProblemTree(&lhs, &rhs, depth, true);
     }
 
     bool isProblem = false;
-    bool isTerminalOperandProblem = false;
-    std::vector<std::pair<Operand, Operand>> operands;
+    std::vector<std::pair<Operand, Operand>> problemOperands;
     std::vector<ProblemTree> leafs;
     for (auto itRhs = rhs.m_Operands.crbegin(), itLhs = lhs.m_Operands.crbegin(); itLhs != lhs.m_Operands.crend();
          ++itLhs, ++itRhs)
@@ -99,7 +117,7 @@ std::optional<ProblemTree> CompareInstructions(const Instruction& lhs, const Ins
                 if (itLhs->m_LiteralWord != itRhs->m_LiteralWord)
                 {
                     isProblem = true;
-                    operands.emplace_back(*itLhs, *itRhs);
+                    problemOperands.emplace_back(*itLhs, *itRhs);
                 }
             }
             break;
@@ -108,7 +126,7 @@ std::optional<ProblemTree> CompareInstructions(const Instruction& lhs, const Ins
                 if (*itLhs->m_LiteralStr != *itRhs->m_LiteralStr)
                 {
                     isProblem = true;
-                    operands.emplace_back(*itLhs, *itRhs);
+                    problemOperands.emplace_back(*itLhs, *itRhs);
                 }
             }
             break;
@@ -121,7 +139,7 @@ std::optional<ProblemTree> CompareInstructions(const Instruction& lhs, const Ins
     }
 
     return (isProblem || !leafs.empty())
-               ? std::make_optional<ProblemTree>(&lhs, &rhs, depth, isProblem, leafs, operands)
+               ? std::make_optional<ProblemTree>(&lhs, &rhs, depth, isProblem, leafs, problemOperands)
                : std::nullopt;
 }
 
@@ -238,28 +256,28 @@ std::string CompareModules(const std::shared_ptr<Module>& lhs, const std::shared
         return headerDiff.str();
     }
 
-    std::string lhsString;
-    std::string rhsString;
+    std::string lhsDis;
+    std::string rhsDis;
     if (co.m_modelView == ModelView::problemsOnly)
     {
         for (const auto problem : problemOperators)
         {
-            lhsString += InstructionToString(*problem.m_Lhs);
-            lhsString += "\n";
-            rhsString += InstructionToString(*problem.m_Rhs);
-            rhsString += "\n";
+            lhsDis += InstructionToString(*problem.m_Lhs);
+            lhsDis += "\n";
+            rhsDis += InstructionToString(*problem.m_Rhs);
+            rhsDis += "\n";
         }
     }
     else
     {
         const auto lhsBinary = tfsc::WriteToBinary(lhs);
-        auto lhsDis = DisassembleSPIRV(lhsBinary, false);
-        lhsString =
+        lhsDis = DisassembleSPIRV(lhsBinary, false, false);
+        lhsDis =
             co.m_modelView == ModelView::module ? lhsDis : GetSubString(lhsDis, "OpTypeGraphARM ", "OpGraphEndARM");
 
         const auto rhsBinary = tfsc::WriteToBinary(rhs);
-        auto rhsDis = DisassembleSPIRV(rhsBinary, false);
-        rhsString =
+        rhsDis = DisassembleSPIRV(rhsBinary, false, false);
+        rhsDis =
             co.m_modelView == ModelView::module ? rhsDis : GetSubString(rhsDis, "OpTypeGraphARM ", "OpGraphEndARM");
     }
 
@@ -267,8 +285,9 @@ std::string CompareModules(const std::shared_ptr<Module>& lhs, const std::shared
     const auto canonicalizedProblems = CanonicalizeProblems(commonProblems);
 
     std::vector<HighlightCtx> highlightList;
-    std::stringstream lhsSStream;
+    std::stringstream lhsProblemSummary;
     std::stringstream rhsSStream;
+
     for (const auto& problemGroup : canonicalizedProblems)
     {
         HighlightCtx highlightCtx;
@@ -277,7 +296,7 @@ std::string CompareModules(const std::shared_ptr<Module>& lhs, const std::shared
         highlightCtx.m_pre = colour;
         highlightCtx.m_post = resetCode;
 
-        lhsSStream << "\n" << colour << boundary << resetCode << "\n";
+        lhsProblemSummary << "\n" << colour << boundary << resetCode << "\n";
         rhsSStream << "\n\n";
 
         // First group, instructions where terminal operands or instruction type are mismatched
@@ -299,10 +318,10 @@ std::string CompareModules(const std::shared_ptr<Module>& lhs, const std::shared
                 HighlightString(rhsProblemString, problemOperandStringRhs, colour, resetCode);
             }
 
-            lhsSStream << lhsProblemString;
+            lhsProblemSummary << lhsProblemString;
             rhsSStream << rhsProblemString;
         }
-        lhsSStream << boundaryLight << "\n";
+        lhsProblemSummary << boundaryLight << "\n";
         rhsSStream << "\n";
 
         // second group intermediate instructions partially or wholly composed of the first group
@@ -310,16 +329,16 @@ std::string CompareModules(const std::shared_ptr<Module>& lhs, const std::shared
         {
             CollectResIds(problem, highlightCtx.m_lhs, highlightCtx.m_rhs);
 
-            lhsSStream << PrintProblemTreeLhs(problem);
+            lhsProblemSummary << PrintProblemTreeLhs(problem);
             rhsSStream << PrintProblemTreeRhs(problem);
         }
 
-        lhsSStream << "\n" << colour << boundary << resetCode << "\n";
+        lhsProblemSummary << "\n" << colour << boundary << resetCode << "\n";
         rhsSStream << "\n\n";
         highlightList.push_back(highlightCtx);
     }
 
-    std::string lhsS = lhsSStream.str();
+    std::string lhsS = lhsProblemSummary.str();
     std::string rhsS = rhsSStream.str();
     for (const auto& highLightCtx : highlightList)
     {
@@ -328,13 +347,13 @@ std::string CompareModules(const std::shared_ptr<Module>& lhs, const std::shared
             HighlightString(lhsS, highLightCtx.m_lhs[i], highLightCtx.m_pre, highLightCtx.m_post);
             HighlightString(rhsS, highLightCtx.m_rhs[i], highLightCtx.m_pre, highLightCtx.m_post);
 
-            HighlightString(lhsString, highLightCtx.m_lhs[i], highLightCtx.m_pre, highLightCtx.m_post);
-            HighlightString(rhsString, highLightCtx.m_rhs[i], highLightCtx.m_pre, highLightCtx.m_post);
+            HighlightString(lhsDis, highLightCtx.m_lhs[i], highLightCtx.m_pre, highLightCtx.m_post);
+            HighlightString(rhsDis, highLightCtx.m_rhs[i], highLightCtx.m_pre, highLightCtx.m_post);
         }
     }
 
     res << ConcatStringLines(lhsS, rhsS, 20);
-    res << ConcatStringLines(lhsString, rhsString, 20);
+    res << ConcatStringLines(lhsDis, rhsDis, 20);
     return headerDiff.str() + res.str();
 }
 } // namespace testutils

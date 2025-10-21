@@ -38,7 +38,7 @@ static const std::string simpleRescale = SPIRV_HEADER +
          %20 = OpConstantComposite %_arr_uint_uint_1 %uint_1
          %21 = OpTypeTensorARM %uchar %uint_1 %20
     %uchar_1 = OpConstant %uchar 1
-         %23 = OpConstantCompositeReplicateEXT %21 %uchar_1
+         %23 = OpConstantComposite %21 %uchar_1
          %28 = OpTypeGraphARM 1 %9 %9
                OpGraphEntryPointARM %29 "main" %11 %27
          %29 = OpGraphARM %28

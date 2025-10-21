@@ -97,7 +97,7 @@ TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Rescale)
     auto multiplierTensor = std::make_unique<TosaSerializationTensor>(multiplierName,
                                                                       multiplierShape,
                                                                       DType::DType_INT32,
-                                                                      std::vector<uint8_t>{{0, 0, 0, 1}});
+                                                                      std::vector<uint8_t>{{1, 0, 0, 0}});
     tensors.push_back(std::move(multiplierTensor));
     auto multiplierOp = std::make_unique<tosa::TosaSerializationOperator>(Op::Op_CONST,
                                                                           Attribute::Attribute_NONE,

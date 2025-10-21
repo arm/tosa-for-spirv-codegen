@@ -170,22 +170,18 @@ TEST(Spirv2TosaTest, Spirv2OperatorsBasicTest)
     for (size_t i = 0; i < 9; ++i)
     {
         TosaOperator op;
-        op.op = static_cast<tfsc::tosa::OperatorEnum>(
-            static_cast<size_t>(tfsc::tosa::OperatorEnum::BitwiseAnd) + i);
-        op.inputs.emplace_back(
-            tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, tfsc::tosa::Tensor::TensorShape{1}},
-            TosaInputType::Dynamic,
-            0,
-            0,
-            bindingId++);
-        op.inputs.emplace_back(
-            tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, tfsc::tosa::Tensor::TensorShape{1}},
-            TosaInputType::Dynamic,
-            0,
-            0,
-            bindingId++);
-        op.outputs.emplace_back(
-            tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, tfsc::tosa::Tensor::TensorShape{1}});
+        op.op = static_cast<tfsc::tosa::OperatorEnum>(static_cast<size_t>(tfsc::tosa::OperatorEnum::BitwiseAnd) + i);
+        op.inputs.emplace_back(tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, tfsc::tosa::Tensor::TensorShape{1}},
+                               TosaInputType::Dynamic,
+                               0,
+                               0,
+                               bindingId++);
+        op.inputs.emplace_back(tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, tfsc::tosa::Tensor::TensorShape{1}},
+                               TosaInputType::Dynamic,
+                               0,
+                               0,
+                               bindingId++);
+        op.outputs.emplace_back(tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, tfsc::tosa::Tensor::TensorShape{1}});
         ops.push_back(op);
     }
     EXPECT_TRUE(Spirv2operatorsTest(ops, ops, defaultOpComparator));
@@ -199,13 +195,10 @@ TEST(Spirv2TosaTest, Spirv2operatorsGraphTest)
 
     const auto& input1 = graph.AddInput(tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, {2}}, 0);
     const auto& input2 = graph.AddGraphConstant(tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, {2}});
-    const auto& shift =
-        graph.AddTensorConstant(tfsc::tosa::Attribute{{1}, tfsc::tosa::DataType::uint32_t, {1}});
+    const auto& shift = graph.AddTensorConstant(tfsc::tosa::Attribute{{1}, tfsc::tosa::DataType::uint32_t, {1}});
 
-    const auto& output = graph.AddMulOperator(input1,
-                                              input2,
-                                              shift,
-                                              tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, {2}});
+    const auto& output =
+        graph.AddMulOperator(input1, input2, shift, tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, {2}});
     graph.AddOutput(output, 0);
 
     graph.FinalizeGraph();
@@ -216,18 +209,16 @@ TEST(Spirv2TosaTest, Spirv2operatorsGraphTest)
 
     TosaOperator op;
     op.op = tfsc::tosa::OperatorEnum::Mul;
-    op.inputs.emplace_back(
-        tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, tfsc::tosa::Tensor::TensorShape{2}});
+    op.inputs.emplace_back(tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, tfsc::tosa::Tensor::TensorShape{2}});
     op.inputs.emplace_back(tfsc::tosa::Attribute{std::initializer_list<uint32_t>{},
-                                                       tfsc::tosa::DataType::uint32_t,
-                                                       tfsc::tosa::Tensor::TensorShape{2}},
+                                                 tfsc::tosa::DataType::uint32_t,
+                                                 tfsc::tosa::Tensor::TensorShape{2}},
                            TosaInputType::GraphConstant);
     op.inputs.emplace_back(tfsc::tosa::Attribute{std::initializer_list<uint32_t>{1},
-                                                       tfsc::tosa::DataType::uint32_t,
-                                                       tfsc::tosa::Tensor::TensorShape{1}},
+                                                 tfsc::tosa::DataType::uint32_t,
+                                                 tfsc::tosa::Tensor::TensorShape{1}},
                            TosaInputType::TensorConstant);
-    op.outputs.emplace_back(
-        tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, tfsc::tosa::Tensor::TensorShape{2}});
+    op.outputs.emplace_back(tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, tfsc::tosa::Tensor::TensorShape{2}});
 
     EXPECT_TRUE(CompareTosaOperatorData(op, generatedOp[0]));
 }
@@ -239,14 +230,11 @@ TEST(Spirv2TosaTest, Spirv2operatorsGraphInputOrderTest)
     tfsc::tosa::Graph graph{module};
 
     const auto& input1 = graph.AddGraphConstant(tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, {2}});
-    const auto& input2 =
-        graph.AddTensorConstant(tfsc::tosa::Attribute{{2, 3}, tfsc::tosa::DataType::uint32_t, {2}});
+    const auto& input2 = graph.AddTensorConstant(tfsc::tosa::Attribute{{2, 3}, tfsc::tosa::DataType::uint32_t, {2}});
     const auto& shift = graph.AddInput(tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, {1}}, 0);
 
-    const auto& output = graph.AddMulOperator(input1,
-                                              input2,
-                                              shift,
-                                              tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, {2}});
+    const auto& output =
+        graph.AddMulOperator(input1, input2, shift, tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t, {2}});
     graph.AddOutput(output, 0);
 
     graph.FinalizeGraph();
@@ -305,18 +293,16 @@ TEST(Spirv2TosaTest, Spirv2OperatorsGraphMultiOutputTest)
     // Adding FFT2D
     const auto& input1 = graph.AddInput(tfsc::tosa::Tensor{tfsc::tosa::DataType::float32_t, {2, 2, 2}}, 0);
     const auto& input2 = graph.AddInput(tfsc::tosa::Tensor{tfsc::tosa::DataType::float32_t, {2, 2, 2}}, 1);
-    const auto& fft2dOutput =
-        graph.AddFft2dOperator(input1,
-                               input2,
-                               tfsc::tosa::Attribute{{0}, tfsc::tosa::DataType::bool_t, {1}},
-                               tfsc::tosa::Attribute{{0}, tfsc::tosa::DataType::bool_t, {1}},
-                               tfsc::tosa::Tensor{tfsc::tosa::DataType::float32_t, {2, 2, 2}},
-                               tfsc::tosa::Tensor{tfsc::tosa::DataType::float32_t, {2, 2, 2}});
+    const auto& fft2dOutput = graph.AddFft2dOperator(input1,
+                                                     input2,
+                                                     tfsc::tosa::Attribute{{0}, tfsc::tosa::DataType::bool_t, {1}},
+                                                     tfsc::tosa::Attribute{{0}, tfsc::tosa::DataType::bool_t, {1}},
+                                                     tfsc::tosa::Tensor{tfsc::tosa::DataType::float32_t, {2, 2, 2}},
+                                                     tfsc::tosa::Tensor{tfsc::tosa::DataType::float32_t, {2, 2, 2}});
     // Adding ADD connected to the two FFT2D outputs
-    const auto& graphOutput =
-        graph.AddAddOperator(fft2dOutput[0],
-                             fft2dOutput[1],
-                             tfsc::tosa::Tensor{tfsc::tosa::DataType::float32_t, {2, 2, 2}});
+    const auto& graphOutput = graph.AddAddOperator(fft2dOutput[0],
+                                                   fft2dOutput[1],
+                                                   tfsc::tosa::Tensor{tfsc::tosa::DataType::float32_t, {2, 2, 2}});
     graph.AddOutput(graphOutput, 0);
     graph.FinalizeGraph();
 
@@ -334,12 +320,12 @@ TEST(Spirv2TosaTest, Spirv2OperatorsGraphMultiOutputTest)
          tfsc::tosa::Attribute{{0}, tfsc::tosa::DataType::bool_t, {1}}}};
     EXPECT_TRUE(CompareTosaOperatorData(generatedOps[0], fft2dExpected));
 
-    TosaOperator addExpected = TosaOperator{
-        tfsc::tosa::OperatorEnum::Add,
-        {{tfsc::tosa::Tensor{tfsc::tosa::DataType::float32_t, {2, 2, 2}}, TosaInputType::Dynamic},
-         {tfsc::tosa::Tensor{tfsc::tosa::DataType::float32_t, {2, 2, 2}}, TosaInputType::Dynamic}},
-        {tfsc::tosa::Tensor{tfsc::tosa::DataType::float32_t, {2, 2, 2}}},
-        {}};
+    TosaOperator addExpected =
+        TosaOperator{tfsc::tosa::OperatorEnum::Add,
+                     {{tfsc::tosa::Tensor{tfsc::tosa::DataType::float32_t, {2, 2, 2}}, TosaInputType::Dynamic},
+                      {tfsc::tosa::Tensor{tfsc::tosa::DataType::float32_t, {2, 2, 2}}, TosaInputType::Dynamic}},
+                     {tfsc::tosa::Tensor{tfsc::tosa::DataType::float32_t, {2, 2, 2}}},
+                     {}};
     EXPECT_TRUE(CompareTosaOperatorData(generatedOps[1], addExpected));
 }
 
@@ -350,17 +336,13 @@ TEST(Spirv2TosaTest, Spirv2OperatorsComparatorTest)
     for (size_t i = 0; i < 9; ++i)
     {
         TosaOperator op;
-        op.op = static_cast<tfsc::tosa::OperatorEnum>(
-            static_cast<size_t>(tfsc::tosa::OperatorEnum::BitwiseAnd) + i);
-        op.inputs.emplace_back(
-            tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t,
-                                     tfsc::tosa::Tensor::TensorShape{1, static_cast<uint32_t>(i)}});
-        op.inputs.emplace_back(
-            tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t,
-                                     tfsc::tosa::Tensor::TensorShape{1, static_cast<uint32_t>(i)}});
-        op.outputs.emplace_back(
-            tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t,
-                                     tfsc::tosa::Tensor::TensorShape{1, static_cast<uint32_t>(i)}});
+        op.op = static_cast<tfsc::tosa::OperatorEnum>(static_cast<size_t>(tfsc::tosa::OperatorEnum::BitwiseAnd) + i);
+        op.inputs.emplace_back(tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t,
+                                                  tfsc::tosa::Tensor::TensorShape{1, static_cast<uint32_t>(i)}});
+        op.inputs.emplace_back(tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t,
+                                                  tfsc::tosa::Tensor::TensorShape{1, static_cast<uint32_t>(i)}});
+        op.outputs.emplace_back(tfsc::tosa::Tensor{tfsc::tosa::DataType::uint32_t,
+                                                   tfsc::tosa::Tensor::TensorShape{1, static_cast<uint32_t>(i)}});
 
         ops.push_back(op);
         ops.push_back(op);
@@ -418,14 +400,13 @@ TEST(Spirv2TosaTest, GetResIdNumberTest)
 {
     uint32_t idNumber = 12345;
 
-    tfsc::spirv::Instruction instr0{spv::Op::OpTypeInt,
-                                          {tfsc::spirv::Operand{idNumber, tfsc::spirv::RES_ID}}};
+    tfsc::spirv::Instruction instr0{spv::Op::OpTypeInt, {tfsc::spirv::Operand{idNumber, tfsc::spirv::RES_ID}}};
     tfsc::tosa::ResId resId0{&instr0};
     EXPECT_EQ(GetResIdNumber(resId0), idNumber);
 
     tfsc::spirv::Instruction instr1{spv::Op::OpExtInst,
-                                          {tfsc::spirv::Operand{0u, tfsc::spirv::INSTRUCTION_POINTER},
-                                           tfsc::spirv::Operand{idNumber, tfsc::spirv::RES_ID}}};
+                                    {tfsc::spirv::Operand{0u, tfsc::spirv::INSTRUCTION_POINTER},
+                                     tfsc::spirv::Operand{idNumber, tfsc::spirv::RES_ID}}};
     tfsc::tosa::ResId resId1{&instr1};
     EXPECT_EQ(GetResIdNumber(resId1), idNumber);
 
@@ -680,8 +661,7 @@ TEST(Spirv2TosaTest, GetTosaSerializationHandlerBasicTest)
     const auto& input2Id = graph.AddInput({tfsc::tosa::DataType::uint32_t, {1, 2, 3, 4}}, 1);
     const auto& input3Id = graph.AddInput({tfsc::tosa::DataType::uint32_t, {1, 2, 3, 4}}, 2);
 
-    const auto& addOutputId =
-        graph.AddAddOperator(input1Id, input2Id, {tfsc::tosa::DataType::uint32_t, {1, 2, 3, 4}});
+    const auto& addOutputId = graph.AddAddOperator(input1Id, input2Id, {tfsc::tosa::DataType::uint32_t, {1, 2, 3, 4}});
 
     const auto& subOutputId =
         graph.AddSubOperator(addOutputId, input3Id, {tfsc::tosa::DataType::uint32_t, {1, 2, 3, 4}});
@@ -711,8 +691,8 @@ TEST(Spirv2TosaTest, GetTosaSerializationHandlerTensorNameTest)
     auto module = tfsc::CreateModule(tfsc::TOSAVersion::v1_0);
     tfsc::tosa::Graph graph{module};
 
-    const auto& literal2 = graph.AddTensorConstant({{2.0f}, tfsc::tosa::DataType::float32_t, {2}});
-    const auto& literal4 = graph.AddTensorConstant({{4.0f}, tfsc::tosa::DataType::float32_t, {2}});
+    const auto& literal2 = graph.AddTensorConstant({{2.0f, 2.0f}, tfsc::tosa::DataType::float32_t, {2}});
+    const auto& literal4 = graph.AddTensorConstant({{4.0f, 2.0f}, tfsc::tosa::DataType::float32_t, {2}});
     const auto& literalI0 = graph.AddTensorConstant({{0}, tfsc::tosa::DataType::int8_t, {1}});
     const auto& literalF0 = graph.AddTensorConstant({{0.0f}, tfsc::tosa::DataType::float32_t, {1}});
 
@@ -723,13 +703,11 @@ TEST(Spirv2TosaTest, GetTosaSerializationHandlerTensorNameTest)
     const auto& mul1Op = graph.AddMulOperator(in1, in3, literalI0, {tfsc::tosa::DataType::float32_t, {2}});
 
     const auto& powOp = graph.AddPowOperator(in2, literal2, {tfsc::tosa::DataType::float32_t, {2}});
-    const auto& mul2Op =
-        graph.AddMulOperator(mul1Op, literal4, literalI0, {tfsc::tosa::DataType::float32_t, {2}});
+    const auto& mul2Op = graph.AddMulOperator(mul1Op, literal4, literalI0, {tfsc::tosa::DataType::float32_t, {2}});
 
     const auto& negativeIn2 =
         graph.AddNegateOperator(in2, literalF0, literalF0, {tfsc::tosa::DataType::float32_t, {2}});
-    const auto& doubleIn1 =
-        graph.AddMulOperator(in1, literal2, literalI0, {tfsc::tosa::DataType::float32_t, {2}});
+    const auto& doubleIn1 = graph.AddMulOperator(in1, literal2, literalI0, {tfsc::tosa::DataType::float32_t, {2}});
     const auto& inverseIn1 = graph.AddReciprocalOperator(doubleIn1, {tfsc::tosa::DataType::float32_t, {2}});
 
     const auto& delta = graph.AddSubOperator(powOp, mul2Op, {tfsc::tosa::DataType::float32_t, {2}});
@@ -739,10 +717,8 @@ TEST(Spirv2TosaTest, GetTosaSerializationHandlerTensorNameTest)
     const auto& subRsqrt = graph.AddSubOperator(negativeIn2, rsqrtOp, {tfsc::tosa::DataType::float32_t, {2}});
     const auto& addRsqrt = graph.AddAddOperator(negativeIn2, rsqrtOp, {tfsc::tosa::DataType::float32_t, {2}});
 
-    const auto& result2 =
-        graph.AddMulOperator(subRsqrt, inverseIn1, literalI0, {tfsc::tosa::DataType::float32_t, {2}});
-    const auto& result1 =
-        graph.AddMulOperator(addRsqrt, inverseIn1, literalI0, {tfsc::tosa::DataType::float32_t, {2}});
+    const auto& result2 = graph.AddMulOperator(subRsqrt, inverseIn1, literalI0, {tfsc::tosa::DataType::float32_t, {2}});
+    const auto& result1 = graph.AddMulOperator(addRsqrt, inverseIn1, literalI0, {tfsc::tosa::DataType::float32_t, {2}});
 
     graph.AddOutput(result1, 1);
     graph.AddOutput(result2, 2);
@@ -769,7 +745,8 @@ TEST(Spirv2TosaTest, GetTosaSerializationHandlerTensorNameTest)
     const auto binarySpirv = tfsc::WriteToBinary(module2);
     EXPECT_NE(testutils::DisassembleSPIRV(binarySpirv, true), "");
     // Checking that the modules are equal
-    const auto diff = testutils::CompareModules(module, module2);
+    const auto diff = testutils::CompareModules(module, module2, {testutils::ModelView::module});
+    std::cout << diff;
     EXPECT_TRUE(diff.empty());
 }
 
@@ -790,16 +767,14 @@ TEST(Spirv2TosaTest, GetOperatorNameTest)
     EXPECT_EQ(tfsc::tosa::GetOperatorName(tfsc::tosa::OperatorEnum::Sigmoid), "Sigmoid");
     EXPECT_EQ(tfsc::tosa::GetOperatorName(tfsc::tosa::OperatorEnum::Tanh), "Tanh");
     EXPECT_EQ(tfsc::tosa::GetOperatorName(tfsc::tosa::OperatorEnum::Add), "Add");
-    EXPECT_EQ(tfsc::tosa::GetOperatorName(tfsc::tosa::OperatorEnum::ArithmeticRightShift),
-              "ArithmeticRightShift");
+    EXPECT_EQ(tfsc::tosa::GetOperatorName(tfsc::tosa::OperatorEnum::ArithmeticRightShift), "ArithmeticRightShift");
     EXPECT_EQ(tfsc::tosa::GetOperatorName(tfsc::tosa::OperatorEnum::BitwiseAnd), "BitwiseAnd");
     EXPECT_EQ(tfsc::tosa::GetOperatorName(tfsc::tosa::OperatorEnum::BitwiseOr), "BitwiseOr");
     EXPECT_EQ(tfsc::tosa::GetOperatorName(tfsc::tosa::OperatorEnum::BitwiseXor), "BitwiseXor");
     EXPECT_EQ(tfsc::tosa::GetOperatorName(tfsc::tosa::OperatorEnum::IntDiv), "IntDiv");
     EXPECT_EQ(tfsc::tosa::GetOperatorName(tfsc::tosa::OperatorEnum::LogicalAnd), "LogicalAnd");
     EXPECT_EQ(tfsc::tosa::GetOperatorName(tfsc::tosa::OperatorEnum::LogicalLeftShift), "LogicalLeftShift");
-    EXPECT_EQ(tfsc::tosa::GetOperatorName(tfsc::tosa::OperatorEnum::LogicalRightShift),
-              "LogicalRightShift");
+    EXPECT_EQ(tfsc::tosa::GetOperatorName(tfsc::tosa::OperatorEnum::LogicalRightShift), "LogicalRightShift");
     EXPECT_EQ(tfsc::tosa::GetOperatorName(tfsc::tosa::OperatorEnum::LogicalOr), "LogicalOr");
     EXPECT_EQ(tfsc::tosa::GetOperatorName(tfsc::tosa::OperatorEnum::LogicalXor), "LogicalXor");
     EXPECT_EQ(tfsc::tosa::GetOperatorName(tfsc::tosa::OperatorEnum::Maximum), "Maximum");

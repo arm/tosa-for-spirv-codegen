@@ -21,6 +21,7 @@ struct HighlightCtx
     std::vector<std::string> m_rhs = {};
     std::string m_pre = {};
     std::string m_post = {};
+    std::string m_tosaOp = {};
 };
 
 const unsigned int boundaryWidth = 120;

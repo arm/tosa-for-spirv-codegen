@@ -28,8 +28,7 @@ struct AdjacencyMatrix
 
 inline bool isAdjacencyMatrixOp(const spv::Op op)
 {
-    return op == spv::OpGraphInputARM || op == spv::OpGraphConstantARM || op == spv::OpExtInst ||
-           op == spv::OpGraphSetOutputARM;
+    return op == spv::OpGraphInputARM || op == spv::OpExtInst || op == spv::OpGraphSetOutputARM;
 }
 
 } // namespace testutils

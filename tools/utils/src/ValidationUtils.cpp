@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+#include <iostream>
 #include <sstream>
 #include <stdexcept>
 
@@ -112,47 +113,127 @@ void CheckConstant(const spirv::Instruction* instruction,
     {
         throw std::invalid_argument("Invalid instruction passed to CheckConstant");
     }
-    if (expectedDataType != tosa::DataType::int48_t && instruction->m_Operands.size() != 3u)
-    {
-        throw std::invalid_argument("Int DataType must have 3 operands");
-    }
-    if (expectedDataType == tosa::DataType::int48_t && instruction->m_Operands.size() != 4u)
-    {
-        throw std::invalid_argument("Int48 DataType must have 4 operands");
-    }
 
-    if (instruction->GetOpCode() != spv::OpConstant ||
-        instruction->m_Operands[0].m_Type != spirv::INSTRUCTION_POINTER ||
-        instruction->m_Operands[1].m_Type != spirv::RES_ID ||
-        instruction->m_Operands[2].m_Type != spirv::LITERAL_WORD ||
-        (instruction->m_Operands.size() == 4 && instruction->m_Operands[3].m_Type != spirv::LITERAL_WORD))
+    const auto opcode = instruction->GetOpCode();
+    const bool isBool = (expectedDataType == tosa::DataType::bool_t);
+    const bool isInt48 = (expectedDataType == tosa::DataType::int48_t);
+
+    // ---- Operand count checks by opcode/type ----
+    if (opcode == spv::OpConstantTrue || opcode == spv::OpConstantFalse)
+    {
+        // Boolean constants: ResultType, ResultId (no literal words)
+        if (!isBool)
+        {
+            std::ostringstream oss;
+            oss << "Boolean constant with non-boolean expected type. OpCode=" << opcode;
+            throw std::invalid_argument(oss.str());
+        }
+        if (instruction->m_Operands.size() != 2u)
+        {
+            throw std::invalid_argument("Bool Constant must have 2 operands");
+        }
+    }
+    else if (opcode == spv::OpConstant)
+    {
+        // Integer constants (including int48_t)
+        const std::size_t expectedOperands = isInt48 ? 4u : 3u;
+        if (instruction->m_Operands.size() != expectedOperands)
+        {
+            if (!isInt48 && instruction->m_Operands.size() != 3u)
+            {
+                std::cout << "instruction->GetOpCode(): " << opcode;
+                throw std::invalid_argument("Int DataType must have 3 operands");
+            }
+            if (isInt48 && instruction->m_Operands.size() != 4u)
+            {
+                throw std::invalid_argument("Int48 DataType must have 4 operands");
+            }
+        }
+    }
+    else
     {
         std::ostringstream oss;
-        oss << "Invalid Constant Data: OpCode=" << instruction->GetOpCode()
-            << ", Operand[0] m_Type=" << instruction->m_Operands[0].m_Type
-            << ", Operand[1] m_Type=" << instruction->m_Operands[1].m_Type
-            << ", Operand[2] m_Type=" << instruction->m_Operands[2].m_Type;
-        if (instruction->m_Operands.size() == 4)
-            oss << ", Operand[3] m_Type=" << instruction->m_Operands[3].m_Type;
+        oss << "Unsupported opcode in CheckConstant: " << opcode;
         throw std::invalid_argument(oss.str());
     }
 
+    // ---- Operand type checks ----
+    // Common first two operands: ResultType, ResultId
+    if (instruction->m_Operands[0].m_Type != spirv::INSTRUCTION_POINTER ||
+        instruction->m_Operands[1].m_Type != spirv::RES_ID)
+    {
+        std::ostringstream oss;
+        oss << "Invalid Constant Data (common operands). OpCode=" << opcode
+            << ", Operand[0] m_Type=" << instruction->m_Operands[0].m_Type
+            << ", Operand[1] m_Type=" << instruction->m_Operands[1].m_Type;
+        throw std::invalid_argument(oss.str());
+    }
+
+    if (opcode == spv::OpConstant)
+    {
+        if (instruction->m_Operands[2].m_Type != spirv::LITERAL_WORD ||
+            (isInt48 && instruction->m_Operands[3].m_Type != spirv::LITERAL_WORD))
+        {
+            std::ostringstream oss;
+            oss << "Invalid Constant Data (literal operands). OpCode=" << opcode
+                << ", Operand[2] m_Type=" << instruction->m_Operands[2].m_Type;
+            if (isInt48)
+                oss << ", Operand[3] m_Type=" << instruction->m_Operands[3].m_Type;
+            throw std::invalid_argument(oss.str());
+        }
+    }
+
+    // ---- Semantic checks shared by all constants ----
     CheckDataType(instruction->m_Operands[0].m_InstructionPtr, expectedDataType);
     CheckResID(instruction->m_Operands[1]);
 
-    if (expectedValue0.has_value() && instruction->m_Operands[2].m_LiteralWord != expectedValue0.value())
+    // ---- Value checks ----
+    if (opcode == spv::OpConstant)
     {
-        std::ostringstream oss;
-        oss << "Constant value mismatch. Expected: " << expectedValue0.value()
-            << ", Got: " << instruction->m_Operands[2].m_LiteralWord;
-        throw std::invalid_argument(oss.str());
+        if (expectedValue0.has_value() && instruction->m_Operands[2].m_LiteralWord != expectedValue0.value())
+        {
+            std::ostringstream oss;
+            oss << "Constant value mismatch (word0). Expected: " << expectedValue0.value()
+                << ", Got: " << instruction->m_Operands[2].m_LiteralWord;
+            throw std::invalid_argument(oss.str());
+        }
+
+        // NOTE: fixed bug — check the second literal word (index 3) for int48_t.
+        if (isInt48 && expectedValue1.has_value() && instruction->m_Operands[3].m_LiteralWord != expectedValue1.value())
+        {
+            std::ostringstream oss;
+            oss << "Constant value mismatch (word1). Expected: " << expectedValue1.value()
+                << ", Got: " << instruction->m_Operands[3].m_LiteralWord;
+            throw std::invalid_argument(oss.str());
+        }
     }
-    if (expectedValue1.has_value() && instruction->m_Operands[2].m_LiteralWord != expectedValue1.value())
+    else
     {
-        std::ostringstream oss;
-        oss << "Constant value mismatch. Expected: " << expectedValue1.value()
-            << ", Got: " << instruction->m_Operands[2].m_LiteralWord;
-        throw std::invalid_argument(oss.str());
+        // Boolean constants; allow expectedValue0/1 (0=false, nonzero=true)
+        const bool actual = (opcode == spv::OpConstantTrue);
+
+        if (expectedValue0.has_value())
+        {
+            const bool expected = (expectedValue0.value() != 0u);
+            if (expected != actual)
+            {
+                std::ostringstream oss;
+                oss << "Constant bool mismatch. Expected: " << (expected ? "true" : "false")
+                    << ", Got: " << (actual ? "true" : "false");
+                throw std::invalid_argument(oss.str());
+            }
+        }
+        if (expectedValue1.has_value())
+        {
+            const bool expected = (expectedValue1.value() != 0u);
+            if (expected != actual)
+            {
+                std::ostringstream oss;
+                oss << "Constant bool mismatch (expectedValue1). Expected: " << (expected ? "true" : "false")
+                    << ", Got: " << (actual ? "true" : "false");
+                throw std::invalid_argument(oss.str());
+            }
+        }
     }
 }
 

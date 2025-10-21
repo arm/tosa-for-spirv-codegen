@@ -9,48 +9,8 @@
 #include <Operand.hpp>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 #include <unordered_map>
-
-// Maps separated into their own functions to enable test coverage
-static const std::unordered_map<std::string, spv::Op>& getInstructionMap()
-{
-    static const auto mapInstance = []()
-    {
-        std::unordered_map<std::string, spv::Op> tmp;
-        tmp.reserve(29);
-        tmp.emplace("OpCapability", spv::Op::OpCapability);
-        tmp.emplace("OpExtension", spv::Op::OpExtension);
-        tmp.emplace("OpMemoryModel", spv::Op::OpMemoryModel);
-        tmp.emplace("OpTypeInt", spv::Op::OpTypeInt);
-        tmp.emplace("OpTypeFloat", spv::Op::OpTypeFloat);
-        tmp.emplace("OpTypeBool", spv::Op::OpTypeBool);
-        tmp.emplace("OpConstantTrue", spv::Op::OpConstantTrue);
-        tmp.emplace("OpConstantFalse", spv::Op::OpConstantFalse);
-        tmp.emplace("OpConstant", spv::Op::OpConstant);
-        tmp.emplace("OpConstantComposite", spv::Op::OpConstantComposite);
-        tmp.emplace("OpConstantNull", spv::Op::OpConstantNull);
-        tmp.emplace("OpConstantCompositeReplicateEXT", spv::Op::OpConstantCompositeReplicateEXT);
-        tmp.emplace("OpTypeArray", spv::Op::OpTypeArray);
-        tmp.emplace("OpTypeTensorARM", spv::Op::OpTypeTensorARM);
-        tmp.emplace("OpTypeStruct", spv::Op::OpTypeStruct);
-        tmp.emplace("OpExtInst", spv::Op::OpExtInst);
-        tmp.emplace("OpCompositeExtract", spv::Op::OpCompositeExtract);
-        tmp.emplace("OpTypeGraphARM", spv::Op::OpTypeGraphARM);
-        tmp.emplace("OpExtInstImport", spv::Op::OpExtInstImport);
-        tmp.emplace("OpGraphInputARM", spv::Op::OpGraphInputARM);
-        tmp.emplace("OpGraphSetOutputARM", spv::Op::OpGraphSetOutputARM);
-        tmp.emplace("OpGraphARM", spv::Op::OpGraphARM);
-        tmp.emplace("OpTypePointer", spv::Op::OpTypePointer);
-        tmp.emplace("OpVariable", spv::Op::OpVariable);
-        tmp.emplace("OpDecorate", spv::Op::OpDecorate);
-        tmp.emplace("OpGraphEntryPointARM", spv::Op::OpGraphEntryPointARM);
-        tmp.emplace("OpGraphEndARM", spv::Op::OpGraphEndARM);
-        tmp.emplace("OpGraphConstantARM", spv::Op::OpGraphConstantARM);
-        tmp.emplace("OpName", spv::Op::OpName);
-        return tmp;
-    }();
-    return mapInstance;
-}
 
 spv::Op GetOpEnum(const std::string& instruction)
 {
@@ -94,89 +54,9 @@ spv::Op GetOpEnum(const std::string& instruction)
     throw std::invalid_argument("Unsupported instruction: " + instruction);
 }
 
-static const std::unordered_map<spv::Op, std::string>& getOpToStringMap()
-{
-    static const auto mapInstance = []()
-    {
-        std::unordered_map<spv::Op, std::string> tmp;
-        tmp.reserve(29);
-        tmp.emplace(spv::Op::OpCapability, "OpCapability");
-        tmp.emplace(spv::Op::OpExtension, "OpExtension");
-        tmp.emplace(spv::Op::OpMemoryModel, "OpMemoryModel");
-        tmp.emplace(spv::Op::OpTypeInt, "OpTypeInt");
-        tmp.emplace(spv::Op::OpTypeFloat, "OpTypeFloat");
-        tmp.emplace(spv::Op::OpTypeBool, "OpTypeBool");
-        tmp.emplace(spv::Op::OpConstantTrue, "OpConstantTrue");
-        tmp.emplace(spv::Op::OpConstantFalse, "OpConstantFalse");
-        tmp.emplace(spv::Op::OpConstant, "OpConstant");
-        tmp.emplace(spv::Op::OpConstantComposite, "OpConstantComposite");
-        tmp.emplace(spv::Op::OpConstantNull, "OpConstantNull");
-        tmp.emplace(spv::Op::OpConstantCompositeReplicateEXT, "OpConstantCompositeReplicateEXT");
-        tmp.emplace(spv::Op::OpTypeArray, "OpTypeArray");
-        tmp.emplace(spv::Op::OpTypeTensorARM, "OpTypeTensorARM");
-        tmp.emplace(spv::Op::OpTypeStruct, "OpTypeStruct");
-        tmp.emplace(spv::Op::OpExtInst, "OpExtInst");
-        tmp.emplace(spv::Op::OpCompositeExtract, "OpCompositeExtract");
-        tmp.emplace(spv::Op::OpTypeGraphARM, "OpTypeGraphARM");
-        tmp.emplace(spv::Op::OpExtInstImport, "OpExtInstImport");
-        tmp.emplace(spv::Op::OpGraphInputARM, "OpGraphInputARM");
-        tmp.emplace(spv::Op::OpGraphSetOutputARM, "OpGraphSetOutputARM");
-        tmp.emplace(spv::Op::OpGraphARM, "OpGraphARM");
-        tmp.emplace(spv::Op::OpTypePointer, "OpTypePointer");
-        tmp.emplace(spv::Op::OpVariable, "OpVariable");
-        tmp.emplace(spv::Op::OpDecorate, "OpDecorate");
-        tmp.emplace(spv::Op::OpGraphEntryPointARM, "OpGraphEntryPointARM");
-        tmp.emplace(spv::Op::OpGraphEndARM, "OpGraphEndARM");
-        tmp.emplace(spv::Op::OpGraphConstantARM, "OpGraphConstantARM");
-        tmp.emplace(spv::Op::OpName, "OpName");
-        return tmp;
-    }();
-    return mapInstance;
-}
-
-std::string GetOpString(const spv::Op op)
-{
-    const std::unordered_map<spv::Op, std::string> opToString = {
-        {spv::Op::OpCapability, "OpCapability"},
-        {spv::Op::OpExtension, "OpExtension"},
-        {spv::Op::OpMemoryModel, "OpMemoryModel"},
-        {spv::Op::OpTypeInt, "OpTypeInt"},
-        {spv::Op::OpTypeFloat, "OpTypeFloat"},
-        {spv::Op::OpTypeBool, "OpTypeBool"},
-        {spv::Op::OpConstantTrue, "OpConstantTrue"},
-        {spv::Op::OpConstantFalse, "OpConstantFalse"},
-        {spv::Op::OpConstant, "OpConstant"},
-        {spv::Op::OpConstantComposite, "OpConstantComposite"},
-        {spv::Op::OpConstantNull, "OpConstantNull"},
-        {spv::Op::OpConstantCompositeReplicateEXT, "OpConstantCompositeReplicateEXT"},
-        {spv::Op::OpTypeArray, "OpTypeArray"},
-        {spv::Op::OpTypeTensorARM, "OpTypeTensorARM"},
-        {spv::Op::OpTypeStruct, "OpTypeStruct"},
-        {spv::Op::OpExtInst, "OpExtInst"},
-        {spv::Op::OpCompositeExtract, "OpCompositeExtract"},
-        {spv::Op::OpTypeGraphARM, "OpTypeGraphARM"},
-        {spv::Op::OpExtInstImport, "OpExtInstImport"},
-        {spv::Op::OpGraphInputARM, "OpGraphInputARM"},
-        {spv::Op::OpGraphSetOutputARM, "OpGraphSetOutputARM"},
-        {spv::Op::OpGraphARM, "OpGraphARM"},
-        {spv::Op::OpTypePointer, "OpTypePointer"},
-        {spv::Op::OpVariable, "OpVariable"},
-        {spv::Op::OpDecorate, "OpDecorate"},
-        {spv::Op::OpGraphEntryPointARM, "OpGraphEntryPointARM"},
-        {spv::Op::OpGraphEndARM, "OpGraphEndARM"},
-        {spv::Op::OpGraphConstantARM, "OpGraphConstantARM"}};
-
-    if (const auto it = opToString.find(op); it != opToString.end())
-    {
-        return it->second;
-    }
-    throw std::invalid_argument("Unsupported op enum value");
-}
-
 static const std::unordered_map<std::string, TOSAInstructions>& getTosaInstructionsMap()
 {
-    static const auto mapInstance = []()
-    {
+    static const auto mapInstance = []() {
         std::unordered_map<std::string, TOSAInstructions> tmp;
         tmp.reserve(66);
         tmp.emplace("ARGMAX", TOSAARGMAX);
@@ -404,8 +284,7 @@ tfsc::tosa::OperatorEnum GetOperatorEnum(TOSAInstructions instructionType)
 
 static const std::unordered_map<std::string, spv::Capability>& getCapabilityMap()
 {
-    static const auto mapInstance = []()
-    {
+    static const auto mapInstance = []() {
         std::unordered_map<std::string, spv::Capability> tmp;
         tmp.reserve(10);
         tmp.emplace("VulkanMemoryModel", spv::Capability::CapabilityVulkanMemoryModel);
@@ -522,7 +401,8 @@ std::string OpToString(const spv::Op op)
     {
         return it->second;
     }
-    throw std::invalid_argument("Unsupported op enum value");
+    std::string er = "GetOpString::Unsupported op enum value: " + std::to_string(op);
+    throw std::invalid_argument(er);
 }
 
 unsigned int GetResId(const tfsc::spirv::Instruction& instruction)

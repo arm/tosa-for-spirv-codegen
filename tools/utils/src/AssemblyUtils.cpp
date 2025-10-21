@@ -5,6 +5,7 @@
 
 #include "EnumMaps.hpp"
 #include <AssemblyUtils.hpp>
+#include <cstring>
 
 #include <spirv-tools/libspirv.hpp>
 
@@ -17,7 +18,7 @@
 namespace testutils
 {
 
-std::string DisassembleSPIRV(const std::vector<uint32_t>& binary, bool runValidation)
+std::string DisassembleSPIRV(const std::vector<uint32_t>& binary, bool runValidation, bool friendlyNames)
 {
     spvtools::SpirvTools tools{SPV_ENV_UNIVERSAL_1_6};
 
@@ -51,13 +52,14 @@ std::string DisassembleSPIRV(const std::vector<uint32_t>& binary, bool runValida
         std::cerr << "DisassembleSPIRV():Failed to validate SPIR-V program." << std::endl;
         return {};
     }
-
+    uint32_t options = SPV_BINARY_TO_TEXT_OPTION_INDENT | SPV_BINARY_TO_TEXT_OPTION_NO_HEADER;
+    if (friendlyNames)
+    {
+        options |= SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES;
+    }
     // Return SPIR-V in human-readable form with indentation and friendly names
     // for types.
-    if (!tools.Disassemble(binary,
-                           &humanReadableSpirV,
-                           SPV_BINARY_TO_TEXT_OPTION_INDENT | SPV_BINARY_TO_TEXT_OPTION_NO_HEADER |
-                               SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES))
+    if (!tools.Disassemble(binary, &humanReadableSpirV, options))
     {
         // Exception
         std::cerr << "DisassembleSPIRV():Failed to disassemble SPIR-V program." << std::endl;
@@ -73,6 +75,11 @@ using ResIdMap = std::unordered_map<std::string, Operand>;
 
 std::vector<Operand> ParseOperand(const std::string& token, ResIdMap& resIdMap)
 {
+    if (token.empty())
+    {
+        throw std::invalid_argument("Empty operand token");
+    }
+
     if (const auto it = resIdMap.find(token); it != resIdMap.end())
     {
         return {it->second};
@@ -85,21 +92,51 @@ std::vector<Operand> ParseOperand(const std::string& token, ResIdMap& resIdMap)
         {
             throw std::invalid_argument("Mismatched quotes in operand: " + token);
         }
-        // Remove the quotes.
         const std::string inner = token.substr(1, token.size() - 2);
         return {Operand(inner)};
     }
 
-    // Otherwise, try to parse as an integer.
-    // Remove trailing punctuation (e.g., commas or parentheses) if any.
-    std::string intToken = token;
-    while (!intToken.empty() && !std::isdigit(intToken.back()) && intToken.back() != '-')
+    // Keep only chars that can appear in a numeric literal.
+    auto isNumericChar = [](unsigned char c) {
+        return static_cast<bool>(std::isdigit(c)) || c == '-' || c == '+' || c == '.' || c == 'e' || c == 'E';
+    };
+
+    std::string numToken = token;
+    while (!numToken.empty() && !isNumericChar(static_cast<unsigned char>(numToken.back())))
     {
-        intToken.pop_back();
+        numToken.pop_back();
     }
+    if (numToken.empty())
+    {
+        throw std::invalid_argument("Invalid terminal operand: " + token);
+    }
+
+    // If it looks like a float (has '.' or exponent), parse as float32 and pack bits.
+    if (numToken.find('.') != std::string::npos || numToken.find('e') != std::string::npos ||
+        numToken.find('E') != std::string::npos)
+    {
+        try
+        {
+            const float f = std::stof(numToken); // single-precision only
+            static_assert(sizeof(float) == 4, "Float is not 32-bit on this platform");
+            uint32_t bits = 0;
+            std::memcpy(&bits, &f, sizeof(bits)); // preserve IEEE-754 bit pattern
+            return {Operand(bits)};
+        }
+        catch (const std::out_of_range&)
+        {
+            throw std::invalid_argument("Invalid terminal operand (float32 out of range): " + token);
+        }
+        catch (const std::exception&)
+        {
+            throw std::invalid_argument("Invalid terminal operand (float32 parse): " + token);
+        }
+    }
+
+    // treat as int
     try
     {
-        const uint64_t value = std::stoull(intToken);
+        const uint64_t value = std::stoull(numToken);
         const auto low = static_cast<uint32_t>(value);
         const auto high = static_cast<uint32_t>(value >> 32);
         if (high == 0)
@@ -262,10 +299,12 @@ void ParseSpirvTextImpl(const std::string& text, Module& module, ResIdMap& resId
                 }
             }
         }
-        if (firstPass && (opcode == spv::Op::OpDecorate || opcode == spv::Op::OpGraphEntryPointARM) || opcode == spv::Op::OpNop)
+        if (firstPass && (opcode == spv::Op::OpDecorate || opcode == spv::Op::OpGraphEntryPointARM) ||
+            opcode == spv::Op::OpNop)
         {
             continue;
         }
+
         if (!resId.empty())
         {
             // ResId position needs to be specified

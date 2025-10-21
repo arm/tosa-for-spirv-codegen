@@ -18,7 +18,7 @@ namespace testutils
 
 std::string
 DiffSPIRV(const std::vector<uint32_t> &rhsBinary, const std::vector<uint32_t> &lhsBinary, bool runValidation = true);
-std::string DisassembleSPIRV(const std::vector<uint32_t> &binary, bool runValidation = true);
+std::string DisassembleSPIRV(const std::vector<uint32_t> &binary, bool runValidation = true, bool friendlyNames = true);
 
 std::shared_ptr<tfsc::spirv::Module> LoadSPIRVDisassembly(const std::string &text);
 

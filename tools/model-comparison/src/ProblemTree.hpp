@@ -1,7 +1,7 @@
-//
 // Copyright © 2025 Arm Ltd and Contributors. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 //
+#pragma once
 
 #include <Instruction.hpp>
 #include <ModuleComparator.hpp>

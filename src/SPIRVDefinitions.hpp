@@ -14,10 +14,11 @@ namespace tfsc::spirv
 Operand CreateDataType(tosa::DataType datatype, Module& module);
 Operand CreateConstant(uint32_t value, tosa::DataType dataType, Module& module);
 Operand CreateConstantDouble(uint32_t valueLow, uint32_t valueHigh, Module& module);
-Operand
-CreateConstantComposite(const std::vector<uint32_t>& array, const Operand& typeId, Module& module, bool reduce = true);
-Operand CreateConstantCompositeDouble(const std::vector<uint32_t>& array, const Operand& typeId, Module& module);
-Operand CreateConstantCompositeTyped(const std::vector<uint32_t>& array, const Operand& typeId, Module& module, tosa::DataType type);
+Operand CreateConstantComposite(const std::vector<uint32_t>& array,
+                                const Operand& typeId,
+                                Module& module,
+                                tosa::DataType type = tosa::DataType::int32_t,
+                                bool reduce = false);
 Operand CreateTensor(const tosa::Tensor& tensor, Module& module);
 Operand CreateAttribute(const tosa::Attribute& attribute, Module& module);
 

@@ -48,15 +48,13 @@ AdjacencyMatrix::AdjacencyMatrix(const Module &module)
     // SPIRV graph Where the graph only consists of the 4 SPIRV Op instructions
     // below
     const auto [inputsBegin, inputsEnd] = module.GetInstructionsOfType(spv::OpGraphInputARM);
-    const auto [constantsBegin, constantsEnd] = module.GetInstructionsOfType(spv::OpGraphConstantARM);
     const auto [operatorsBegin, operatorsEnd] = module.GetInstructionsOfType(spv::OpExtInst);
     const auto [outputsBegin, outputsEnd] = module.GetInstructionsOfType(spv::OpGraphSetOutputARM);
 
     const auto inputSize = std::distance(inputsBegin, inputsEnd);
-    const auto constantSize = std::distance(constantsBegin, constantsEnd);
     const auto operatorSize = std::distance(operatorsBegin, operatorsEnd);
     const auto outputSize = std::distance(outputsBegin, outputsEnd);
-    const auto totalSize = inputSize + constantSize + operatorSize + outputSize;
+    const auto totalSize = inputSize + operatorSize + outputSize;
 
     m_AdjacencyMatrix = std::vector(totalSize, std::vector<unsigned int>{});
     m_Instructions.reserve(totalSize);

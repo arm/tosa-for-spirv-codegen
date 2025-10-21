@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <TosaSerializationParser.hpp>
 #include <ParserUtils.hpp>
+#include <TosaSerializationParser.hpp>
 
 namespace tfsc::parsers
 {
@@ -32,10 +32,7 @@ TosaSerializationParser::TosaSerializationParser(TosaSerializationHandler* handl
     }
 }
 
-bool IsConstOp(const TosaSerializationOperator* op)
-{
-    return op->GetOp() == Op_CONST || op->GetOp() == Op_CONST_SHAPE;
-}
+bool IsConstOp(const TosaSerializationOperator* op) { return op->GetOp() == Op_CONST || op->GetOp() == Op_CONST_SHAPE; }
 
 #ifndef NDEBUG
 bool IsTensorConstant(TosaSerializationBasicBlock* block, const std::string_view tensorName)
@@ -52,7 +49,7 @@ bool IsTensorConstant(TosaSerializationBasicBlock* block, const std::string_view
     }
     return false;
 }
-#endif  // NDEBUG
+#endif // NDEBUG
 
 ResId TosaSerializationParser::AddExternalConstant(Graph& graph,
                                                    const Tensor& constTensor,
@@ -101,10 +98,9 @@ ResId TosaSerializationParser::ParseConstantShape(const std::string& shapeName, 
     }
 
     // Create a 1-D int32 tensor of length == rank(dims.size())
-    Tensor constTensor(DataType::int32_t,
-                       { static_cast<unsigned int>(dims.size()) });
+    Tensor constTensor(DataType::int32_t, {static_cast<unsigned int>(dims.size())});
 
-    const Attribute attr{ data32, DataType::int32_t, constTensor.GetTensorShape() };
+    const Attribute attr{data32, DataType::int32_t, constTensor.GetTensorShape()};
     ResId constantResId = graph.AddTensorConstant(attr);
 
     m_OpNameResIdMap.try_emplace(shapeName, constantResId);
@@ -123,8 +119,7 @@ void TosaSerializationParser::ParseConstantOp(TosaSerializationOperator* op, Gra
     const auto& tensorName = op->GetOutputTensorNames()[0];
     if (m_OpNameResIdMap.find(tensorName) != m_OpNameResIdMap.end())
     {
-        throw std::runtime_error("ParseConstantOp: tensor name already exists in m_OpNameResIdMap: " +
-                                 tensorName);
+        throw std::runtime_error("ParseConstantOp: tensor name already exists in m_OpNameResIdMap: " + tensorName);
     }
 
     if (op->GetOp() == Op_CONST_SHAPE)
@@ -137,7 +132,6 @@ void TosaSerializationParser::ParseConstantOp(TosaSerializationOperator* op, Gra
     }
 }
 
-
 ResId TosaSerializationParser::ParseConstantTensor(const std::string& tensorName, Graph& graph)
 {
     assert(IsTensorConstant(m_Block, tensorName) && "ParseConstantTensor called on a non-constant tensor");
@@ -148,9 +142,8 @@ ResId TosaSerializationParser::ParseConstantTensor(const std::string& tensorName
         throw std::runtime_error("ParseConstantTensor: m_Block->GetTensorByName() returned null for: " + tensorName);
     }
 
-    const Tensor constTensor(
-        GetDataTypeFromDType(constTosaTensor->GetDtype()),
-        ConvertTensorShape(constTosaTensor->GetShape()));
+    const Tensor constTensor(GetDataTypeFromDType(constTosaTensor->GetDtype()),
+                             ConvertTensorShape(constTosaTensor->GetShape()));
 
     constexpr auto internalConstantLimit = 16u;
     if (constTensor.GetTensorShape().size() > 1 || constTensor.GetNumElements() > internalConstantLimit)
@@ -158,7 +151,8 @@ ResId TosaSerializationParser::ParseConstantTensor(const std::string& tensorName
         if (constTensor.GetDataType() == DataType::int48_t)
         {
             std::vector<int64_t> vec;
-            const auto err = TosaSerializationHandler::ConvertU8toI48(constTosaTensor->GetData(), constTensor.GetNumElements(), vec);
+            const auto err =
+                TosaSerializationHandler::ConvertU8toI48(constTosaTensor->GetData(), constTensor.GetNumElements(), vec);
             if (err != TOSA_OK)
             {
                 throw std::runtime_error("Failed to convert int48_t tensor: " + tensorName);
@@ -168,7 +162,8 @@ ResId TosaSerializationParser::ParseConstantTensor(const std::string& tensorName
         if (constTensor.GetDataType() == DataType::int4_t)
         {
             std::vector<int8_t> vec;
-            const auto err = TosaSerializationHandler::ConvertU8toI4(constTosaTensor->GetData(), constTensor.GetNumElements(), vec);
+            const auto err =
+                TosaSerializationHandler::ConvertU8toI4(constTosaTensor->GetData(), constTensor.GetNumElements(), vec);
             if (err != TOSA_OK)
             {
                 throw std::runtime_error("Failed to convert int4_t tensor: " + tensorName);
@@ -187,7 +182,8 @@ ResId TosaSerializationParser::ParseConstantTensor(const std::string& tensorName
     if (constTensor.GetDataType() == DataType::int48_t)
     {
         std::vector<int64_t> vec;
-        const auto err = TosaSerializationHandler::ConvertU8toI48(constTosaTensor->GetData(), constTensor.GetNumElements(), vec);
+        const auto err =
+            TosaSerializationHandler::ConvertU8toI48(constTosaTensor->GetData(), constTensor.GetNumElements(), vec);
         if (err != TOSA_OK)
         {
             throw std::runtime_error("Failed to convert int48_t tensor: " + tensorName);
@@ -197,18 +193,20 @@ ResId TosaSerializationParser::ParseConstantTensor(const std::string& tensorName
     else if (constTensor.GetDataType() == DataType::int4_t)
     {
         std::vector<int8_t> vec;
-        const auto err = TosaSerializationHandler::ConvertU8toI4(constTosaTensor->GetData(), constTensor.GetNumElements(), vec);
+        const auto err =
+            TosaSerializationHandler::ConvertU8toI4(constTosaTensor->GetData(), constTensor.GetNumElements(), vec);
         if (err != TOSA_OK)
         {
             throw std::runtime_error("Failed to convert int4_t tensor: " + tensorName);
         }
-        constantResId = graph.AddTensorConstant(Attribute{vec, constTensor.GetDataType(), constTensor.GetTensorShape()});
+        constantResId =
+            graph.AddTensorConstant(Attribute{vec, constTensor.GetDataType(), constTensor.GetTensorShape()});
     }
     else if (constTensor.GetDataType() == DataType::bool_t)
     {
         std::vector<bool> vec;
-        const auto err = TosaSerializationHandler::ConvertU8toBool(constTosaTensor->GetData(),
-                                                                   constTensor.GetNumElements(), vec);
+        const auto err =
+            TosaSerializationHandler::ConvertU8toBool(constTosaTensor->GetData(), constTensor.GetNumElements(), vec);
         if (err != TOSA_OK)
         {
             throw std::runtime_error("Failed to convert bool_t tensor: " + tensorName);
@@ -219,7 +217,8 @@ ResId TosaSerializationParser::ParseConstantTensor(const std::string& tensorName
     else
     {
         const std::vector<uint32_t> vec = ConvertToUint32(constTosaTensor->GetData(), constTensor);
-        constantResId = graph.AddTensorConstant(Attribute{vec, constTensor.GetDataType(), constTensor.GetTensorShape()});
+        constantResId =
+            graph.AddTensorConstant(Attribute{vec, constTensor.GetDataType(), constTensor.GetTensorShape()});
     }
 
     m_OpNameResIdMap.try_emplace(tensorName, constantResId);
@@ -312,7 +311,7 @@ void TosaSerializationParser::ParseOperator(TosaSerializationOperator* op, Graph
 
     if (flatbufferEnum == Op_RESHAPE)
     {
-        const auto& inputNames  = op->GetInputTensorNames();
+        const auto& inputNames = op->GetInputTensorNames();
         const auto& outputNames = op->GetOutputTensorNames();
 
         // second input _should_ be the shape‐constant name
@@ -332,7 +331,7 @@ void TosaSerializationParser::ParseOperator(TosaSerializationOperator* op, Graph
         if (dims.empty())
         {
             // rank‐0 reshape is just an identity
-            ResId inId  = GetInputTensorResId(graph, inputNames[0]);
+            ResId inId = GetInputTensorResId(graph, inputNames[0]);
             ResId outId = inId;
 
             m_OpNameResIdMap.try_emplace(outputNames[0], outId);
@@ -363,11 +362,10 @@ void TosaSerializationParser::ParseOperator(TosaSerializationOperator* op, Graph
         }
         else
         {
-            throw std::runtime_error("ParseOperator: input \"" + inputName +
-                                     "\" is neither tensor nor shape");
+            throw std::runtime_error("ParseOperator: input \"" + inputName + "\" is neither tensor nor shape");
         }
         inputDataTypes.push_back(GetDataTypeFromDType(rawDtype));
-        }
+    }
 
     for (const auto& outputName : outputNames)
     {
@@ -701,4 +699,4 @@ void TosaSerializationParser::ParseOperator(TosaSerializationOperator* op, Graph
     }
 }
 
-}  // namespace tfsc::parsers
+} // namespace tfsc::parsers

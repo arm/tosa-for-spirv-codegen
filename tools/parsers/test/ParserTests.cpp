@@ -1154,9 +1154,11 @@ TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Conv2dIdentityConv2d)
     auto block = GeneratorConv2DIdentityConv2DModel();
 
     TosaSerializationParser parser(block.get());
-
+    testutils::ComparatorOptions co;
+    co.m_modelView = testutils::ModelView::module;
     auto module1 = parser.GenerateSPIRVModule("main");
-    const auto diff = testutils::CompareModules(module1, spirvmodels::Conv2DRescaleConv2D);
+    const auto diff =
+        testutils::CompareModules(module1, testutils::LoadSPIRVDisassembly(spirvmodels::Conv2DRescaleConv2D), co);
     EXPECT_TRUE(diff.empty());
 }
 

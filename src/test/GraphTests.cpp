@@ -7,8 +7,8 @@
 #include <Graph.hpp>
 #include <Module.hpp>
 #include <SPIRVDefinitions.hpp>
-#include <ValidationUtils.hpp>
 #include <TosaForSpirvCodegen.hpp>
+#include <ValidationUtils.hpp>
 
 #include <gtest/gtest.h>
 #include <spirv-tools/libspirv.hpp>
@@ -240,7 +240,7 @@ TEST(GraphTests, CreateConstantCompositeBasic)
     for (auto dt : types)
     {
         auto typeId = CreateDataType(dt, *sharedModule);
-        auto result = CreateConstantComposite(values, typeId, *sharedModule, false);
+        auto result = CreateConstantComposite(values, typeId, *sharedModule);
 
         CheckConstantComposite(result.m_InstructionPtr, values, DataType::uint32_t, dt);
     }
@@ -254,7 +254,7 @@ TEST(GraphTests, CreateCreateConstantCompositeDouble)
     const std::vector<uint32_t> values = {2, 2};
 
     const auto typeId = CreateDataType(DataType::int48_t, *sharedModule);
-    const auto result = CreateConstantCompositeDouble(values, typeId, *sharedModule);
+    const auto result = CreateConstantComposite(values, typeId, *sharedModule, DataType::int48_t);
 
     CheckConstantComposite(result.m_InstructionPtr, values, DataType::int48_t, DataType::int48_t);
 }
@@ -270,7 +270,7 @@ TEST(GraphTests, CreateConstantCompositeTypedBool)
 
     const std::vector<uint32_t> boolData = {1, 0, 1};
 
-    const auto result = CreateConstantCompositeTyped(boolData, typeId, *sharedModule, tosa::DataType::bool_t);
+    const auto result = CreateConstantComposite(boolData, typeId, *sharedModule, tosa::DataType::bool_t);
 
     ASSERT_EQ(result.m_InstructionPtr->GetOpCode(), spv::OpConstantComposite);
     ASSERT_EQ(result.m_InstructionPtr->m_Operands.size(), boolData.size() + 2);
@@ -289,7 +289,6 @@ TEST(GraphTests, CreateConstantCompositeTypedBool)
         }
     }
 }
-
 
 TEST(GraphTests, CreateTensor)
 {

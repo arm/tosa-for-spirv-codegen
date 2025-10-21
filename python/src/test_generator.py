@@ -602,7 +602,7 @@ class TestGenerator:
         if self.is_constant_input(argument):
             valuesStr = values
         if self.is_constant_input(argument) and values == '1' and datatype == "int32":
-            valuesStr = '{0,0,0,1}'
+            valuesStr = '{1,0,0,0}'
 
         tensor_line = 'auto {}Tensor = std::make_unique<TosaSerializationTensor>({}Name, {}Shape, {}, std::vector<uint8_t>{{{}}});\n'.format(argument.name, argument.name,
                                                                                                           argument.name, self.get_dtype(datatype), valuesStr)
