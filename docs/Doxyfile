@@ -173,7 +173,7 @@ INLINE_INHERITED_MEMB  = NO
 # shortest path that makes the file name unique will be used
 # The default value is: YES.
 
-FULL_PATH_NAMES        = YES
+FULL_PATH_NAMES        = NO
 
 # The STRIP_FROM_PATH tag can be used to strip a user-defined part of the path.
 # Stripping is only done if one of the specified strings matches the left-hand
@@ -314,7 +314,7 @@ OPTIMIZE_OUTPUT_VHDL   = NO
 # Note that for custom extensions you also need to set FILE_PATTERNS otherwise
 # the files are not read by doxygen.
 
-EXTENSION_MAPPING      =
+EXTENSION_MAPPING      = */tests/* */test/* */operatorTests/*
 
 # If the MARKDOWN_SUPPORT tag is enabled then doxygen pre-processes all comments
 # according to the Markdown format, which allows for more readable
@@ -813,14 +813,14 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = ./include/ \
-                         ./parsers/ \
-                         ./vgfwriter/include \
-                         ./generator/test/GeneratorTests.cpp \
-                         ./src/test/layerTests/MaxPool2dTests.cpp \
-                         ./src/test/layerTests/RescaleTests.cpp \
-                         ./parsers/test/ParserTests.cpp \
-                         ./README.md
+INPUT                  = @PROJECT_SOURCE_DIR@/include/ \
+                         @PROJECT_SOURCE_DIR@/tools/parsers/include/ \
+                         @PROJECT_SOURCE_DIR@/tools/ModelComparisonTool/include/ \
+                         @PROJECT_SOURCE_DIR@/tools/tosaregen/include/ \
+                         @PROJECT_SOURCE_DIR@/tools/vgfwriter/include/ \
+                         @PROJECT_SOURCE_DIR@/tools/utils/include/ \
+                         @PROJECT_SOURCE_DIR@/src/ \
+                         @PROJECT_SOURCE_DIR@/README.md
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -845,8 +845,7 @@ INPUT_ENCODING         = UTF-8
 # *.m, *.markdown, *.md, *.mm, *.dox, *.py, *.pyw, *.f90, *.f95, *.f03, *.f08,
 # *.f, *.for, *.tcl, *.vhd, *.vhdl, *.ucf and *.qsf.
 
-FILE_PATTERNS          = *.cpp \
-                         *.inl \
+FILE_PATTERNS          = *.inl \
                          *.h \
                          *.hpp \
                          *.md \
@@ -867,8 +866,8 @@ RECURSIVE              = YES
 # Note that relative paths are relative to the directory from which doxygen is
 # run.
 
-EXCLUDE                = ./include/armnnTestUtils \
-                         ./tests/
+EXCLUDE                = @PROJECT_SOURCE_DIR@/include/armnnTestUtils \
+                         @PROJECT_SOURCE_DIR@/tests/
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
@@ -979,7 +978,7 @@ FILTER_SOURCE_PATTERNS =
 # (index.html). This can be useful if you have a project on for instance GitHub
 # and want to reuse the introduction page also for the doxygen output.
 
-USE_MDFILE_AS_MAINPAGE = ./README.md
+USE_MDFILE_AS_MAINPAGE = @PROJECT_SOURCE_DIR@/README.md
 
 #---------------------------------------------------------------------------
 # Configuration options related to source browsing
@@ -1154,7 +1153,7 @@ HTML_FILE_EXTENSION    = .xhtml
 # of the possible markers and block names see the documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_HEADER            = ./docs/header.xhtml
+HTML_HEADER            = @PROJECT_SOURCE_DIR@/docs/header.xhtml
 
 # The HTML_FOOTER tag can be used to specify a user-defined HTML footer for each
 # generated HTML page. If the tag is left blank doxygen will generate a standard
@@ -1189,7 +1188,7 @@ HTML_STYLESHEET        =
 # list). For an example see the documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_STYLESHEET  = ./docs/stylesheet.css
+HTML_EXTRA_STYLESHEET  = @PROJECT_SOURCE_DIR@/docs/stylesheet.css
 
 # The HTML_EXTRA_FILES tag can be used to specify one or more extra images or
 # other source files which should be copied to the HTML output directory. Note
@@ -1943,7 +1942,7 @@ MAN_LINKS              = NO
 # captures the structure of the code including all documentation.
 # The default value is: NO.
 
-GENERATE_XML           = NO
+GENERATE_XML           = YES
 
 # The XML_OUTPUT tag is used to specify where the XML pages will be put. If a
 # relative path is entered the value of OUTPUT_DIRECTORY will be put in front of

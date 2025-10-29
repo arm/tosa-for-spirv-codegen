@@ -11,13 +11,16 @@ include(GNUInstallDirs)  # Ensure standard install directory variables are defin
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Ensure custom CMake modules can be found
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
+
 # By default tosa_for_spirv_codegen is a static library.
 option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
 option(BUILD_TOSA_SERIALIZATION_PARSER
        "Build the TOSA Serialization Parser. This library can parse a TOSA Serialization structure and \
         generate SPIRV." ON)
 option(BUILD_TOSA_FOR_SPIRV_CODEGEN_GENERATOR
-       "Build the tosa-for-spirv-codegen generator. This command line tool generates SPIRV binary from a TOSA \
+       "Build the tosa_for_spirv_codegen generator. This command line tool generates SPIRV binary from a TOSA \
         Flatbuffers file." ON)
 option(BUILD_MODEL_COMPARISON_TOOL "Build Model comparison tool" ON)
 option(BUILD_TOSA_REGEN "Build the tosa regen module." ON)
@@ -144,5 +147,10 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/tosa
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/spirv
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/tosa_for_spirv_codegen)
+
+install(TARGETS tosa_for_spirv_codegen)
+if(ML_SDK_BUILD_DOCS)
+    include(docs/docs.cmake)
+endif()
 
 install(TARGETS tosa_for_spirv_codegen)
