@@ -14,6 +14,8 @@
 #include "StringUtils.hpp"
 
 #include <algorithm>
+#include <memory>
+#include <set>
 #include <cstddef>
 #include <iostream>
 #include <iterator>
@@ -342,7 +344,7 @@ std::string CompareModules(const std::shared_ptr<Module>& lhs, const std::shared
     std::string rhsS = rhsSStream.str();
     for (const auto& highLightCtx : highlightList)
     {
-        for (unsigned int i = 0; i < highLightCtx.m_lhs.size(); i++)
+        for (std::size_t i = 0; i < highLightCtx.m_lhs.size(); i++)
         {
             HighlightString(lhsS, highLightCtx.m_lhs[i], highLightCtx.m_pre, highLightCtx.m_post);
             HighlightString(rhsS, highLightCtx.m_rhs[i], highLightCtx.m_pre, highLightCtx.m_post);

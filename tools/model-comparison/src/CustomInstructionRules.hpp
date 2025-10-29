@@ -9,6 +9,8 @@
 #include <TosaForSpirvCodegen.hpp>
 
 #include <iterator>
+#include <functional>
+#include <unordered_map>
 #include <optional>
 #include <utility>
 #include <vector>
@@ -68,7 +70,6 @@ static std::optional<ProblemTree>
 Compare_Composite_to_Replicate(const Instruction& comp, const Instruction& repl, int depth)
 {
     bool isProblem = false;
-    std::vector<std::pair<Operand, Operand>> operands;
     std::vector<ProblemTree> leafs;
 
     const auto replConstituentType = *repl.m_Operands[0].m_InstructionPtr;
@@ -93,7 +94,7 @@ Compare_Composite_to_Replicate(const Instruction& comp, const Instruction& repl,
     {
         const auto replConstituentValue = *repl.m_Operands[2].m_InstructionPtr;
 
-        for (auto it = compConstituentValueBegin; it != comp.m_Operands.end(); it++)
+        for (auto it = compConstituentValueBegin; it != comp.m_Operands.cend(); it++)
         {
             auto constituentValueCheck = CompareInstructions(*it->m_InstructionPtr, replConstituentValue, depth);
             if (constituentValueCheck)
