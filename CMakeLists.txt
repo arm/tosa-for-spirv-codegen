@@ -22,7 +22,6 @@ option(BUILD_TOSA_SERIALIZATION_PARSER
 option(BUILD_TOSA_FOR_SPIRV_CODEGEN_GENERATOR
        "Build the tosa_for_spirv_codegen generator. This command line tool generates SPIRV binary from a TOSA \
         Flatbuffers file." ON)
-option(BUILD_MODEL_COMPARISON_TOOL "Build Model comparison tool" ON)
 option(BUILD_TOSA_REGEN "Build the tosa regen module." ON)
 option(BUILD_VGF_WRITER "Build the VGF Writer library.
                          A wrapper of the VGF Encoder allowing users to create .vgf files with tosa_for_spirv_codegen output." ON)
@@ -136,9 +135,8 @@ if(BUILD_TOSA_REGEN)
     add_subdirectory(${TOOLS_PATH}/tosa-regen)
 endif()
 
-if(BUILD_UNITTESTS OR BUILD_MODEL_COMPARISON_TOOL)
+if(BUILD_UNITTESTS)
     add_subdirectory(${TOOLS_PATH}/utils)
-    add_subdirectory(${TOOLS_PATH}/model-comparison)  # comparison functionality needed for testing
 endif()
 
 if(BUILD_UNITTESTS)

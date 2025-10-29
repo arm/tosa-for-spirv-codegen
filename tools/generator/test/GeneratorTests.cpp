@@ -4,7 +4,6 @@
 //
 
 #include <AssemblyUtils.hpp>
-#include <ModuleComparator.hpp>
 #include <TosaSerializationParser.hpp>
 #include <VgfWriter.hpp>
 #include <TosaForSpirvCodegen.hpp>
@@ -337,11 +336,11 @@ TEST(TOSA_FOR_SPIRV_CODEGEN_GENERATOR, GeneratorTestExampleTosaFile)
     // Create SPIRV
     const auto module1 = parser.GenerateSPIRVModule("main");
 
+
     std::vector<uint32_t> spirv = tfsc::WriteToBinary(module1);
     std::string outputStr(testutils::DisassembleSPIRV(spirv, true));
-    // Check expected spirv and actual spirv
-    const auto diff = testutils::CompareModules(module1, spirvmodels::SimpleMaxpool2dGenerator);
-    EXPECT_TRUE(diff.empty());
+
+    EXPECT_EQ(outputStr, spirvmodels::SimpleMaxpool2dGenerator);
 }
 
 TEST(TOSA_FOR_SPIRV_CODEGEN_GENERATOR, GeneratorTestExampleJsonFile)
@@ -537,10 +536,8 @@ TEST(TOSA_FOR_SPIRV_CODEGEN_GENERATOR, GeneratorWriteVgfFile)
 
     // Disassemble the Spir-V and validate
     const std::string outputStr(testutils::DisassembleSPIRV(spvData, true));
+    EXPECT_EQ(outputStr, spirvmodels::SimpleMaxpool2d);
 
-    // Check as expected
-    const auto diff = testutils::CompareModules(module, spirvmodels::SimpleMaxpool2d);
-    EXPECT_TRUE(diff.empty());
     // Delete the .vgf
     if (std::remove(vgfName.c_str()) != 0)
     {
@@ -717,8 +714,7 @@ TEST(TOSA_FOR_SPIRV_CODEGEN_GENERATOR, GeneratorWriteNpyFiles)
     const std::string outputStr(testutils::DisassembleSPIRV(spvData, true));
     const auto module0 = testutils::LoadSPIRVDisassembly(outputStr);
     const auto module1 = testutils::LoadSPIRVDisassembly(spirvmodels::SimpleConv2d);
-    // Check as expected
-    const auto diff = testutils::CompareModules(module1, module0);
+    EXPECT_EQ(module1, module0);
 
     std::vector<uint8_t> weightData;
     mlsdk::vgf_dump::getConstant(vgfName,

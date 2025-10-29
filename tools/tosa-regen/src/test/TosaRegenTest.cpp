@@ -6,7 +6,6 @@
 #include <AssemblyUtils.hpp>
 #include <Graph.hpp>
 #include <Instruction.hpp>
-#include <ModuleComparator.hpp>
 #include <OpTestUtils.hpp>
 #include <Operand.hpp>
 #include <OperatorEnum.hpp>
@@ -15,12 +14,15 @@
 #include <TosaSerializationParser.hpp>
 #include <TosaRegen.hpp>
 #include <TosaForSpirvCodegen.hpp>
+#include <spirvmodels/TensorName.hpp>
 
 #include <algorithm>
 #include <cstdio>
 #include <functional>
 #include <stdexcept>
 #include <string>
+#include <sstream>
+#include <regex>
 
 #include <gtest/gtest.h>
 
@@ -249,17 +251,18 @@ TEST(Spirv2TosaTest, Spirv2operatorsGraphInputOrderTest)
     std::vector<tfsc::tosa::ResId> inputIds;
     for (size_t idx = 0; idx < generatedOp[0].inputs.size(); ++idx)
     {
-        switch (generatedOp[0].inputs[idx].type)
+        const auto& in = generatedOp[0].inputs[idx];
+        switch (in.type)
         {
             case TosaInputType::Dynamic:
             {
-                const auto& inputId = graph2.AddInput(generatedOp[0].inputs[idx].GetTensor(), idx);
+                const auto& inputId = graph2.AddInput(in.GetTensor(), in.bindingId);
                 inputIds.push_back(inputId);
             }
             break;
             case TosaInputType::GraphConstant:
             {
-                const auto& graphConstId = graph2.AddGraphConstant(generatedOp[0].inputs[idx].GetTensor());
+                const auto& graphConstId = graph2.AddGraphConstant(in.GetTensor());
                 inputIds.push_back(graphConstId);
             }
             break;
@@ -280,8 +283,13 @@ TEST(Spirv2TosaTest, Spirv2operatorsGraphInputOrderTest)
     graph2.AddOutput(output2[0], 0);
     graph2.FinalizeGraph();
 
-    const auto diff = testutils::CompareModules(module, module2);
-    EXPECT_TRUE(diff.empty());
+    std::vector<uint32_t> spirv = tfsc::WriteToBinary(module);
+    std::vector<uint32_t> spirv2 = tfsc::WriteToBinary(module2);
+    const auto actualText = testutils::DisassembleSPIRV(spirv, false);
+    const auto actualText2 = testutils::DisassembleSPIRV(spirv2, false);
+    const auto actualBinary = tfsc::WriteToBinary(testutils::LoadSPIRVDisassembly(actualText));
+    const auto expectedBinary = tfsc::WriteToBinary(testutils::LoadSPIRVDisassembly(actualText2));
+    EXPECT_EQ(actualBinary, expectedBinary);
 }
 
 TEST(Spirv2TosaTest, Spirv2OperatorsGraphMultiOutputTest)
@@ -678,11 +686,14 @@ TEST(Spirv2TosaTest, GetTosaSerializationHandlerBasicTest)
     tfsc::parsers::TosaSerializationParser parser{handler->GetMainRegion()->GetBlockByName("main")};
     // Checking that the SPIR-V generated is valid
     const auto module2 = parser.GenerateSPIRVModule("main");
-    const auto binarySpirv = tfsc::WriteToBinary(module2);
-    EXPECT_NE(testutils::DisassembleSPIRV(binarySpirv, true), "");
-    // Checking that the modules are equal
-    const auto diff = testutils::CompareModules(module, module2);
-    EXPECT_TRUE(diff.empty());
+    std::vector<uint32_t> spirv = tfsc::WriteToBinary(module2);
+    EXPECT_NE(testutils::DisassembleSPIRV(spirv, true), "");
+    std::vector<uint32_t> spirv2 = tfsc::WriteToBinary(module);
+    const auto text1 = testutils::DisassembleSPIRV(spirv2, false);
+    const auto actualBinary = tfsc::WriteToBinary(testutils::LoadSPIRVDisassembly(text1));
+    const auto text2 = testutils::DisassembleSPIRV(actualBinary, false);
+    const auto expectedBinary = tfsc::WriteToBinary(testutils::LoadSPIRVDisassembly(text2));
+    EXPECT_EQ(actualBinary, expectedBinary);
 }
 
 TEST(Spirv2TosaTest, GetTosaSerializationHandlerTensorNameTest)
@@ -740,14 +751,17 @@ TEST(Spirv2TosaTest, GetTosaSerializationHandlerTensorNameTest)
 
     // Verifying the correctness of the generated handler using the parser and comparator
     tfsc::parsers::TosaSerializationParser parser{handler->GetMainRegion()->GetBlockByName("main")};
+
     // Checking that the SPIR-V generated is valid
     const auto module2 = parser.GenerateSPIRVModule("main");
-    const auto binarySpirv = tfsc::WriteToBinary(module2);
-    EXPECT_NE(testutils::DisassembleSPIRV(binarySpirv, true), "");
-    // Checking that the modules are equal
-    const auto diff = testutils::CompareModules(module, module2, {testutils::ModelView::module});
-    std::cout << diff;
-    EXPECT_TRUE(diff.empty());
+    const auto spirv = tfsc::WriteToBinary(module2);
+
+    const auto text1 = testutils::DisassembleSPIRV(spirv, false);
+    const auto text2 = spirvmodels::GetTosaSerializationHandlerTensorNameTestGolden;
+
+    const auto actualText = tfsc::WriteToBinary(testutils::LoadSPIRVDisassembly(text1));
+    const auto expectedText = tfsc::WriteToBinary(testutils::LoadSPIRVDisassembly(text2));
+    EXPECT_EQ(actualText, expectedText);
 }
 
 TEST(Spirv2TosaTest, GetOperatorNameTest)

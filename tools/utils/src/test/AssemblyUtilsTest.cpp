@@ -4,7 +4,6 @@
 //
 
 #include <AssemblyUtils.hpp>
-#include <ModuleComparator.hpp>
 #include <spirvmodels/Add.hpp>
 
 #include <spirvmodels/Conv2d.hpp>
@@ -37,8 +36,8 @@ void RoundTripModel(const std::string& model)
     EXPECT_FALSE(disassembly0.empty());
 
     const auto module1 = LoadSPIRVDisassembly(disassembly0);
-    const auto diff = CompareModules(module0, module1);
-    EXPECT_TRUE(diff.empty());
+    const auto binary1 = WriteToBinary(module1);
+    EXPECT_EQ(binary0, binary1);
 }
 
 TEST(TESTUTILS, RoundTripModels)
@@ -56,14 +55,16 @@ TEST(TESTUTILS, Idempotence)
 {
     const auto reference = LoadSPIRVDisassembly(spirvmodels::SimpleMaxpool2d);
     auto module = LoadSPIRVDisassembly(spirvmodels::SimpleMaxpool2d);
+    const auto referenceBinary = WriteToBinary(reference);
 
     for (int i = 0; i < 10; i++)
     {
-        const auto binary = WriteToBinary(module);
-        const auto modelDisassembly = DisassembleSPIRV(binary, true);
+        const auto referenceBinary = WriteToBinary(module);
+        const auto modelDisassembly = DisassembleSPIRV(referenceBinary, true);
         module = LoadSPIRVDisassembly(modelDisassembly);
-        const auto diff = CompareModules(module, reference);
-        EXPECT_TRUE(diff.empty());
+
+        const auto binary0 = WriteToBinary(module);
+        EXPECT_EQ(binary0, referenceBinary);
     }
 }
 

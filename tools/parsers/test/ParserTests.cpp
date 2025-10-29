@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <ModuleComparator.hpp>
 #include <OpTestUtils.hpp>
 #include <TosaSerializationParser.hpp>
 
@@ -371,9 +370,12 @@ TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Readme)
     // This can then be disassembled into human-readable SPIR-V or passed for execution.
     const auto module = parser.GenerateSPIRVModule("main");
 
-    // Ensure output is as expected
-    const auto diff = testutils::CompareModules(module, spirvmodels::SimpleMaxpool2d);
-    EXPECT_TRUE(diff.empty());
+    const auto binary0= tfsc::WriteToBinary(module);
+    const auto actualText= testutils::DisassembleSPIRV(binary0, /*friendlyNames=*/false);
+    const auto actualBinary= tfsc::WriteToBinary(testutils::LoadSPIRVDisassembly(actualText));
+    const auto expectedBinary= tfsc::WriteToBinary(
+                                        testutils::LoadSPIRVDisassembly(spirvmodels::SimpleMaxpool2d));
+    EXPECT_EQ(actualBinary, expectedBinary);
 }
 
 // Multi Layer Conv2d reusing the weight and bias GraphConstantId
@@ -607,8 +609,13 @@ TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Conv2DRescaleConv2D)
     TosaSerializationParser parser(block.get());
 
     const auto module1 = parser.GenerateSPIRVModule("main");
-    const auto diff = testutils::CompareModules(module1, spirvmodels::Conv2DRescaleConv2D);
-    EXPECT_TRUE(diff.empty());
+    const auto text1 = testutils::DisassembleSPIRV(tfsc::WriteToBinary(module1), false);
+    const auto text2 = spirvmodels::Conv2DRescaleConv2D;
+
+    const auto actualBinary = tfsc::WriteToBinary(testutils::LoadSPIRVDisassembly(text1));
+    const auto expectedBinary = tfsc::WriteToBinary(testutils::LoadSPIRVDisassembly(text2));
+
+    EXPECT_EQ(actualBinary, expectedBinary);
 }
 
 // Invalid block with graph input and output directly connected via IdentityOps
@@ -1154,12 +1161,15 @@ TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Conv2dIdentityConv2d)
     auto block = GeneratorConv2DIdentityConv2DModel();
 
     TosaSerializationParser parser(block.get());
-    testutils::ComparatorOptions co;
-    co.m_modelView = testutils::ModelView::module;
     auto module1 = parser.GenerateSPIRVModule("main");
-    const auto diff =
-        testutils::CompareModules(module1, testutils::LoadSPIRVDisassembly(spirvmodels::Conv2DRescaleConv2D), co);
-    EXPECT_TRUE(diff.empty());
+
+    std::vector<uint32_t> spirv = tfsc::WriteToBinary(module1);
+    const auto text1 = testutils::DisassembleSPIRV(spirv, false);
+    const auto text2 = spirvmodels::Conv2DRescaleConv2D;
+
+    const auto actualBinary = tfsc::WriteToBinary(testutils::LoadSPIRVDisassembly(text1));
+    const auto expectedBinary = tfsc::WriteToBinary(testutils::LoadSPIRVDisassembly(text2));
+    EXPECT_EQ(actualBinary, expectedBinary);
 }
 
 // Multi Layer CONV2D - IDENTITY - (Graph Output) - IDENTITY - RESCALE - CONV2D
@@ -1428,11 +1438,14 @@ TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, Conv2dIdentityConv2dDualOutput)
     TosaSerializationParser parser(block.get());
 
     const auto module1 = parser.GenerateSPIRVModule("main");
-    const auto diff = testutils::CompareModules(module1, spirvmodels::Conv2DRescaleConv2DDualOutput);
-    EXPECT_TRUE(diff.empty());
-}
+    std::vector<uint32_t> spirv = tfsc::WriteToBinary(module1);
+    const auto text1 = testutils::DisassembleSPIRV(spirv, false);
+    const auto text2 = spirvmodels::Conv2DRescaleConv2DDualOutput;
 
-// Struct containing golden SPIRV of Add operator with one input having an empty shape.
+    const auto actualBinary = tfsc::WriteToBinary(testutils::LoadSPIRVDisassembly(text1));
+    const auto expectedBinary = tfsc::WriteToBinary(testutils::LoadSPIRVDisassembly(text2));
+    EXPECT_EQ(actualBinary, expectedBinary);
+}
 
 // Test case to test that we correctly transform empty tensor shape to shape of { 1 } otherwise this would fail.
 TEST(TOSA_FOR_SPIRV_CODEGEN_PARSER, EmptyTensor)
