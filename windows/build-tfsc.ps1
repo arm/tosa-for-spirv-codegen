@@ -28,9 +28,9 @@ if (!(Test-Path $RepoRoot)) {
     $user  = $env:GITLAB_USER
     $token = $env:GITLAB_TOKEN
     if ($user -and $token) {
-        git clone "https://$user`:$token@gitlab.geo.arm.com/artificial-intelligence/neural-graphics/tosa-for-spirv-codegen.git" $RepoRoot
+        git clone "https://$user`:$token@gitlab.arm.com/artificial-intelligence/neural-graphics/tosa-for-spirv-codegen.git" $RepoRoot
     } else {
-        git clone "ssh://$Username@gitlab.geo.arm.com/artificial-intelligence/neural-graphics/tosa-for-spirv-codegen.git" $RepoRoot
+        git clone "ssh://$Username@gitlab.arm.com/artificial-intelligence/neural-graphics/tosa-for-spirv-codegen.git" $RepoRoot
     }
     AssertZeroExitCode "Cloning tosa-for-spirv-codegen repo failed"
 } else {
