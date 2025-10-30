@@ -18,7 +18,6 @@ $Here = Split-Path -Parent $MyInvocation.MyCommand.Definition
 & "$Here\clone_argparse.ps1"                   -ExternalDir $ExternalDir
 & "$Here\clone_googletest.ps1"                 -ExternalDir $ExternalDir
 & "$Here\clone_json.ps1"                       -ExternalDir $ExternalDir
-& "$Here\clone_ngp_runtime.ps1"                -ExternalDir $ExternalDir -Username $Username
 
 & "$Here\clone_spirv_headers.ps1"              -ExternalDir $ExternalDir -Username $Username
 & "$Here\clone_spirv_tools.ps1"                -ExternalDir $ExternalDir -Username $Username

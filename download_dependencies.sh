@@ -36,10 +36,6 @@ function DownloadVgfEncoder {
   scripts/clone_vgf_encoder.sh $USERNAME || exit 1
 }
 
-function DownloadNgpRuntime {
-  scripts/clone_ngp_runtime.sh $USERNAME || exit 1 # To be moved to external repo in IVGCVSW-8415
-}
-
 function DownloadArgparse {
   scripts/clone_argparse.sh || exit 1
 }
@@ -57,7 +53,6 @@ DownloadSpirvTools
 DownloadTOSASerializationLibrary
 DownloadTosaSpec
 DownloadVgfEncoder
-DownloadNgpRuntime
 DownloadArgparse
 DownloadJson
 

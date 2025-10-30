@@ -27,10 +27,8 @@ tosa_for_spirv_codegen
     :caption: Table of Contents:
 
     building
-    generator_usage
     parser_usage
     graph_api_usage
     tosaregen_usage
-    frontend_generator
     dependencies
     license

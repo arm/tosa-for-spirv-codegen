@@ -102,7 +102,6 @@ files). Code changes that do not affect these build rules can be
 rebuilt simply using `make`.
 
 #### Outputs
-- [tools/generator/tfsc-generator](#frontend-generator) — See **[Frontend Generator](#frontend-generator)** for usage.
 - [libtosa_for_spirv_codegen.a / .so](#graph-api-usage) — See **[Graph API Usage](#graph-api-usage)**
 - [tools/tosaregen/libtosaregen.a](#tosaregen-usage) — See **[TosaRegen Usage](#tosaregen-usage)**
 - [tools/parsers/libtosaSerializationParser.a](#tosaserializationparser-api-usage) — See **[TosaSerializationParser API Usage](#tosaserializationparser-api-usage)**
@@ -345,37 +344,6 @@ To format your code:
 
 ```bash
 clang-format-11 -i path/to/file.cpp
-```
-
-## Frontend Generator
-
-Located in the `python` directory we have provided the frontend_generator.py script
-along with its input files (.hpp) and (.cpp).
-This script can be used to generate the front end interface for tosa_for_spirv_codegen. It will generate the following:
-
-* Graph header `include/Graph.hpp`  and source file `src/Graph.cpp`.
-* Unit tests covering the Operators and their output SPIR-V.
-
-The AddXXXOperator() functions generated in `include/Graph.hpp` are created using the TOSA specifications directly this
-means the script has a dependency on `tosa.xml`  and `tosa.py`.
-
-| GENERATION_ARGS          | Description                                                                         |
-|--------------------------|:------------------------------------------------------------------------------------|
-| -g, --graph_enabled      | **flag:** generate graph header `include/Graph.hpp` and source file `src/Graph.cpp` |
-| -d, --definition_enabled | **flag:** generate operator definitions to include/OperatorDefinitions.hpp          |
-| -u, --unit_test_enabled  | **flag:** generate parser unit tests to `tools/parsers/test`                        |
-
-To generate Graph header, source file, operators and unit tests, the following command can be run:
-
-```bash
-python python/code_generator.py
-```
-
-The python script generates graph, operator definitions classes and unit tests by default. To disable one of them, such as graph
-class generation:
-
-```bash
-python python/code_generator.py -g 0
 ```
 
 ## TosaRegen Usage

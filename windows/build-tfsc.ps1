@@ -56,7 +56,6 @@ $ExternalDir = Join-Path $RepoRoot "external"
 $ArgParseDir = Join-Path $ExternalDir "argparse"
 $GoogleTestDir = Join-Path $ExternalDir "googletest"
 $JsonDir = Join-Path $ExternalDir "json"
-$NgpRuntimeDir = Join-Path $ExternalDir "ngp-runtime"
 $SpirvHeadersDir = (Join-Path $ExternalDir "SPIRV-Headers").Replace('\','/') #CMake on Windows supports forward slashes, and using them avoids the escape problem entirely.
 $SpirvToolsDir = (Join-Path $ExternalDir "SPIRV-Tools").Replace('\','/')
 $SpirvToolsBuildDir = Join-Path $SpirvToolsDir 'build'
