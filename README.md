@@ -428,6 +428,19 @@ External dependencies used by tosa-for-spirv-codegen:
 | ml-sdk-vgf-lib             | Apache-2.0        | Provides methods to encode SPIR-V TOSA graph into vgf format | 55d73eaa8c88f74cf5732a3a8902450f208006af | https://github.com/arm/ai-ml-sdk-vgf-library |
 | cmake                      | BSD 3-Clause      | C++ build tool                                               | v3.25.0                                  | https://github.com/Kitware/CMake |
 
+## Build Flags
+tosa_for_spirv_codegen uses the following security related build flags in their code:
+
+| Build flags	       |
+|---------------------|
+| -Wall	           |
+| -Wextra             |
+| -Wold-style-cast    |
+| -Wno-missing-braces |
+| -Wconversion        |
+| -Wsign-conversion   |
+| -Werror             |
+
 ## License
 
 The *tosa_for_spirv_codegen* project is licensed under Apache-2.0.

@@ -265,6 +265,7 @@ int main(const int argc, char** argv)
     }
     else if (strcmp(argv[2], "tests") == 0)
     {
+        /* REUSE-IgnoreStart */
         std::string fileHeader = "//\n"
                                  "// Copyright © 2025 Arm Ltd and Contributors. All rights reserved.\n"
                                  "// SPDX-License-Identifier: Apache-2.0\n"
@@ -276,6 +277,7 @@ int main(const int argc, char** argv)
                                  "using namespace tfsc::tosa;\n"
                                  "using namespace testutils;\n"
                                  "\n";
+        /* REUSE-IgnoreEnd */
         result = tfsc::regen::Tests(argc, argv, spirvFile, fileHeader);
     }
     else if (strcmp(argv[2], "tosa") == 0)
