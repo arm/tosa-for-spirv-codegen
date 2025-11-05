@@ -3,10 +3,10 @@
 ## Introduction
 
 The tosa_for_spirv_codegen project provides a lightweight set of online tools and API's for a user
-to easily generate valid SPIR-V binary from TOSA based data structures, without using MLIR or other
+to easily generate valid SPIR-V™ binary from TOSA based data structures, without using MLIR or other
 compiler frameworks.
 
-**[TOSA Specification](https://www.mlplatform.org/tosa/tosa_spec.html)**
+**[TOSA Specification](https://github.com/arm/tosa-specification)**
 
 **[SPIR-V Specification](https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html)**
 
@@ -14,7 +14,7 @@ compiler frameworks.
 ## How to get started
 
 By default tosa_for_spirv_codegen will build for the native platform. It also supports
-building with the Android NDK. It assumes that GNU cmake with a minimum
+building with the Android™ NDK. It assumes that CMake™ with a minimum
 version of 3.17.2 is available in the path.
 
 In order to build the tosa_for_spirv_codegen project a number of dependencies are required,
@@ -414,4 +414,10 @@ tosa_for_spirv_codegen uses the following security related build flags in their 
 The *tosa_for_spirv_codegen* project is licensed under Apache-2.0.
 
 Copyright (c) 2023-2025 Arm Limited.
+
+## Attributions
+
+SPIR-V is a trademark of the Khronos Group Inc.
+Android is a trademark of Google Inc.
+CMake is a trademark of Kitware Inc.
 
