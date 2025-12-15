@@ -38,12 +38,12 @@ set(TFSC_EXTERNAL_PATH "${TFSC_ROOT}/external")
 
 # Paths to specific external libraries
 set(ARGPARSE_SOURCE_PATH           "${TFSC_EXTERNAL_PATH}/argparse"                 CACHE PATH "")
-set(SERIALIZATION_LIB_SOURCE_PATH "${TFSC_EXTERNAL_PATH}/serialization_lib"        CACHE PATH "")
-set(FLATBUFFERS_SOURCE_PATH       "${TFSC_EXTERNAL_PATH}/flatbuffers"              CACHE PATH "")
-set(SPIRV_TOOLS_SOURCE_PATH       "${TFSC_EXTERNAL_PATH}/SPIRV-Tools"              CACHE PATH "")
-set(SPIRV_HEADERS_SOURCE_PATH     "${TFSC_EXTERNAL_PATH}/SPIRV-Headers/include"    CACHE PATH "")
-set(GOOGLETEST_PATH               "${TFSC_EXTERNAL_PATH}/googletest"               CACHE PATH "")
-set(NLOHMANN_PATH                 "${TFSC_EXTERNAL_PATH}/json"                     CACHE PATH "")
+set(SERIALIZATION_LIB_SOURCE_PATH "${TFSC_EXTERNAL_PATH}/tosa-tools/serialization"  CACHE PATH "")
+set(FLATBUFFERS_SOURCE_PATH       "${TFSC_EXTERNAL_PATH}/flatbuffers"               CACHE PATH "")
+set(SPIRV_TOOLS_SOURCE_PATH       "${TFSC_EXTERNAL_PATH}/SPIRV-Tools"               CACHE PATH "")
+set(SPIRV_HEADERS_SOURCE_PATH     "${TFSC_EXTERNAL_PATH}/SPIRV-Headers/include"     CACHE PATH "")
+set(GOOGLETEST_PATH               "${TFSC_EXTERNAL_PATH}/googletest"                CACHE PATH "")
+set(NLOHMANN_PATH                 "${TFSC_EXTERNAL_PATH}/json"                      CACHE PATH "")
 
 # Build paths for certain dependencies
 set(SERIALIZATION_LIB_BUILD_PATH "${SERIALIZATION_LIB_SOURCE_PATH}/build"          CACHE PATH "")

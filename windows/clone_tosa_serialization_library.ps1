@@ -8,11 +8,11 @@ param(
   [Parameter(Mandatory)][string]$Username
 )
 
-$TosaSerLibDir = Join-Path $ExternalDir "serialization_lib"
-New-Item -ItemType Directory -Force -Path $TosaSerLibDir | Out-Null
-git clone "https://$Username@review.mlplatform.org/tosa/serialization_lib" $TosaSerLibDir
-Push-Location $TosaSerLibDir
-git checkout 359145e768e565d7666aa6ebd0abb92784f398cb
+$TosaToolsDir = Join-Path $ExternalDir "tosa-tools"
+New-Item -ItemType Directory -Force -Path $TosaToolsDir | Out-Null
+git clone "https://gitlab.arm.com/tosa/tosa-tools" $TosaToolsDir
+Push-Location $TosaToolsDir/serialization
+git checkout 988e56145ab66d802ce4a32fa31c0c76e5c801f9
 git submodule update --init --recursive
 Pop-Location
 

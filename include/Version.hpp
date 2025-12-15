@@ -12,7 +12,7 @@
 // tosa_for_spirv_codegen version components
 #define TFSC_MAJOR_VERSION 1
 #define TFSC_MINOR_VERSION 0
-#define TFSC_PATCH_VERSION 0
+#define TFSC_PATCH_VERSION 1
 
 /// TFSC_VERSION: "X.Y.Z"
 /// where:

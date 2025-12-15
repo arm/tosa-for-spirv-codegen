@@ -4,6 +4,12 @@ Tosa-for-spirv-codegen follows the [Semantic Versioning](https://semver.org/) sp
 
 ## Upcoming Release
 
+# v1.0.1
+
+* Update documentation to match with SDK standards.
+* Clone tosa-spec from github instead of mlplatform.
+* Clone and build serialization library from tosa-tools v2025.11.0.
+
 # v1.0.0
 
 * Graphbuilder API for TOSA 1.0

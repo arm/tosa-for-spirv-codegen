@@ -60,7 +60,8 @@ $SpirvHeadersDir = (Join-Path $ExternalDir "SPIRV-Headers").Replace('\','/') #CM
 $SpirvToolsDir = (Join-Path $ExternalDir "SPIRV-Tools").Replace('\','/')
 $SpirvToolsBuildDir = Join-Path $SpirvToolsDir 'build'
 $SpirvToolsInstall  = Join-Path $ExternalDir 'spirv-tools-install'
-$TosaSerLibDir = Join-Path $ExternalDir "serialization_lib"
+$TosaToolsDir = Join-Path $ExternalDir "tosa-tools"
+$TosaSerLibDir = Join-Path $TosaToolsDir "serialization"
 $TosaSpecDir = Join-Path $ExternalDir "tosa_specification" 
 $VgfEncoderDir = Join-Path $ExternalDir "vgf_encoder"
 
@@ -140,8 +141,8 @@ $testDirs = @(
 $VgfLibDir  = Join-Path $VgfBuildDir "src\$BuildType"
 $TosaSerLib = Join-Path $TosaSerBuildDir "$BuildType\tosa_serialization_lib.lib"
 $FbIncDir   = (Join-Path $FlatbuffersInstall "include") -replace '\\','/'
-$FbLibPath = Join-Path $TosaSerBuildDir "_deps\flatbuffers-build\$BuildType\flatbuffers.lib"
-$FbLibPath = $FbLibPath -replace '\\','/'
+$FbLibPath  = Join-Path $TosaSerBuildDir "_deps\flatbuffers-build\$BuildType\flatbuffers.lib"
+$FbLibPath  = $FbLibPath -replace '\\','/'
 $TosaSerInc = (Join-Path $TosaSerLibDir "include") -replace '\\','/'
 
 # Append to the args used for the tosa-for-spirv-codegen configure:

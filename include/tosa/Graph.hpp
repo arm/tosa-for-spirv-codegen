@@ -20,7 +20,8 @@ class Module;
 namespace tfsc::tosa
 {
 
-/// Class which encapsulates the concept of a graph containing layers.
+/// TOSA graph builder that creates and connects TOSA inputs, outputs, constants and operators.
+/// After FinalizeGraph() is called, the Graph may be safely destructed.
 class Graph
 {
     public:

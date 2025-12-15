@@ -7,16 +7,16 @@
 
 source "$(dirname "$0")/scripts_common.sh"
 
-TOSA_SERIALIZATION_LIB_DIR=$EXTERNAL_DIR/serialization_lib
+TOSA_TOOLS_DIR=$EXTERNAL_DIR/tosa-tools
 
-rm -rf $TOSA_SERIALIZATION_LIB_DIR
+rm -rf $TOSA_TOOLS_DIR
 
-TOSA_SERIALIZATION_LIB_REVISION="359145e768e565d7666aa6ebd0abb92784f398cb" # Released with TOSA Software v2025.07.0
+TOSA_SERIALIZATION_LIB_REVISION="988e56145ab66d802ce4a32fa31c0c76e5c801f9" # Released with TOSA Software v2025.11.0
 
 echo "+++ Cloning TOSA Serialization Library"
-git clone "https://gitlab.arm.com/tosa/tosa-serialization.git" $TOSA_SERIALIZATION_LIB_DIR
+git clone "https://gitlab.arm.com/tosa/tosa-tools.git" $TOSA_TOOLS_DIR
 
-pushd $TOSA_SERIALIZATION_LIB_DIR > /dev/null
+pushd $TOSA_TOOLS_DIR/serialization > /dev/null
   git checkout $TOSA_SERIALIZATION_LIB_REVISION
 
   # Initialise Flatbuffers dependency, which is currently v2.0.6

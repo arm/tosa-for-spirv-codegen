@@ -16,3 +16,4 @@ Building tosa_for_spirv_codegen on Windows
 -------------------------------------------
 .. include:: ../generated/windows/README.md
     :parser: myst_parser.sphinx_
+    :start-line: 15

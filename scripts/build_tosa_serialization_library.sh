@@ -8,7 +8,7 @@ source "$(dirname "$0")/scripts_common.sh"
 
 CMAKE_PATH=$1
 TARGET=$2
-TOSA_SERIALIZATION_LIB_DIR=$EXTERNAL_DIR/serialization_lib
+TOSA_SERIALIZATION_LIB_DIR=$EXTERNAL_DIR/tosa-tools/serialization
 BUILD_DIR=$TOSA_SERIALIZATION_LIB_DIR/build
 
 pushd "$TOSA_SERIALIZATION_LIB_DIR" > /dev/null

@@ -12,7 +12,8 @@ function X { param([string]$m) if ($LASTEXITCODE -ne 0) { throw $m } }
 
 $ExternalDir          = Join-Path $RepoRoot "external"
 $ArgParseDir          = Join-Path $ExternalDir "argparse"
-$TosaSerLibDir        = Join-Path $ExternalDir "serialization_lib"
+$TosaToolsDir         = Join-Path $ExternalDir "tosa-tools"
+$TosaSerLibDir        = Join-Path $TosaToolsDir "serialization"
 $VgfEncoderDir        = Join-Path $ExternalDir "vgf_encoder"
 
 # FlatBuffers bits produced by serialization build

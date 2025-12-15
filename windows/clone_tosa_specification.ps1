@@ -6,7 +6,7 @@
 param([Parameter(Mandatory)][string]$ExternalDir)
 
 $TosaSpecDir = Join-Path $ExternalDir "tosa_specification"
-git clone "https://review.mlplatform.org/tosa/specification.git" $TosaSpecDir
+git clone "https://github.com/arm/tosa-specification.git" $TosaSpecDir
 Push-Location $TosaSpecDir
 git checkout v1.0
 Pop-Location

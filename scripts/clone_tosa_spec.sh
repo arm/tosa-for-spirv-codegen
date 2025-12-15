@@ -15,7 +15,7 @@ rm -rf $TOSA_SPEC_DIR
 TOSA_SPEC_REVISION="v1.0"
 
 echo "+++ Cloning Tosa Specification"
-git clone https://review.mlplatform.org/tosa/specification.git $TOSA_SPEC_DIR
+git clone https://github.com/arm/tosa-specification.git $TOSA_SPEC_DIR
 
 pushd $TOSA_SPEC_DIR > /dev/null
   git checkout $TOSA_SPEC_REVISION

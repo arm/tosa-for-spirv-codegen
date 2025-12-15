@@ -11,7 +11,8 @@ param(
 function AssertNonZero { param([string]$Msg) if ($LASTEXITCODE -ne 0) { throw $Msg } }
 
 $ExternalDir       = Join-Path $RepoRoot "external"
-$TosaSerLibDir     = Join-Path $ExternalDir "serialization_lib"
+$TosaToolsDir      = Join-Path $ExternalDir "tosa-tools"
+$TosaSerLibDir     = Join-Path $TosaToolsDir "serialization"
 $TosaSerBuildDir   = Join-Path $TosaSerLibDir "build"
 
 if (Test-Path $TosaSerBuildDir) { Remove-Item -Recurse -Force $TosaSerBuildDir }
